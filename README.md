@@ -33,4 +33,3 @@ mvn spring-boot:run \
 ```
 
 Browse to: http://localhost:8080
-
