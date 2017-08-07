@@ -16,8 +16,9 @@
 package com.okta.spring.oauth;
 
 import org.springframework.beans.InvalidPropertyException;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -37,26 +38,18 @@ import org.springframework.util.Assert;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+@EnableConfigurationProperties(OauthProperties.class)
 @EnableResourceServer
 @EnableWebSecurity
 @Configuration
 public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
-    @Value("#{ @environment['okta.oauth.issuer'] }") //  i.e. 'https://dev-123456.oktapreview.com/oauth2/ausar5cbq5TRooicu812'
-    protected String issuerUrl;
-
-    @Value("#{ @environment['okta.oauth.audience'] ?: 'all' }")
-    protected String audience;
-
-    @Value("#{ @environment['okta.oauth.scopeClaim'] ?: 'scp' }")
-    protected String scopeClaim;
-
-    @Value("#{ @environment['okta.oauth.rolesClaim'] ?: 'groups' }")
-    protected String rolesClaim;
+    @Autowired
+    private OauthProperties oauthProperties;
 
     @Override
     public void configure(final ResourceServerSecurityConfigurer config) {
-        config.resourceId(audience); // set audience
+        config.resourceId(oauthProperties.getAudience()); // set audience
         config.tokenServices(tokenServices());
     }
 
@@ -71,15 +64,14 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     @Bean
     @ConditionalOnMissingBean
     public TokenStore tokenStore() {
-        Assert.hasText(issuerUrl, "Property 'okta.oauth.issuer' is required, must not be null or empty.");
-        return new JwkTokenStore(issuerUrl + "/v1/keys", accessTokenConverter(), jwtClaimsSetVerifier());
+        return new JwkTokenStore(issuerUrl() + "/v1/keys", accessTokenConverter(), jwtClaimsSetVerifier());
     }
 
     @Bean
     @ConditionalOnMissingBean
     public AccessTokenConverter accessTokenConverter() {
         JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
-        jwtAccessTokenConverter.setAccessTokenConverter(new ConfigurableAccessTokenConverter(scopeClaim, rolesClaim));
+        jwtAccessTokenConverter.setAccessTokenConverter(new ConfigurableAccessTokenConverter(oauthProperties.getScopeClaim(), oauthProperties.getRolesClaim()));
         return jwtAccessTokenConverter;
     }
 
@@ -87,9 +79,16 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     @ConditionalOnMissingBean
     public JwtClaimsSetVerifier jwtClaimsSetVerifier() {
         try {
-            return new IssuerClaimVerifier(new URL(issuerUrl));
+            return new IssuerClaimVerifier(new URL(issuerUrl()));
         } catch (MalformedURLException e) {
             throw new InvalidPropertyException(JwtClaimsSetVerifier.class, "okta.oauth2.issuer", "Failed to parse issuer URL", e);
         }
     }
+
+    private String issuerUrl() {
+        String issuerUrl = oauthProperties.getIssuer();
+        Assert.hasText(issuerUrl, "Property 'okta.oauth.issuer' is required, must not be null or empty.");
+        return issuerUrl;
+    }
+
 }
