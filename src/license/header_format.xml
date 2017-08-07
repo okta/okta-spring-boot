@@ -19,7 +19,6 @@
         <firstLine><![CDATA[<!--]]></firstLine>
         <beforeEachLine>  ~ </beforeEachLine>
         <endLine><![CDATA[  -->]]></endLine>
-        <!--<afterEachLine><![CDATA[]]></afterEachLine>-->
         <skipLine><![CDATA[^<\?xml.*>$]]></skipLine>
         <firstLineDetectionPattern><![CDATA[(\s|\t)*<!--.*$]]></firstLineDetectionPattern>
         <lastLineDetectionPattern><![CDATA[.*-->(\s|\t)*$]]></lastLineDetectionPattern>
@@ -31,8 +30,6 @@
         <firstLine>/*</firstLine>
         <beforeEachLine> * </beforeEachLine>
         <endLine> */</endLine>
-        <!--<afterEachLine></afterEachLine>-->
-        <!--skipLine></skipLine-->
         <firstLineDetectionPattern>(\s|\t)*/\*.*$</firstLineDetectionPattern>
         <lastLineDetectionPattern>.*\*/(\s|\t)*$</lastLineDetectionPattern>
         <allowBlankLines>false</allowBlankLines>
@@ -49,6 +46,4 @@
         <isMultiline>true</isMultiline>
         <padLines>false</padLines>
     </dynascript_style>
-
-
 </additionalHeaders>
