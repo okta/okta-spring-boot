@@ -1,0 +1,9 @@
+language: java
+jdk:
+- oraclejdk8
+before_install:
+- source ./src/ci/before_install.sh
+script:
+- "./src/ci/build.sh"
+after_success:
+  - bash <(curl -s https://codecov.io/bash) -f okta-spring-security-starter/target/jacoco.exec
