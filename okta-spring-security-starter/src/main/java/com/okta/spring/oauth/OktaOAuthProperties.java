@@ -18,7 +18,7 @@ package com.okta.spring.oauth;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties("okta.oauth")
-public class OauthProperties {
+public class OktaOAuthProperties {
 
     /**
      * Custom authorization server issuer URL: i.e. 'https://dev-123456.oktapreview.com/oauth2/ausar5cbq5TRooicu812'.

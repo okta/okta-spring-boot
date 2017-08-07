@@ -15,7 +15,7 @@
  */
 package com.okta.spring.example.resources;
 
-import com.okta.spring.oauth.OauthProperties;
+import com.okta.spring.oauth.OktaOAuthProperties;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,11 +32,11 @@ public class SignInWidgetConfigResource {
 
     private final  String clientId;
 
-    public SignInWidgetConfigResource(OauthProperties oauthProperties) {
+    public SignInWidgetConfigResource(OktaOAuthProperties OAuthProperties) {
 
-        Assert.notNull(oauthProperties.getClientId(), "Property 'okta.oauth.clientId' is required.");
-        this.issuerUrl = oauthProperties.getIssuer();
-        this.clientId = oauthProperties.getClientId();
+        Assert.notNull(OAuthProperties.getClientId(), "Property 'okta.oauth.clientId' is required.");
+        this.issuerUrl = OAuthProperties.getIssuer();
+        this.clientId = OAuthProperties.getClientId();
     }
 
 

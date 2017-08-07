@@ -38,18 +38,18 @@ import org.springframework.util.Assert;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-@EnableConfigurationProperties(OauthProperties.class)
+@EnableConfigurationProperties(OktaOAuthProperties.class)
 @EnableResourceServer
 @EnableWebSecurity
 @Configuration
 public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
     @Autowired
-    private OauthProperties oauthProperties;
+    private OktaOAuthProperties OAuthProperties;
 
     @Override
     public void configure(final ResourceServerSecurityConfigurer config) {
-        config.resourceId(oauthProperties.getAudience()); // set audience
+        config.resourceId(OAuthProperties.getAudience()); // set audience
         config.tokenServices(tokenServices());
     }
 
@@ -71,7 +71,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     @ConditionalOnMissingBean
     public AccessTokenConverter accessTokenConverter() {
         JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
-        jwtAccessTokenConverter.setAccessTokenConverter(new ConfigurableAccessTokenConverter(oauthProperties.getScopeClaim(), oauthProperties.getRolesClaim()));
+        jwtAccessTokenConverter.setAccessTokenConverter(new ConfigurableAccessTokenConverter(OAuthProperties.getScopeClaim(), OAuthProperties.getRolesClaim()));
         return jwtAccessTokenConverter;
     }
 
@@ -86,7 +86,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     }
 
     private String issuerUrl() {
-        String issuerUrl = oauthProperties.getIssuer();
+        String issuerUrl = OAuthProperties.getIssuer();
         Assert.hasText(issuerUrl, "Property 'okta.oauth.issuer' is required, must not be null or empty.");
         return issuerUrl;
     }
