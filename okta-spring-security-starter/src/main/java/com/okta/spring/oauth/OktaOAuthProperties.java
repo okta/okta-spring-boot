@@ -28,7 +28,7 @@ public class OktaOAuthProperties {
     /**
      * Expected access token audience claim value.
      */
-    private String audience = "all";
+    private String audience = "api://default";
 
     /**
      * Access token scope claim key.
