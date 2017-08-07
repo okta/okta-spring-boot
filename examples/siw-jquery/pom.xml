@@ -47,7 +47,7 @@
                 <scope>import</scope>
             </dependency>
 
-            <!-- User newer oauth2 module -->
+            <!-- User newer oauth2 module, this will be removed when this version is include in the above BOM  -->
             <dependency>
                 <groupId>org.springframework.security.oauth</groupId>
                 <artifactId>spring-security-oauth2</artifactId>
@@ -88,7 +88,6 @@
             <artifactId>spring-boot-devtools</artifactId>
             <scope>runtime</scope>
         </dependency>
-
 
         <!-- Logging -->
         <dependency>
