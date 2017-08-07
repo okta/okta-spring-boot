@@ -15,17 +15,22 @@
  */
 package com.okta.spring.example.resources;
 
-import org.springframework.stereotype.Controller;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-@Controller
 @RestController
 public class WelcomeResource {
 
+    /**
+     * Simple example REST endpoint that returns a static message.  This resource also serves as an example for checking
+     * an OAuth scope and client roles (parsed from an access token).
+     * @return a static welcome message
+     */
     @GetMapping("/welcome")
+    @PreAuthorize("#oauth2.clientHasRole('Everyone') || #oauth2.hasScope('email')")
     public Welcome getMessageOfTheDay() {
         return new Welcome("The message of the day is boring.");
     }

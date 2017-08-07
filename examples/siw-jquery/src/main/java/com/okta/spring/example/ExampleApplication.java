@@ -18,24 +18,28 @@ package com.okta.spring.example;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecurityExpressionHandler;
 
 
 @SpringBootApplication
-@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class ExampleApplication {
 
-//    @Bean
-//    protected GlobalMethodSecurityConfiguration methodSecurityConfiguration() {
-//        return new GlobalMethodSecurityConfiguration() {
-//            @Override
-//            protected MethodSecurityExpressionHandler createExpressionHandler() {
-//                return new OAuth2MethodSecurityExpressionHandler();
-//            }
-//        };
-//    }
+    /**
+     * Enable OAuth claim checking from @PreAuthorize annotation.
+     * @see com.okta.spring.example.resources.WelcomeResource
+     */
+    @EnableGlobalMethodSecurity(prePostEnabled = true)
+    protected static class GlobalSecurityConfiguration extends GlobalMethodSecurityConfiguration {
+        @Override
+        protected MethodSecurityExpressionHandler createExpressionHandler() {
+            return new OAuth2MethodSecurityExpressionHandler();
+        }
+    }
 
     @Bean
     protected WebSecurityConfigurerAdapter webSecurityConfigurerAdapter() {
