@@ -1,46 +1,36 @@
 okta-spring-security
 ====================
 
-This repo is still a little raw, and will be cleaned up before merging to master.
-Of interest:
+Still some work to be done on this README.
 
-- okta-spring-security-oauth is a Spring Boot starter use to configure an implicit flow access token validation.
+For now here are the basics:
 
-- Example (is an example...)
-  -  example is a Spring-Boot example backend (based off a previous examples)
-  -  example/client is Angular front end
+  - okta-spring-security-starter: a Spring Boot starter use to configure an implicit flow access token validation.
+  - examples/siw-jquery - is a Spring Boot example backend with a static single page client.
 
-- Requires a custom Authorization Server
-
-Build it:
-
-From the root: `mvn install`
-
-Run the backend:
+Build the code:
 ``` bash
-cd example/
+mvn clean install
+```
+
+Pre-commit, to include license header checking, PMD, and Findbugs (including find-sec-bugs) use the `ci` profile:
+``` bash
+# can only be run from the root of the project
+mvn clean install -Pci
+```
+
+
+- Requires a custom Authorization Server, (instructions to be added soon)
+
+Run the example:
+``` bash
+cd examples/siw-jquery
 mvn spring-boot:run \
--Dokta.oauth.issuer=https://dev-123456.oktapreview.com/oauth2/ausar5cbq5TRooicu812 \
--Dokta.oauth.audience=your-authorization-server-audience \
--Dokta.oauth.rolesClaim=custom-group-claim
+-Dokta.oauth.issuer=https://{yourOktaDomain}/oauth2/{yourAuthorizationServerId} \
+-Dokta.oauth.audience={yourAuthorizationServerAudience} \
+-Dokta.oauth.clientId={oauthClientId} \
+-Dokta.oauth.rolesClaim={customRoleClaim) # defaults to 'groups'
 ```
 
-**Note:** `okta.oauth.rolesClaim` defaults to `groups`, so in your custom Authorization Server define a custom claim:
-- Name: 'groups'
-- Value Type: 'Groups'
-- Filter: Regex - `.*`
+Browse to: http://localhost:8080
 
-Run the example client:
-``` bash
-cd example/client
-npm install
-npm start
-```
-
-Browse to: http://localhost:4200
-
-Up for review:
-code in: okta-spring-security-starter
-
-
-TODO: Needs tests (obviously)
