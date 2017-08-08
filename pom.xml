@@ -43,4 +43,41 @@
         <module>examples</module>
     </modules>
 
+    <profiles>
+        <profile>
+            <id>pub-docs</id>
+            <build>
+
+                <!-- this needs to be fixed in the parent pom -->
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-scm-publish-plugin</artifactId>
+                            <version>1.1</version>
+                            <configuration>
+                                <checkinComment>Publishing javadoc for ${project.artifactId}:${project.version}</checkinComment>
+                                <content>${gh-pages.dir}</content>
+                                <skipDeletedFiles>true</skipDeletedFiles>
+                                <pubScmUrl>scm:git:https://${github.api.key}@github.com/${github.slug}.git</pubScmUrl>
+                                <scmBranch>gh-pages</scmBranch> <!-- branch with static site -->
+                                <checkoutDirectory>${project.build.directory}/scmpublish-checkout-javadoc</checkoutDirectory>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+                <!-- end fix in parent -->
+
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-scm-publish-plugin</artifactId>
+                        <version>1.1</version>
+                        <inherited>false</inherited>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>
