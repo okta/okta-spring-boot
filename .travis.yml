@@ -5,7 +5,6 @@ addons:
   apt:
     packages:
     - libxml2-utils
-    - unzip
 before_install:
 - source ./src/ci/before_install.sh
 script:
