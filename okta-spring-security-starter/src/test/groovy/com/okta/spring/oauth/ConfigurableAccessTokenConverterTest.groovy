@@ -106,7 +106,21 @@ class ConfigurableAccessTokenConverterTest {
                                             new SimpleGrantedAuthority("red_role"),
                                             new SimpleGrantedAuthority("blue_role")),
                                         hasSize(4))
+        assertThat auth.getUserAuthentication(), nullValue()
+    }
 
-
+    @Test
+    void extractSubject() {
+        def scopeClaim = "custom_scope"
+        def roleClaim = "custom_role"
+        def email = "joe.coder@example.com"
+        def converter = new ConfigurableAccessTokenConverter(scopeClaim, roleClaim)
+        def initialClaimMap = [
+                sub: email,
+                custom_scope: ["my_custom_scope", "as_an_array"],
+                custom_role: ["one_role", "two_role", "red_role", "blue_role"]
+        ]
+        def auth = converter.extractAuthentication(initialClaimMap)
+        assertThat auth.getUserAuthentication().name, equalTo(email)
     }
 }

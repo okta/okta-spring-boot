@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import java.security.Principal;
 
 @RestController
 public class WelcomeResource {
@@ -31,16 +32,18 @@ public class WelcomeResource {
      */
     @GetMapping("/welcome")
     @PreAuthorize("#oauth2.clientHasRole('Everyone') || #oauth2.hasScope('email')")
-    public Welcome getMessageOfTheDay() {
-        return new Welcome("The message of the day is boring.");
+    public Welcome getMessageOfTheDay(Principal principal) {
+        return new Welcome("The message of the day is boring.", principal.getName());
     }
 
     @XmlRootElement
     public static class Welcome {
         public String messageOfTheDay;
+        public String username;
 
-        public Welcome(String messageOfTheDay) {
+        public Welcome(String messageOfTheDay, String username) {
             this.messageOfTheDay = messageOfTheDay;
+            this.username = username;
         }
     }
 }
