@@ -90,7 +90,7 @@
       },
     }).then(function(data) {
       // Render the message of the day
-      $('#cool-stuff-here').append(data.messageOfTheDay);
+      $('#cool-stuff-here').append(data.messageOfTheDay + "<br><strong>User:</strong> " + data.username);
     })
     .fail(function(data) {
       // handle any errors

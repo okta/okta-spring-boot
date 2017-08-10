@@ -30,6 +30,8 @@ import java.util.Map;
  */
 public class ConfigurableAccessTokenConverter extends DefaultAccessTokenConverter {
 
+    private static final String SUBJECT_CLAIM = "sub";
+
     private final String scopeClaim;
     private final String rolesClaim;
 
@@ -54,6 +56,11 @@ public class ConfigurableAccessTokenConverter extends DefaultAccessTokenConverte
             if (!ObjectUtils.isEmpty(roles)) {
                 tokenMap.put(UserAuthenticationConverter.AUTHORITIES, roles);
             }
+        }
+
+        if (tokenMap.containsKey(SUBJECT_CLAIM)) {
+            Object sub = tokenMap.get(SUBJECT_CLAIM);
+            tokenMap.put(UserAuthenticationConverter.USERNAME, sub);
         }
 
         return tokenMap;
