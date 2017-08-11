@@ -10,4 +10,14 @@ before_install:
 script:
 - "./src/ci/build.sh"
 after_success:
-  - bash <(curl -s https://codecov.io/bash) -f okta-spring-security-starter/target/jacoco.exec
+  - bash <(curl -s https://codecov.io/bash) -f okta-spring-security-starter/target/site/jacoco/jacoco.xml
+
+deploy:
+  - provider: pages
+    skip_cleanup: true
+    github_token: $GH_API_KEY
+    local_dir: target/gh-pages
+    email: developers@okta.com
+    name: Travis CI - Auto Doc Build
+    on:
+      branch: master
