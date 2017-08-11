@@ -34,9 +34,8 @@ else
         $MVN_CMD deploy -Pci
 
         # also deploy the javadocs to the site
-        git config --global user.email "developers@okta.com"
-        git config --global user.name "travis-ci Auto Doc Build"
-        $MVN_CMD javadoc:aggregate scm-publish:publish-scm -Ppub-docs -Pci
+        git clone -b gh-pages https://github.com/${REPO_SLUG}.git target/gh-pages/
+        $MVN_CMD javadoc:aggregate -Ppub-docs -Pci
     else
         # else try to run the ITs if possible (for someone who has push access to the repo
         if [ "$RUN_ITS" = true ] ; then
