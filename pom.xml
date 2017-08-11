@@ -26,7 +26,7 @@
 
     <groupId>com.okta.spring</groupId>
     <artifactId>okta-spring-security-parent</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1-SNAPSHOT</version>
     <name>Okta Spring Security</name>
     <packaging>pom</packaging>
 
@@ -76,9 +76,4 @@
             </build>
         </profile>
     </profiles>
-
-
-  <scm>
-    <tag>okta-spring-security-parent-0.1.0</tag>
-  </scm>
 </project>
