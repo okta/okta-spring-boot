@@ -38,13 +38,13 @@ You can configure your applications properties with environment variables, syste
 
 ## Create a Controller 
 
-The above client makes a request to `/hello_oauth`, we simply need to create a `Controller` to handle the response: 
+The above client makes a request to `/hello-oauth`, you simply need to create a `Controller` to handle the response: 
 
 ```java
 @RestController
 class ExampleRestController {
 
-    @GetMapping("/hello_oauth")
+    @GetMapping("/hello-oauth")
     public String sayHello(Principal principal) {
         return "Hello, " + principal.getName();
     }
@@ -56,20 +56,28 @@ class ExampleRestController {
 To test things out we can use curl:
 
 ```bash
-$ curl http://localhost:8080/hello_oauth \
+$ curl http://localhost:8080/hello-oauth \
    --header "Authorization: Bearer ${accessToken}"
 ```
 The result should look something like:
-```
+```text
 Hello, joe.coder@example.com
 ```
 
-Okta's Spring Security integration will [parse the JWT access token](/blog/2017/06/21/what-the-heck-is-oauth#oauth-flows) from the HTTP request's `Authorization: Bearer` header value.
+Okta's Spring Security integration will [parse the JWT access token](https://developer.okta.com/blog/2017/06/21/what-the-heck-is-oauth#oauth-flows) from the HTTP request's `Authorization: Bearer` header value.
 
-Check out a minimal example that uses the [Okta Signin Widget and JQuery](examples/siw-jquery) or this [blog post](https://scotch.io/@mraible/build-a-secure-notes-application-with-kotlin-typescript-and-okta). 
+Check out a minimal example that uses the [Okta Signin Widget and JQuery](examples/siw-jquery) or [this blog post](https://scotch.io/tutorials/build-a-secure-notes-application-with-kotlin-typescript-and-okta). 
 
 
 # Extra Credit
 
-Want to build this project?, just clone it out and run `mvn install`
+Want to build this project? 
+
+Just clone it out and run:
+
+```bash
+$ git clone https://github.com/okta/okta-spring-security.git
+$ cd okta-spring-security
+$ mvn install
+```
 
