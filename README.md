@@ -1,7 +1,7 @@
 Okta Spring Boot Starter
 ========================
 
-Okta's Spring Boot Starter will enable your Spring Boot application to work with an Okta access token via an OAuth implicit flow.  Jump to our [quickstart](https://developer.okta.com/quickstart/#/angular/java/spring) to see how to configure various clients or follow along below and to use curl.
+Okta's Spring Boot Starter will enable your Spring Boot application to work with an Okta access token via an OAuth implicit flow.  Jump to our [quickstart](https://developer.okta.com/quickstart/#/angular/java/spring) to see how to configure various clients or follow along below to use curl.
 
 ## What you need
 
@@ -53,7 +53,7 @@ class ExampleRestController {
 
 ## That's it!
 
-To test things out we can use curl:
+To test things out you can use curl:
 
 ```bash
 $ curl http://localhost:8080/hello-oauth \
@@ -73,7 +73,7 @@ Check out a minimal example that uses the [Okta Signin Widget and JQuery](exampl
 
 Want to build this project? 
 
-Just clone it out and run:
+Just clone it and run:
 
 ```bash
 $ git clone https://github.com/okta/okta-spring-security.git
