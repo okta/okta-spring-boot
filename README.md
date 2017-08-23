@@ -5,7 +5,7 @@ Okta's Spring Boot Starter will enable your Spring Boot application to work with
 
 ## What you need
 
-* Okta account, go sign up for a [free developer account](https://developer.okta.com/signup/))
+* An Okta account (sign up for a [forever-free developer account](https://developer.okta.com/signup/))
 * An OIDC application (typically a 'SPA' application)
 * An [access token](https://developer.okta.com/docs/api/resources/oauth2.html)
 
