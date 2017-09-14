@@ -23,19 +23,14 @@
         <version>0.1.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>okta-spring-security-starter</artifactId>
-    <name>Okta Spring Security :: Starter</name>
+    <artifactId>okta-spring-security-implicit-flow</artifactId>
+    <name>Okta Spring Security :: Implicit Flow</name>
 
     <properties>
         <spring-boot.version>1.5.4.RELEASE</spring-boot.version>
     </properties>
 
     <dependencies>
-
-        <dependency>
-            <groupId>com.okta.spring</groupId>
-            <artifactId>okta-spring-security-common</artifactId>
-        </dependency>
 
         <!-- Spring deps-->
         <dependency>

@@ -18,15 +18,18 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.okta.spring</groupId>
-        <artifactId>okta-spring-security-parent</artifactId>
+        <groupId>com.okta.spring.examples</groupId>
+        <artifactId>okta-spring-security-examples</artifactId>
         <version>0.1.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>okta-spring-security-starter</artifactId>
-    <name>Okta Spring Security :: Starter</name>
+    <artifactId>okta-spring-boot-redirect-code-flow-example</artifactId>
+    <name>Okta Spring Security :: Examples :: Redirect Code Flow</name>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <spring-boot.version>1.5.4.RELEASE</spring-boot.version>
     </properties>
 
@@ -37,7 +40,17 @@
             <artifactId>okta-spring-security-common</artifactId>
         </dependency>
 
-        <!-- Spring deps-->
+        <dependency>
+            <groupId>com.okta.spring</groupId>
+            <artifactId>okta-spring-security-oauth-code-flow</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.security.oauth</groupId>
+            <artifactId>spring-security-oauth2</artifactId>
+        </dependency>
+
+        <!-- Other standard Spring starters -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-rest</artifactId>
@@ -55,43 +68,27 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-jwt</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security.oauth</groupId>
-            <artifactId>spring-security-oauth2</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
         </dependency>
 
-        <!-- Test deps -->
+        <!-- Logging -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-test</artifactId>
-            <scope>test</scope>
+            <!-- Required for any libraries that expect to call the commons logging APIs -->
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <scope>test</scope>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>runtime</scope>
         </dependency>
 
     </dependencies>
 
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>jacoco-report</id>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                        <phase>verify</phase>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
+        <defaultGoal>spring-boot:run</defaultGoal>
     </build>
 </project>

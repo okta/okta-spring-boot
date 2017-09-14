@@ -31,6 +31,8 @@
 
     <modules>
         <module>siw-jquery</module>
+        <module>redirect-code-flow</module>
+        <module>hosted-login-code-flow</module>
     </modules>
 
     <build>

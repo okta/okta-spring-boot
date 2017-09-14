@@ -23,8 +23,8 @@
         <version>0.1.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>okta-spring-security-starter</artifactId>
-    <name>Okta Spring Security :: Starter</name>
+    <artifactId>okta-spring-security-common</artifactId>
+    <name>Okta Spring Security :: Common</name>
 
     <properties>
         <spring-boot.version>1.5.4.RELEASE</spring-boot.version>
@@ -32,31 +32,14 @@
 
     <dependencies>
 
-        <dependency>
-            <groupId>com.okta.spring</groupId>
-            <artifactId>okta-spring-security-common</artifactId>
-        </dependency>
-
         <!-- Spring deps-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-rest</artifactId>
+            <artifactId>spring-boot</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-jwt</artifactId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.security.oauth</groupId>

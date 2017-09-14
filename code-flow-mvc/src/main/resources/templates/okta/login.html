@@ -1,0 +1,54 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="#{okta.web.login.title}">|Login|</title>
+    <!--/*/ <th:block th:include="${headViewName} :: ${headFragmentSelector}"/> /*/-->
+</head>
+<body class="login">
+<div class="container custom-container">
+    <div class="va-wrapper">
+        <div class="view login-view container">
+
+            <div class="box row">
+
+                <div id="okta-login-container"></div>
+
+            </div>
+
+        </div>
+        <!--<input type="hidden" id="baseUrl"
+               th:value="${#httpServletRequest.scheme + '://' + #httpServletRequest.serverName + ':'+#httpServletRequest.serverPort+#httpServletRequest.contextPath}"/>-->
+
+    </div>
+</div>
+
+<script th:inline="javascript">
+/*<![CDATA[*/
+
+var oktaBaseUrl = /*[[${oktaBaseUrl}]]*/ 'https://{yourOktaDomain}.com';
+var state = /*[[${state}]]*/ '{state}';
+
+var oktaSignIn = new OktaSignIn({
+  baseUrl: oktaBaseUrl,
+  clientId: /*[[${oktaClientId}]]*/ '{oktaClientId}',
+  redirectUri: /*[[${#httpServletRequest.scheme + '://' + #httpServletRequest.serverName + ':'+#httpServletRequest.serverPort+#httpServletRequest.contextPath} + ${redirectUri}]]*/ '{redirectUri}',
+  authParams: {
+    issuer: /*[[${issuerUri}]]*/ '{issuerUri}',
+    responseType: ['code'],
+    state: state || false
+  }
+});
+
+oktaSignIn.renderEl(
+  { el: '#okta-login-container' },
+  function (res) {
+    if (res.status === 'SUCCESS') {
+      debugger;
+      res.session.setCookieAndRedirect(oktaBaseUrl); }
+  }
+);
+
+/*]]>*/
+</script>
+
+</body>
+</html>
