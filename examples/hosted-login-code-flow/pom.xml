@@ -19,12 +19,12 @@
 
     <parent>
         <groupId>com.okta.spring.examples</groupId>
-        <artifactId>okta-spring-security-examples</artifactId>
+        <artifactId>okta-spring-boot-examples</artifactId>
         <version>0.1.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>okta-spring-boot-hosted-code-flow-example</artifactId>
-    <name>Okta Spring Security :: Examples :: Hosted Code Flow</name>
+    <name>Okta Spring Boot :: Examples :: Hosted Code Flow</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -37,9 +37,10 @@
 
         <dependency>
             <groupId>com.okta.spring</groupId>
-            <artifactId>okta-spring-security-oauth-code-flow-mvc</artifactId>
+            <artifactId>okta-spring-boot-starter</artifactId>
         </dependency>
 
+        <!-- required because this module is marked optional in starter -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>

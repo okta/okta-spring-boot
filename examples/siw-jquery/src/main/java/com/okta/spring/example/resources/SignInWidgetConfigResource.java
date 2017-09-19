@@ -15,7 +15,7 @@
  */
 package com.okta.spring.example.resources;
 
-import com.okta.spring.common.OktaOAuthProperties;
+import com.okta.spring.oauth.OktaOAuthProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;

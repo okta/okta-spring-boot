@@ -25,7 +25,7 @@
     </parent>
 
     <groupId>com.okta.spring</groupId>
-    <artifactId>okta-spring-security-parent</artifactId>
+    <artifactId>okta-spring-boot-parent</artifactId>
     <version>0.1.1-SNAPSHOT</version>
     <name>Okta Spring Security</name>
     <packaging>pom</packaging>
@@ -36,11 +36,9 @@
     </properties>
 
     <modules>
-        <module>common</module>
-        <module>implicit-flow</module>
-        <module>code-flow</module>
-        <module>code-flow-mvc</module>
-        <module>okta-spring-security-starter</module>
+        <module>oauth2</module>
+        <module>thymeleaf</module>
+        <module>okta-spring-boot-starter</module>
         <module>examples</module>
     </modules>
 
@@ -84,17 +82,17 @@
             <!-- this project's modules -->
             <dependency>
                 <groupId>com.okta.spring</groupId>
-                <artifactId>okta-spring-security-common</artifactId>
+                <artifactId>okta-spring-boot-starter</artifactId>
                 <version>0.1.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.okta.spring</groupId>
-                <artifactId>okta-spring-security-oauth-code-flow</artifactId>
+                <artifactId>okta-spring-security-oauth2</artifactId>
                 <version>0.1.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.okta.spring</groupId>
-                <artifactId>okta-spring-security-oauth-code-flow-mvc</artifactId>
+                <artifactId>okta-spring-boot-thymeleaf</artifactId>
                 <version>0.1.1-SNAPSHOT</version>
             </dependency>
 
