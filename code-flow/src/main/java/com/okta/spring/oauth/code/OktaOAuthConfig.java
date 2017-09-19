@@ -2,6 +2,8 @@ package com.okta.spring.oauth.code;
 
 import com.okta.spring.common.OktaOAuthProperties;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.AuthoritiesExtractor;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.PrincipalExtractor;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
@@ -18,6 +20,7 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientAuthenticationProcessingFilter;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.oauth2.common.AuthenticationScheme;
+import org.springframework.security.oauth2.config.annotation.web.configuration.OAuth2ClientConfiguration;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -28,6 +31,8 @@ import javax.servlet.Filter;
 import java.util.function.Consumer;
 
 @Configuration
+@ConditionalOnClass({OAuth2ClientConfiguration.class})
+@ConditionalOnBean(OAuth2ClientConfiguration.class)
 @EnableConfigurationProperties(OktaOAuthProperties.class)
 public class OktaOAuthConfig extends WebSecurityConfigurerAdapter {
 

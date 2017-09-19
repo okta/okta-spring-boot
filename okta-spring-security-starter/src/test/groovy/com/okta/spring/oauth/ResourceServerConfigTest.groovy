@@ -21,18 +21,17 @@ import org.springframework.security.oauth2.provider.token.AccessTokenConverter
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices
 import org.springframework.security.oauth2.provider.token.TokenStore
 import org.springframework.security.oauth2.provider.token.store.JwtClaimsSetVerifier
-import org.springframework.util.Assert
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests
 import org.testng.annotations.Test
 
 import static org.hamcrest.MatcherAssert.*
 import static org.hamcrest.Matchers.*
 
-@SpringBootTest(classes    = [ResourceServerConfig],
-                properties = ["okta.oauth.issuer=https://okta.example.com/oauth2/my_issuer",
-                              "okta.oauth.audience=custom_audience",
-                              "okta.oauth.scopeClaim=custom_scope_claim",
-                              "okta.oauth.rolesClaim=custom_roles_claim"])
+@SpringBootTest(classes    = [StubApp, ResourceServerConfig],
+                properties = ["okta.oauth2.issuer=https://okta.example.com/oauth2/my_issuer",
+                              "okta.oauth2.audience=custom_audience",
+                              "okta.oauth2.scopeClaim=custom_scope_claim",
+                              "okta.oauth2.rolesClaim=custom_roles_claim"])
 class ResourceServerConfigTest extends AbstractTestNGSpringContextTests {
 
     @Autowired

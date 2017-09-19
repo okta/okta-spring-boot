@@ -1,7 +1,11 @@
 package com.okta.spring.oauth.code.mvc;
 
+import com.okta.spring.oauth.code.OktaOAuthConfig;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.thymeleaf.ThymeleafAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -22,6 +26,8 @@ import java.util.List;
 import java.util.Set;
 
 @Configuration
+@ConditionalOnClass({ThymeleafAutoConfiguration.class})
+@ConditionalOnBean({OktaOAuthConfig.class, ThymeleafAutoConfiguration.class})
 @EnableConfigurationProperties(OktaWebProperties.class)
 public class OktaMvcConfig extends WebMvcConfigurerAdapter {
 

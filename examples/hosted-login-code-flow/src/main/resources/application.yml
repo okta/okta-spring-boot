@@ -30,8 +30,6 @@ okta:
 
 
   extraWidgetConfig:
-    features:
-      rememberMe: true
 
 security:
   oauth2:

@@ -17,12 +17,12 @@ package com.okta.spring.oauth;
 
 import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfiguration;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
@@ -38,19 +38,26 @@ import org.springframework.util.Assert;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import com.okta.spring.common.OktaOAuthProperties;
+
 @EnableConfigurationProperties(OktaOAuthProperties.class)
-@EnableResourceServer
-@EnableWebSecurity
+@ConditionalOnBean(ResourceServerConfiguration.class)
 @Configuration
-public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
+public class ResourceServerConfig {
 
     @Autowired
     private OktaOAuthProperties OAuthProperties;
 
-    @Override
-    public void configure(final ResourceServerSecurityConfigurer config) {
-        config.resourceId(OAuthProperties.getAudience()); // set audience
-        config.tokenServices(tokenServices());
+    @Bean
+    @ConditionalOnMissingBean
+    public ResourceServerConfigurerAdapter resourceServerConfigurerAdapter() {
+        return new ResourceServerConfigurerAdapter() {
+            @Override
+            public void configure(final ResourceServerSecurityConfigurer config) {
+                config.resourceId(OAuthProperties.getOauth2().getAudience()); // set audience
+                config.tokenServices(tokenServices());
+            }
+        };
     }
 
     @Bean
@@ -71,7 +78,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     @ConditionalOnMissingBean
     public AccessTokenConverter accessTokenConverter() {
         JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
-        jwtAccessTokenConverter.setAccessTokenConverter(new ConfigurableAccessTokenConverter(OAuthProperties.getScopeClaim(), OAuthProperties.getRolesClaim()));
+        jwtAccessTokenConverter.setAccessTokenConverter(new ConfigurableAccessTokenConverter(OAuthProperties.getOauth2().getScopeClaim(), OAuthProperties.getOauth2().getRolesClaim()));
         return jwtAccessTokenConverter;
     }
 
@@ -86,8 +93,8 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     }
 
     private String issuerUrl() {
-        String issuerUrl = OAuthProperties.getIssuer();
-        Assert.hasText(issuerUrl, "Property 'okta.oauth.issuer' is required, must not be null or empty.");
+        String issuerUrl = OAuthProperties.getOauth2().getIssuer();
+        Assert.hasText(issuerUrl, "Property 'okta.oauth2.issuer' is required, must not be null or empty.");
         return issuerUrl;
     }
 

@@ -15,7 +15,8 @@
  */
 package com.okta.spring.example.resources;
 
-import com.okta.spring.oauth.OktaOAuthProperties;
+import com.okta.spring.common.OktaOAuthProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 
+@EnableConfigurationProperties(OktaOAuthProperties.class)
 @RestController
 public class SignInWidgetConfigResource {
 
@@ -34,9 +36,9 @@ public class SignInWidgetConfigResource {
 
     public SignInWidgetConfigResource(OktaOAuthProperties OAuthProperties) {
 
-        Assert.notNull(OAuthProperties.getClientId(), "Property 'okta.oauth.clientId' is required.");
-        this.issuerUrl = OAuthProperties.getIssuer();
-        this.clientId = OAuthProperties.getClientId();
+        Assert.notNull(OAuthProperties.getOauth2().getClientId(), "Property 'okta.oauth.clientId' is required.");
+        this.issuerUrl = OAuthProperties.getOauth2().getIssuer();
+        this.clientId = OAuthProperties.getOauth2().getClientId();
     }
 
 
