@@ -20,24 +20,21 @@ logging:
     org.springframework.web: DEBUG
     org.springframework.security: DEBUG
 
-spring:
-  messages:
-    basename: com/okta/spring/oauth/code/mvc/i18n
-
 okta:
+  oauth2:
+    # default is unset
+    customLoginRoute: /login
 
-  # default is unset
-  customLoginRoute: /login
+    # default is '/login'
+    redirectUri: /login/okta
 
-  # default is '/login'
-  redirectUri: /login/okta
 
-  client:
-    # Need to figure out how to set this, this needs to be an absolute URI
-    userAuthorizationUri: http://localhost:8080/login
+  extraWidgetConfig:
+    features:
+      rememberMe: true
 
-# need defaults for the rest of this stuff
-    clientAuthenticationScheme: form
-    scope: openid profile email
-  resource:
-    preferTokenInfo: false
+security:
+  oauth2:
+    client:
+      # Need to figure out how to set this, this needs to be an absolute URI
+      userAuthorizationUri: http://localhost:8080/login

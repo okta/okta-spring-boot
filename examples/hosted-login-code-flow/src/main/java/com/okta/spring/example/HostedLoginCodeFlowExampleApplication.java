@@ -40,73 +40,7 @@ public class HostedLoginCodeFlowExampleApplication {
         }
     }
 
-
     public static void main(String[] args) {
         SpringApplication.run(HostedLoginCodeFlowExampleApplication.class, args);
     }
-
-//
-//    @Configuration
-//    public static class WebMvcConfig extends WebMvcConfigurerAdapter {
-//
-//        @Value("#{ @environment['okta.web.head.cssUris'] ?: '' }")
-//        protected String headCssUris;
-//
-//        @Value("#{ @environment['okta.web.head.extraCssUris'] }")
-//        protected String headExtraCssUris;
-//
-//        @Value("#{ @environment['okta.web.head.view'] ?: 'okta/head' }")
-//        protected String headView;
-//
-//        @Value("#{ @environment['okta.web.head.fragmentSelector'] ?: 'head' }")
-//        protected String headFragmentSelector;
-//
-//        @Autowired
-//        private OktaOAuthProperties oktaOAuthProperties;
-//
-//        @Override
-//        public void addInterceptors(InterceptorRegistry registry) {
-//
-//            registry.addInterceptor(oktaLayoutInterceptor());
-//        }
-//
-//        @Bean
-//        public HandlerInterceptor oktaLayoutInterceptor() {
-//            TemplateLayoutInterceptor interceptor = new TemplateLayoutInterceptor();
-//            interceptor.setHeadViewName(headView);
-//            interceptor.setHeadFragmentSelector(headFragmentSelector);
-//            interceptor.setOktaBaseUrl(oktaOAuthProperties.getBaseUrl());
-//            interceptor.setOktaClientId(oktaOAuthProperties.getClient().getClientId());
-//            interceptor.setRedirectUri(oktaOAuthProperties.getRedirectUri());
-//            interceptor.setIssuerUri(oktaOAuthProperties.getIssuer());
-//
-//            //deal w/ URIs:
-//            String[] uris = StringUtils.tokenizeToStringArray(headCssUris, " \t");
-//            Set<String> uriSet = new LinkedHashSet<>();
-//            if (uris != null && uris.length > 0) {
-//                java.util.Collections.addAll(uriSet, uris);
-//            }
-//
-//            uris = StringUtils.tokenizeToStringArray(headExtraCssUris, " \t");
-//            if (uris != null && uris.length > 0) {
-//                java.util.Collections.addAll(uriSet, uris);
-//            }
-//
-//            if (!CollectionUtils.isEmpty(uriSet)) {
-//                List<String> list = new ArrayList<>();
-//                list.addAll(uriSet);
-//                interceptor.setHeadCssUris(list);
-//            }
-//
-//            try {
-//                interceptor.afterPropertiesSet();
-//            } catch (Exception e) {
-//                String msg = "Unable to initialize stormpathLayoutInterceptor: " + e.getMessage();
-//                throw new BeanInitializationException(msg, e);
-//            }
-//
-//            return interceptor;
-//        }
-//    }
-
 }

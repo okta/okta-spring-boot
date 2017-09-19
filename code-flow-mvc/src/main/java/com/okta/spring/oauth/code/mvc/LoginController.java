@@ -12,10 +12,12 @@ public class LoginController {
 
     private static final String STATE = "state";
     private static final String NONCE = "nonce";
+    private static final String SCOPES = "scopes";
     private static final String OKTA_BASE_URL = "oktaBaseUrl";
     private static final String OKTA_CLIENT_ID = "oktaClientId";
     private static final String REDIRECT_URI = "redirectUri";
     private static final String ISSUER_URI = "issuerUri";
+    private static final String WIDGET_CONFIG_MAP = "extraWidgetConfigMap";
 
     @Autowired
     private OktaOAuthProperties oktaOAuthProperties;
@@ -26,10 +28,12 @@ public class LoginController {
         ModelAndView mav = new ModelAndView("okta/login");
         mav.addObject(STATE, state);
         mav.addObject(NONCE, nonce);
-        mav.addObject(OKTA_BASE_URL, oktaOAuthProperties.getBaseUrl());
-        mav.addObject(OKTA_CLIENT_ID, oktaOAuthProperties.getClient().getClientId());
-        mav.addObject(REDIRECT_URI, oktaOAuthProperties.getRedirectUri());
-        mav.addObject(ISSUER_URI, oktaOAuthProperties.getIssuer());
+        mav.addObject(SCOPES, oktaOAuthProperties.getOauth2().getScopes());
+        mav.addObject(OKTA_BASE_URL, oktaOAuthProperties.getClient().getOrgUrl());
+        mav.addObject(OKTA_CLIENT_ID, oktaOAuthProperties.getOauth2().getClientId());
+        mav.addObject(REDIRECT_URI, oktaOAuthProperties.getOauth2().getRedirectUri());
+        mav.addObject(ISSUER_URI, oktaOAuthProperties.getOauth2().getIssuer());
+        mav.addObject(WIDGET_CONFIG_MAP, oktaOAuthProperties.getExtraWidgetConfig());
         return mav;
     }
 }

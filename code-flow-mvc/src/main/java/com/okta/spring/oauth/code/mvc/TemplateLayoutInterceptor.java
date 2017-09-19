@@ -25,7 +25,9 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  */
@@ -34,10 +36,12 @@ public class TemplateLayoutInterceptor extends HandlerInterceptorAdapter impleme
     public static final String HEAD_VIEW_NAME_KEY = "headViewName";
     public static final String HEAD_FRAGMENT_SELECTOR_KEY = "headFragmentSelector";
     public static final String HEAD_CSS_URIS_KEY = "headCssUris";
+    public static final String LOGO_KEY = "logoUri";
 
 
     private String headViewName;
     private String headFragmentSelector;
+    private String logoUri;
     private List<String> headCssUris;
 
     public String getHeadViewName() {
@@ -62,6 +66,14 @@ public class TemplateLayoutInterceptor extends HandlerInterceptorAdapter impleme
 
     public void setHeadCssUris(List<String> headCssUris) {
         this.headCssUris = headCssUris;
+    }
+
+    public String getLogoUri() {
+        return logoUri;
+    }
+
+    public void setLogoUri(String logoUri) {
+        this.logoUri = logoUri;
     }
 
     @Override
@@ -96,6 +108,9 @@ public class TemplateLayoutInterceptor extends HandlerInterceptorAdapter impleme
             modelAndView.addObject(HEAD_VIEW_NAME_KEY, headViewName);
         }
 
+        if (!modelAndView.getModel().containsKey(LOGO_KEY)) {
+            modelAndView.addObject(LOGO_KEY, logoUri);
+        }
 
         if (StringUtils.hasText(headFragmentSelector) && !modelAndView.getModel().containsKey(HEAD_FRAGMENT_SELECTOR_KEY)) {
             modelAndView.addObject(HEAD_FRAGMENT_SELECTOR_KEY, headFragmentSelector);

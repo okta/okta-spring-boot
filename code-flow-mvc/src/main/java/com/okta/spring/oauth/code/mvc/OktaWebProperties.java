@@ -7,6 +7,8 @@ public class OktaWebProperties {
 
     private HeadProperties head = new HeadProperties();
 
+    private String logo = "https://ok1static.oktacdn.com/assets/img/logos/okta-logo.png";
+
     public HeadProperties getHead() {
         return head;
     }
@@ -15,9 +17,17 @@ public class OktaWebProperties {
         this.head = head;
     }
 
+    public String getLogo() {
+        return logo;
+    }
+
+    public void setLogo(String logo) {
+        this.logo = logo;
+    }
+
     public static class HeadProperties {
 
-        private String cssUris = "";
+        private String cssUris = "/okta/okta.css";
 
         private String extraCssUris;
 

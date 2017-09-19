@@ -1,12 +1,15 @@
 package com.okta.spring.oauth.code.mvc;
 
-import com.okta.spring.common.OktaOAuthProperties;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -37,10 +40,18 @@ public class OktaMvcConfig extends WebMvcConfigurerAdapter {
     }
 
     @Bean
+    protected MessageSource messageSource() {
+        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+        messageSource.setBasename(getClass().getPackage().getName().replace('.', '/') +"/i18n");
+        return messageSource;
+    }
+
+    @Bean
     public HandlerInterceptor oktaLayoutInterceptor() {
         TemplateLayoutInterceptor interceptor = new TemplateLayoutInterceptor();
         interceptor.setHeadViewName(oktaWebProperties.getHead().getView());
         interceptor.setHeadFragmentSelector(oktaWebProperties.getHead().getFragmentSelector());
+        interceptor.setLogoUri(oktaWebProperties.getLogo());
 
         //deal w/ URIs:
         String[] uris = StringUtils.tokenizeToStringArray(oktaWebProperties.getHead().getCssUris(), " \t");

@@ -21,9 +21,4 @@ logging:
     org.springframework.security: DEBUG
 
 okta:
-
   client:
-    clientAuthenticationScheme: form
-    scope: openid profile email
-  resource:
-    preferTokenInfo: false

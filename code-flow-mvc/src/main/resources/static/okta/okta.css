@@ -1,0 +1,8 @@
+body.login {
+    background-color: #f9f9f9;
+}
+
+#okta-sign-in {
+    min-height: 0 !important;
+}
+

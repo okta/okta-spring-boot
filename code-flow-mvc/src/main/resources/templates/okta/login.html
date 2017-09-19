@@ -7,46 +7,36 @@
 <div class="container custom-container">
     <div class="va-wrapper">
         <div class="view login-view container">
-
             <div class="box row">
 
                 <div id="okta-login-container"></div>
 
             </div>
-
         </div>
-        <!--<input type="hidden" id="baseUrl"
-               th:value="${#httpServletRequest.scheme + '://' + #httpServletRequest.serverName + ':'+#httpServletRequest.serverPort+#httpServletRequest.contextPath}"/>-->
-
     </div>
 </div>
 
 <script th:inline="javascript">
 /*<![CDATA[*/
 
-var oktaBaseUrl = /*[[${oktaBaseUrl}]]*/ 'https://{yourOktaDomain}.com';
-var state = /*[[${state}]]*/ '{state}';
+var config = /*[[${extraWidgetConfigMap}]]*/ {};
 
-var oktaSignIn = new OktaSignIn({
-  baseUrl: oktaBaseUrl,
-  clientId: /*[[${oktaClientId}]]*/ '{oktaClientId}',
-  redirectUri: /*[[${#httpServletRequest.scheme + '://' + #httpServletRequest.serverName + ':'+#httpServletRequest.serverPort+#httpServletRequest.contextPath} + ${redirectUri}]]*/ '{redirectUri}',
-  authParams: {
-    issuer: /*[[${issuerUri}]]*/ '{issuerUri}',
-    responseType: ['code'],
-    state: state || false
-  }
-});
+config.baseUrl = /*[[${oktaBaseUrl}]]*/ 'https://{yourOktaDomain}.com';
+config.clientId = /*[[${oktaClientId}]]*/ '{oktaClientId}';
+config.redirectUri = /*[[${#httpServletRequest.scheme + '://' + #httpServletRequest.serverName + ':'+#httpServletRequest.serverPort+#httpServletRequest.contextPath} + ${redirectUri}]]*/ '{redirectUri}';
+config.logo =/*[[${logoUri}]]*/ '/path/to/logo.png';
+config.authParams = {
+  issuer: /*[[${issuerUri}]]*/ '{issuerUri}',
+  responseType: 'code',
+  state: /*[[${state}]]*/ '{state}' || false,
+  scopes: /*[[${scopes}]]*/ '[scopes]',
+  display: 'page'
+};
 
-oktaSignIn.renderEl(
+new OktaSignIn(config).renderEl(
   { el: '#okta-login-container' },
-  function (res) {
-    if (res.status === 'SUCCESS') {
-      debugger;
-      res.session.setCookieAndRedirect(oktaBaseUrl); }
-  }
+  function (res) {}
 );
-
 /*]]>*/
 </script>
 

@@ -15,167 +15,219 @@
  */
 package com.okta.spring.common;
 
-import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
+
+import javax.annotation.PostConstruct;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @ConfigurationProperties("okta")
 public class OktaOAuthProperties {
 
-    /**
-     * OAuth2 authorization properties. Typically found via a discovery/metadata endpoint.
-     */
-    private AuthorizationCodeResourceDetails client;
 
-    /**
-     * OAuth resource server and userinfo properties.
-     */
-    private ResourceServerProperties resource;
+    private ClientProperties client = new ClientProperties();
 
-    /**
-     * OIDC discovery URL, when set all properties that are discoverable will be populated automatically.
-     */
-    private String discoveryUri;
+    private OAuthProperties oauth2 = new OAuthProperties();
 
-    /**
-     * Okta organization base Url;
-     */
-    private String baseUrl;
-
-    /**
-     * Custom authorization server issuer URL: i.e. 'https://dev-123456.oktapreview.com/oauth2/ausar5cbq5TRooicu812'.
-     */
-    private String issuer;
-
-    /**
-     * Expected access token audience claim value.
-     */
-    private String audience = "api://default";
-
-    /**
-     * Access token scope claim key.
-     */
-    private String scopeClaim = "scp";
-
-    /**
-     * Access token roles/groups claim key.
-     */
-    private String rolesClaim = "groups";
-
-    /**
-     * Expected clientId value.
-     */
-    private String clientId;
-
-    /**
-     * Claim to pull the principal name from.
-     */
-    private String principalClaim = "email";
-
-    /**
-     * Login route path.
-     */
-    private String redirectUri = "/login";
-
-    /**
-     * Custom login page hosted by this application.
-     */
-    private String customLoginRoute;
+    private Map<String, Object> extraWidgetConfig = new HashMap<>();
 
 
-    public String getIssuer() {
-        return issuer;
+    @PostConstruct
+    public void init() {
+        // make sure 'features' is a map
+        Object[] idps = convertToArray(extraWidgetConfig.get("idps"));
+        if (idps != null) {
+            extraWidgetConfig.put("idps", idps);
+        }
     }
 
-    public void setIssuer(String issuer) {
-        this.issuer = issuer;
+    private Object[] convertToArray(Object array) {
+        if (array instanceof Map) {
+            Map map = (Map) array;
+            return map.values().toArray();
+        }
+        return null;
     }
 
-    public String getAudience() {
-        return audience;
-    }
-
-    public void setAudience(String audience) {
-        this.audience = audience;
-    }
-
-    public String getScopeClaim() {
-        return scopeClaim;
-    }
-
-    public void setScopeClaim(String scopeClaim) {
-        this.scopeClaim = scopeClaim;
-    }
-
-    public String getRolesClaim() {
-        return rolesClaim;
-    }
-
-    public void setRolesClaim(String rolesClaim) {
-        this.rolesClaim = rolesClaim;
-    }
-
-    public String getClientId() {
-        return clientId;
-    }
-
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
-    }
-
-    public AuthorizationCodeResourceDetails getClient() {
+    public ClientProperties getClient() {
         return client;
     }
 
-    public void setClient(AuthorizationCodeResourceDetails client) {
+    public void setClient(ClientProperties client) {
         this.client = client;
     }
 
-    public String getDiscoveryUri() {
-        return discoveryUri;
+
+    public OAuthProperties getOauth2() {
+        return oauth2;
     }
 
-    public void setDiscoveryUri(String discoveryUri) {
-        this.discoveryUri = discoveryUri;
+    public void setOauth2(OAuthProperties oauth2) {
+        this.oauth2 = oauth2;
     }
 
-    public ResourceServerProperties getResource() {
-        return resource;
+    public Map<String, Object> getExtraWidgetConfig() {
+        return extraWidgetConfig;
     }
 
-    public void setResource(ResourceServerProperties resource) {
-        this.resource = resource;
+    public void setExtraWidgetConfig(Map<String, Object> extraWidgetConfig) {
+        this.extraWidgetConfig = extraWidgetConfig;
     }
 
-    public String getPrincipalClaim() {
-        return principalClaim;
+    public static class ClientProperties {
+        private String orgUrl;
+
+        public String getOrgUrl() {
+            return orgUrl;
+        }
+
+        public void setOrgUrl(String orgUrl) {
+            this.orgUrl = orgUrl;
+        }
     }
 
-    public void setPrincipalClaim(String principalClaim) {
-        this.principalClaim = principalClaim;
-    }
+    public static class OAuthProperties {
 
-    public String getRedirectUri() {
-        return redirectUri;
-    }
+        /**
+         * Login route path.
+         */
+        private String redirectUri = "/login";
 
-    public void setRedirectUri(String redirectUri) {
-        this.redirectUri = redirectUri;
-    }
+        /**
+         * Custom login page hosted by this application.
+         */
+        private String customLoginRoute;
 
-    public String getCustomLoginRoute() {
-        return customLoginRoute;
-    }
+        /**
+         *  OAuth2 clientId value.
+         */
+        private String clientId;
 
-    public void setCustomLoginRoute(String customLoginRoute) {
-        this.customLoginRoute = customLoginRoute;
-    }
+        /**
+         * OAuth2 client secret value.
+         */
+        private String clientSecret;
 
-    public String getBaseUrl() {
-        return baseUrl;
-    }
+        /**
+         * OIDC discovery URL, when set all properties that are discoverable will be populated automatically.
+         */
+        private String discoveryUri;
 
-    public void setBaseUrl(String baseUrl) {
-        this.baseUrl = baseUrl;
+        /**
+         * Custom authorization server issuer URL: i.e. 'https://dev-123456.oktapreview.com/oauth2/ausar5cbq5TRooicu812'.
+         */
+        private String issuer;
+
+        /**
+         * Expected access token audience claim value.
+         */
+        private String audience = "api://default";
+
+        /**
+         * Access token scope claim key.
+         */
+        private String scopeClaim = "scp";
+
+        /**
+         * Access token roles/groups claim key.
+         */
+        private String rolesClaim = "groups";
+
+        private List<String> scopes = Arrays.asList("openid", "profile", "email");
+
+        /**
+         * Claim to pull the principal name from.
+         */
+        private String principalClaim = "email";
+
+        public String getClientId() {
+            return clientId;
+        }
+
+        public void setClientId(String clientId) {
+            this.clientId = clientId;
+        }
+
+        public String getClientSecret() {
+            return clientSecret;
+        }
+
+        public void setClientSecret(String clientSecret) {
+            this.clientSecret = clientSecret;
+        }
+
+        public String getIssuer() {
+            return issuer;
+        }
+
+        public void setIssuer(String issuer) {
+            this.issuer = issuer;
+        }
+
+        public String getAudience() {
+            return audience;
+        }
+
+        public void setAudience(String audience) {
+            this.audience = audience;
+        }
+
+        public String getScopeClaim() {
+            return scopeClaim;
+        }
+
+        public void setScopeClaim(String scopeClaim) {
+            this.scopeClaim = scopeClaim;
+        }
+
+        public String getRolesClaim() {
+            return rolesClaim;
+        }
+
+        public void setRolesClaim(String rolesClaim) {
+            this.rolesClaim = rolesClaim;
+        }
+
+        public String getDiscoveryUri() {
+            return discoveryUri;
+        }
+
+        public void setDiscoveryUri(String discoveryUri) {
+            this.discoveryUri = discoveryUri;
+        }
+
+        public String getPrincipalClaim() {
+            return principalClaim;
+        }
+
+        public void setPrincipalClaim(String principalClaim) {
+            this.principalClaim = principalClaim;
+        }
+
+        public String getRedirectUri() {
+            return redirectUri;
+        }
+
+        public void setRedirectUri(String redirectUri) {
+            this.redirectUri = redirectUri;
+        }
+
+        public String getCustomLoginRoute() {
+            return customLoginRoute;
+        }
+
+        public void setCustomLoginRoute(String customLoginRoute) {
+            this.customLoginRoute = customLoginRoute;
+        }
+
+        public List<String> getScopes() {
+            return scopes;
+        }
+
+        public void setScopes(List<String> scopes) {
+            this.scopes = scopes;
+        }
     }
 }
