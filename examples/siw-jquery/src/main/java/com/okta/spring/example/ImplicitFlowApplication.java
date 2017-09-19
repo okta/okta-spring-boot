@@ -28,7 +28,7 @@ import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecur
 
 @EnableResourceServer
 @SpringBootApplication
-public class ExampleApplication {
+public class ImplicitFlowApplication {
 
     /**
      * Enable OAuth claim checking from @PreAuthorize annotation.
@@ -54,6 +54,6 @@ public class ExampleApplication {
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(ExampleApplication.class, args);
+        SpringApplication.run(ImplicitFlowApplication.class, args);
     }
 }
