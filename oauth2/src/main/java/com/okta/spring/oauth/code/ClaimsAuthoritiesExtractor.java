@@ -35,16 +35,18 @@ public class ClaimsAuthoritiesExtractor implements AuthoritiesExtractor {
     @Override
     public List<GrantedAuthority> extractAuthorities(Map<String, Object> map) {
         // extract the string groups from map
-        List<String> groups;
+        List groups= Collections.emptyList();
         if (map.containsKey(rolesClaimKey)) {
-            groups = (List<String>) map.get(rolesClaimKey);
-        } else {
-            groups = Collections.emptyList();
+            Object rawGroups = map.get(rolesClaimKey);
+            if (rawGroups instanceof List) {
+                groups = (List) rawGroups;
+            }
         }
 
         // convert them to authorities
-        return groups.stream()
-                .map(SimpleGrantedAuthority::new)
+        return (List<GrantedAuthority>) groups.stream()
+                .filter(String.class::isInstance)
+                .map(group -> new SimpleGrantedAuthority(group.toString()))
                 .collect(Collectors.toList());
     }
 }

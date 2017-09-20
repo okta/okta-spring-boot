@@ -38,7 +38,7 @@ public class OktaOAuthProperties {
     public void init() {
         // make sure 'features' is a map
         Object[] idps = convertToArray(extraWidgetConfig.get("idps"));
-        if (idps != null) {
+        if (idps.length > 0) {
             extraWidgetConfig.put("idps", idps);
         }
     }
@@ -48,7 +48,7 @@ public class OktaOAuthProperties {
             Map map = (Map) array;
             return map.values().toArray();
         }
-        return null;
+        return new Object[0];
     }
 
     public ClientProperties getClient() {

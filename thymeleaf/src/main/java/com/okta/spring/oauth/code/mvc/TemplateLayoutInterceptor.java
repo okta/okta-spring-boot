@@ -25,9 +25,8 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  */
@@ -42,7 +41,7 @@ public class TemplateLayoutInterceptor extends HandlerInterceptorAdapter impleme
     private String headViewName;
     private String headFragmentSelector;
     private String logoUri;
-    private List<String> headCssUris;
+    private List<String> headCssUris = Collections.emptyList();
 
     public String getHeadViewName() {
         return headViewName;
@@ -118,7 +117,7 @@ public class TemplateLayoutInterceptor extends HandlerInterceptorAdapter impleme
 
         if (!CollectionUtils.isEmpty(headCssUris) && !modelAndView.getModel().containsKey(HEAD_CSS_URIS_KEY)) {
 
-            List<String> modified = new ArrayList<String>(headCssUris.size());
+            List<String> modified = new ArrayList<>(headCssUris.size());
 
             for(String uri : headCssUris) {
                 if (uri.startsWith("http") || uri.startsWith("//")) {

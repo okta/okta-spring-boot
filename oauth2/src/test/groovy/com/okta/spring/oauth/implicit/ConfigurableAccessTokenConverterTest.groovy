@@ -18,7 +18,8 @@ package com.okta.spring.oauth.implicit
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.oauth2.provider.token.UserAuthenticationConverter
 import org.testng.annotations.Test
-import static org.hamcrest.MatcherAssert.*
+
+import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
 class ConfigurableAccessTokenConverterTest {

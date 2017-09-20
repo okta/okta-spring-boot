@@ -19,6 +19,7 @@ import com.okta.spring.oauth.OktaOAuthProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -37,7 +38,7 @@ public class LoginController {
     @Autowired
     private OktaOAuthProperties oktaOAuthProperties;
 
-    @RequestMapping("/login")
+    @RequestMapping(value = "/login", method = RequestMethod.GET)
     // FIXME: figure out what is going on with the nonce
     public ModelAndView login(@RequestParam("state") String state, @RequestParam(value = "nonce", required = false) String nonce) {
         ModelAndView mav = new ModelAndView("okta/login");

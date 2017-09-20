@@ -15,6 +15,11 @@
   -->
 <FindBugsFilter>
 
+    <Match>
+        <Class name="com.okta.spring.oauth.code.mvc.LoginController" />
+        <Bug pattern="SPRING_ENDPOINT" />
+    </Match>
+
     <!-- allow for examples -->
     <Match>
         <Pakage name="com.okta.spring.example.resources" />

@@ -30,11 +30,11 @@ You can configure your applications properties with environment variables, syste
 
 | Property | Default | Details |
 |----------|---------|---------|
-| okta.oauth.issuer     | N/A | [Authorization Server](/docs/how-to/set-up-auth-server.html) issuer URL, i.e.: https://{yourOktaDomain}.com/oauth2/default |
-| okta.oauth.clientId   | N/A | The Client Id of your Okta OIDC application |
-| okta.oauth.audience   | api://default | The audience of your [Authorization Server](/docs/how-to/set-up-auth-server.html) |
-| okta.oauth.scopeClaim | scp | The scope claim key in the Access Token's JWT |
-| okta.oauth.rolesClaim | groups | The claim key in the Access Token's JWT that corresponds to an array of the users groups. |
+| okta.oauth2.issuer     | N/A | [Authorization Server](/docs/how-to/set-up-auth-server.html) issuer URL, i.e.: https://{yourOktaDomain}.com/oauth2/default |
+| okta.oauth2.clientId   | N/A | The Client Id of your Okta OIDC application |
+| okta.oauth2.audience   | api://default | The audience of your [Authorization Server](/docs/how-to/set-up-auth-server.html) |
+| okta.oauth2.scopeClaim | scp | The scope claim key in the Access Token's JWT |
+| okta.oauth2.rolesClaim | groups | The claim key in the Access Token's JWT that corresponds to an array of the users groups. |
 
 ## Create a Controller 
 

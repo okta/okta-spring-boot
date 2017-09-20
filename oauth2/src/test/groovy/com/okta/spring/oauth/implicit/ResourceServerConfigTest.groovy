@@ -24,8 +24,8 @@ import org.springframework.security.oauth2.provider.token.store.JwtClaimsSetVeri
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests
 import org.testng.annotations.Test
 
-import static org.hamcrest.MatcherAssert.*
-import static org.hamcrest.Matchers.*
+import static org.hamcrest.MatcherAssert.assertThat
+import static org.hamcrest.Matchers.notNullValue
 
 @SpringBootTest(classes    = [StubApp, ResourceServerConfig],
                 properties = ["okta.oauth2.issuer=https://okta.example.com/oauth2/my_issuer",

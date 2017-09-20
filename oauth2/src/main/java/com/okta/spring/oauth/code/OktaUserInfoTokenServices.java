@@ -45,11 +45,14 @@ public class OktaUserInfoTokenServices extends UserInfoTokenServices {
 
     private static class CustomOAuth2Request extends OAuth2Request {
 
+        private static final long serialVersionUID = 42L;
+
         private CustomOAuth2Request(OAuth2Request other) {
             super(other);
         }
 
         @Override
+        @SuppressWarnings("PMD.UselessOverridingMethod")
         public void setScope(Collection<String> scope) {
             super.setScope(scope);
         }
