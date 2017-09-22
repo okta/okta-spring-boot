@@ -26,12 +26,7 @@
     <artifactId>okta-spring-security-oauth2</artifactId>
     <name>Okta Spring Boot :: OAuth2</name>
 
-    <properties>
-        <spring-boot.version>1.5.4.RELEASE</spring-boot.version>
-    </properties>
-
     <dependencies>
-
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
@@ -80,7 +75,6 @@
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
