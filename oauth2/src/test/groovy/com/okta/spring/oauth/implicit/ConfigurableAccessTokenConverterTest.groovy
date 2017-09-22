@@ -19,8 +19,13 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.oauth2.provider.token.UserAuthenticationConverter
 import org.testng.annotations.Test
 
+
 import static org.hamcrest.MatcherAssert.assertThat
-import static org.hamcrest.Matchers.*
+import static org.hamcrest.Matchers.allOf
+import static org.hamcrest.Matchers.equalTo
+import static org.hamcrest.Matchers.containsInAnyOrder
+import static org.hamcrest.Matchers.hasSize
+import static org.hamcrest.Matchers.nullValue
 
 class ConfigurableAccessTokenConverterTest {
 

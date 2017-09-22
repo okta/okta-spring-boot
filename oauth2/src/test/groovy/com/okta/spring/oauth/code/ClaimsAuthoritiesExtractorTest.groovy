@@ -20,7 +20,10 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.testng.annotations.Test
 
 import static org.hamcrest.MatcherAssert.assertThat
-import static org.hamcrest.Matchers.*
+import static org.hamcrest.Matchers.allOf
+import static org.hamcrest.Matchers.emptyCollectionOf
+import static org.hamcrest.Matchers.containsInAnyOrder
+import static org.hamcrest.Matchers.hasSize
 
 class ClaimsAuthoritiesExtractorTest {
 

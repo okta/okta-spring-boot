@@ -28,7 +28,9 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests
 import org.testng.annotations.Test
 
 import static org.hamcrest.MatcherAssert.assertThat
-import static org.hamcrest.Matchers.*
+import static org.hamcrest.Matchers.notNullValue
+import static org.hamcrest.Matchers.instanceOf
+import static org.hamcrest.Matchers.equalTo
 
 @SpringBootTest(classes    = [MockCodeFlowApp, OktaOAuthConfig],
                 properties = ["okta.oauth2.issuer=https://okta.example.com/oauth2/my_issuer",
