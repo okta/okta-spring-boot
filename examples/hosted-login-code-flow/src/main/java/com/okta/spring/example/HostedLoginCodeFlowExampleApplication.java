@@ -30,7 +30,7 @@ public class HostedLoginCodeFlowExampleApplication {
 
     /**
      * Enable OAuth claim checking from @PreAuthorize annotation.
-     * @see com.okta.spring.example.resources.WelcomeResource
+     * @see com.okta.spring.example.controllers.WelcomeController
      */
     @EnableGlobalMethodSecurity(prePostEnabled = true)
     protected static class GlobalSecurityConfiguration extends GlobalMethodSecurityConfiguration {

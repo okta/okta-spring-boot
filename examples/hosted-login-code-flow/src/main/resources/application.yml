@@ -28,9 +28,6 @@ okta:
     # default is '/login'
     redirectUri: /login/okta
 
-
-  extraWidgetConfig:
-
 security:
   oauth2:
     client:

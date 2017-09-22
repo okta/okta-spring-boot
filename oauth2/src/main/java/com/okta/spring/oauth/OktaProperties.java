@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 @ConfigurationProperties("okta")
-public class OktaOAuthProperties {
+public class OktaProperties {
 
 
     private ClientProperties client = new ClientProperties();

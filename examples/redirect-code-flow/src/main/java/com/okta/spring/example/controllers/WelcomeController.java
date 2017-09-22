@@ -13,31 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.example.resources;
+package com.okta.spring.example.controllers;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.security.Principal;
 
 @RestController
-public class WelcomeResource {
+public class WelcomeController {
 
     /**
-     * Simple example REST endpoint that returns a static message.  This resource also serves as an example for checking
+     * Simple example REST endpoint that returns a static message.  This controller also serves as an example for checking
      * an OAuth scope and client roles (parsed from an access token).
      * @return a static welcome message
      */
     @GetMapping("/")
     @PreAuthorize("#oauth2.clientHasRole('Everyone') || #oauth2.hasScope('email')")
-//    @PreAuthorize("#oauth2.clientHasRole('Everyone') || #oauth2.hasScope('email')")
     public Welcome getMessageOfTheDay(Principal principal) {
         return new Welcome("The message of the day is boring.", principal.getName());
     }
 
-    @XmlRootElement
     public static class Welcome {
         public String messageOfTheDay;
         public String username;

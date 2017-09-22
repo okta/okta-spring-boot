@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.example.resources;
+package com.okta.spring.example.controllers;
 
-import com.okta.spring.oauth.OktaOAuthProperties;
+import com.okta.spring.oauth.OktaProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,15 +26,15 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 
-@EnableConfigurationProperties(OktaOAuthProperties.class)
+@EnableConfigurationProperties(OktaProperties.class)
 @RestController
-public class SignInWidgetConfigResource {
+public class SignInWidgetConfigController {
 
     private final String issuerUrl;
 
     private final  String clientId;
 
-    public SignInWidgetConfigResource(OktaOAuthProperties OAuthProperties) {
+    public SignInWidgetConfigController(OktaProperties OAuthProperties) {
 
         Assert.notNull(OAuthProperties.getOauth2().getClientId(), "Property 'okta.oauth.clientId' is required.");
         this.issuerUrl = OAuthProperties.getOauth2().getIssuer();

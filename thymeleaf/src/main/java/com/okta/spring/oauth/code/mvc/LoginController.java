@@ -15,7 +15,7 @@
  */
 package com.okta.spring.oauth.code.mvc;
 
-import com.okta.spring.oauth.OktaOAuthProperties;
+import com.okta.spring.oauth.OktaProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,7 +36,7 @@ public class LoginController {
     private static final String WIDGET_CONFIG_MAP = "extraWidgetConfigMap";
 
     @Autowired
-    private OktaOAuthProperties oktaOAuthProperties;
+    private OktaProperties oktaProperties;
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     // FIXME: figure out what is going on with the nonce
@@ -44,12 +44,12 @@ public class LoginController {
         ModelAndView mav = new ModelAndView("okta/login");
         mav.addObject(STATE, state);
         mav.addObject(NONCE, nonce);
-        mav.addObject(SCOPES, oktaOAuthProperties.getOauth2().getScopes());
-        mav.addObject(OKTA_BASE_URL, oktaOAuthProperties.getClient().getOrgUrl());
-        mav.addObject(OKTA_CLIENT_ID, oktaOAuthProperties.getOauth2().getClientId());
-        mav.addObject(REDIRECT_URI, oktaOAuthProperties.getOauth2().getRedirectUri());
-        mav.addObject(ISSUER_URI, oktaOAuthProperties.getOauth2().getIssuer());
-        mav.addObject(WIDGET_CONFIG_MAP, oktaOAuthProperties.getExtraWidgetConfig());
+        mav.addObject(SCOPES, oktaProperties.getOauth2().getScopes());
+        mav.addObject(OKTA_BASE_URL, oktaProperties.getClient().getOrgUrl());
+        mav.addObject(OKTA_CLIENT_ID, oktaProperties.getOauth2().getClientId());
+        mav.addObject(REDIRECT_URI, oktaProperties.getOauth2().getRedirectUri());
+        mav.addObject(ISSUER_URI, oktaProperties.getOauth2().getIssuer());
+        mav.addObject(WIDGET_CONFIG_MAP, oktaProperties.getExtraWidgetConfig());
         return mav;
     }
 }
