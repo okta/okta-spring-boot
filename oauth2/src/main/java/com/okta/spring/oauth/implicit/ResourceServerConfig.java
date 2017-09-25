@@ -53,7 +53,7 @@ public class ResourceServerConfig {
         return new ResourceServerConfigurerAdapter() {
             @Override
             public void configure(final ResourceServerSecurityConfigurer config) {
-                config.resourceId(OAuthProperties.getOauth2().getAudience()); // set audience
+                config.resourceId(OAuthProperties.getOauth2().getAudience()); // set resourceId to the audience
                 config.tokenServices(tokenServices());
             }
         };

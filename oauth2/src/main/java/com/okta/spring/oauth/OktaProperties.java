@@ -26,13 +26,11 @@ import java.util.Map;
 @ConfigurationProperties("okta")
 public class OktaProperties {
 
-
     private ClientProperties client = new ClientProperties();
 
     private OAuthProperties oauth2 = new OAuthProperties();
 
     private Map<String, Object> extraWidgetConfig = new HashMap<>();
-
 
     @PostConstruct
     public void init() {
@@ -58,7 +56,6 @@ public class OktaProperties {
     public void setClient(ClientProperties client) {
         this.client = client;
     }
-
 
     public OAuthProperties getOauth2() {
         return oauth2;

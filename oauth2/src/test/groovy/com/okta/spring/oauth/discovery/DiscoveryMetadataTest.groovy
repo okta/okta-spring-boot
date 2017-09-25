@@ -28,7 +28,6 @@ class DiscoveryMetadataTest {
     @Test
     void basicParseTest() {
 
-
         def converter = new MappingJackson2HttpMessageConverter()
         DiscoveryMetadata metadata = converter.read(DiscoveryMetadata, new HttpInputMessage() {
 

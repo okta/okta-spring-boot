@@ -23,7 +23,6 @@ import org.springframework.security.config.annotation.method.configuration.Globa
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
 import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecurityExpressionHandler;
 
-
 @SpringBootApplication
 @EnableOAuth2Client
 public class HostedLoginCodeFlowExampleApplication {

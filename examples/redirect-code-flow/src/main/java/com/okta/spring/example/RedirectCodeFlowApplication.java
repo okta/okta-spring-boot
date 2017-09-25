@@ -39,9 +39,7 @@ public class RedirectCodeFlowApplication {
         }
     }
 
-
     public static void main(String[] args) {
         SpringApplication.run(RedirectCodeFlowApplication.class, args);
     }
-
 }
