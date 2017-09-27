@@ -15,6 +15,7 @@
  */
 package com.okta.spring.oauth.code;
 
+import com.okta.spring.oauth.InvalidConfigurationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;

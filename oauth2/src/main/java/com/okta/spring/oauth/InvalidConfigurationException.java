@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.oauth.code;
+package com.okta.spring.oauth;
 
 public class InvalidConfigurationException extends RuntimeException {
 

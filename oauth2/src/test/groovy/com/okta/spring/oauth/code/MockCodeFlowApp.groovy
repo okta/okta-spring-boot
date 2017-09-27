@@ -15,36 +15,21 @@
  */
 package com.okta.spring.oauth.code
 
-import com.okta.spring.config.DiscoveryMetadata
+import com.okta.spring.oauth.discovery.OidcDiscoveryMetadata
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
-import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client
-import org.springframework.web.client.RestTemplate
-
-import static org.mockito.Mockito.mock
-import static org.mockito.Mockito.when
-
 @Configuration
 @EnableOAuth2Client
 @EnableAutoConfiguration
 class MockCodeFlowApp {
 
     @Bean
-    RestTemplateBuilder restTemplateBuilder() {
-
-        DiscoveryMetadata metadata = new DiscoveryMetadata()
-        metadata.userinfoEndpoint = "https://okta.example.com/userinfoEndpoint"
-        metadata.introspectionEndpoint = "https://okta.example.com/introspectionEndpoint"
-
-        RestTemplate template = mock(RestTemplate)
-        RestTemplateBuilder builder = mock(RestTemplateBuilder)
-        when(builder.build()).thenReturn(template)
-        when(template.getForObject("https://okta.example.com/oauth2/my_issuer/.well-known/openid-configuration", DiscoveryMetadata.class)).thenReturn(metadata)
-
-        return builder
-
+    OidcDiscoveryMetadata oktaOidcDiscoveryMetadata() {
+        return new OidcDiscoveryMetadata()
+            .setUserinfoEndpoint("https://okta.example.com/userinfoEndpoint")
+            .setIntrospectionEndpoint("https://okta.example.com/introspectionEndpoint")
+            .setIssuer("https://okta.example.com/oauth2/my_issuer")
     }
-
 }

@@ -15,7 +15,7 @@
  */
 package com.okta.spring.oauth.code
 
-import com.okta.spring.config.DiscoveryMetadata
+import com.okta.spring.oauth.discovery.OidcDiscoveryMetadata
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.security.oauth2.resource.AuthoritiesExtractor
@@ -47,7 +47,7 @@ class OktaOAuthConfigTest extends AbstractTestNGSpringContextTests {
     ResourceServerProperties resourceServerProperties
 
     @Autowired
-    DiscoveryMetadata discoveryMetadata
+    OidcDiscoveryMetadata discoveryMetadata
 
     @Autowired
     PrincipalExtractor principalExtractor

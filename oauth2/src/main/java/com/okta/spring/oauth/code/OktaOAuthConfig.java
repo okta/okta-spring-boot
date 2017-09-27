@@ -17,20 +17,19 @@ package com.okta.spring.oauth.code;
 
 import com.okta.spring.config.OktaClientProperties;
 import com.okta.spring.config.OktaOAuth2Properties;
-import com.okta.spring.config.DiscoveryMetadata;
 import com.okta.spring.config.OktaPropertiesConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.okta.spring.oauth.discovery.OidcDiscoveryConfiguration;
+import com.okta.spring.oauth.discovery.OidcDiscoveryMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.AuthoritiesExtractor;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.PrincipalExtractor;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoTokenServices;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,14 +43,13 @@ import org.springframework.security.oauth2.common.AuthenticationScheme;
 import org.springframework.security.oauth2.config.annotation.web.configuration.OAuth2ClientConfiguration;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.Filter;
 import java.util.function.Consumer;
 
 @Configuration
-@Import({OktaPropertiesConfiguration.class, OktaOAuthConfig.OidcDiscoveryConfiguration.class})
+@Import({OktaPropertiesConfiguration.class, OidcDiscoveryConfiguration.class})
 @ConditionalOnClass({OAuth2ClientConfiguration.class})
 @ConditionalOnBean(OAuth2ClientConfiguration.class)
 public class OktaOAuthConfig {
@@ -63,7 +61,7 @@ public class OktaOAuthConfig {
     private OktaClientProperties oktaClientProperties;
 
     @Autowired
-    private DiscoveryMetadata discoveryMetadata;
+    private OidcDiscoveryMetadata discoveryMetadata;
 
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
@@ -122,23 +120,27 @@ public class OktaOAuthConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     PrincipalExtractor principalExtractor() {
         return new ClaimsPrincipalExtractor(oktaOAuth2Properties.getPrincipalClaim());
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public AuthoritiesExtractor authoritiesExtractor() {
         return new ClaimsAuthoritiesExtractor(oktaOAuth2Properties.getRolesClaim());
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public WebSecurityConfigurerAdapter oktaWebSecurityConfigurerAdapter() {
         return new OktaWebSecurityConfigurerAdapter();
     }
 
     @Bean
+    @ConditionalOnMissingBean(name = "oktaAuthorizationCodeResourceDetails")
     @ConfigurationProperties("security.oauth2.client")
-    protected AuthorizationCodeResourceDetails oktaAuthorizationCodeResourceDetails(DiscoveryMetadata discoveryMetadata, OktaOAuth2Properties oktaOAuth2Properties) {
+    protected AuthorizationCodeResourceDetails oktaAuthorizationCodeResourceDetails(OidcDiscoveryMetadata discoveryMetadata, OktaOAuth2Properties oktaOAuth2Properties) {
         AuthorizationCodeResourceDetails details = new AuthorizationCodeResourceDetails();
         details.setClientAuthenticationScheme(AuthenticationScheme.form);
         details.setScope(oktaOAuth2Properties.getScopes());
@@ -152,8 +154,9 @@ public class OktaOAuthConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean(name = "oktaResourceServerProperties")
     @ConfigurationProperties("security.oauth2.resource")
-    protected ResourceServerProperties oktaResourceServerProperties(DiscoveryMetadata discoveryMetadata) {
+    protected ResourceServerProperties oktaResourceServerProperties(OidcDiscoveryMetadata discoveryMetadata) {
         ResourceServerProperties props = new ResourceServerProperties();
         props.setPreferTokenInfo(false);
 
@@ -164,8 +167,8 @@ public class OktaOAuthConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     protected OktaHttpSecurityConfigurationAdapter defaultOktaHttpSecurityConfigurationAdapter() {
-
         return new DefaultOktaSecurityConfigurer(ssoFilter(), oktaOAuth2Properties.getRedirectUri());
     }
 
@@ -181,37 +184,5 @@ public class OktaOAuthConfig {
         tokenServices.setAuthoritiesExtractor(authoritiesExtractor);
         oktaFilter.setTokenServices(tokenServices);
         return oktaFilter;
-    }
-    /**
-     * General configuration will take precedence over any discovery properties.
-     */
-    @Configuration
-    static class OidcDiscoveryConfiguration {
-
-        // FIXME: looks like there should already be support for this in Spring Sec OAuth2
-
-        private final Logger logger = LoggerFactory.getLogger(OktaPropertiesConfiguration.class);
-
-        @Bean
-        protected DiscoveryMetadata discoveryMetadata(OktaOAuth2Properties oktaOAuth2Properties, RestTemplate restTemplate) {
-
-            String discoveryUrl = oktaOAuth2Properties.getDiscoveryUri();
-
-            if (!StringUtils.hasText(discoveryUrl) && StringUtils.hasText(oktaOAuth2Properties.getIssuer())) {
-                discoveryUrl = oktaOAuth2Properties.getIssuer() + "/.well-known/openid-configuration";
-            }
-
-            if (!StringUtils.hasText(discoveryUrl)) {
-                logger.warn("Could not perform OIDC discovery, property `okta.oauth2.discoveryUrl` or `okta.oauth2.issuer` was not set.");
-                return new DiscoveryMetadata();
-            }
-
-            return restTemplate.getForObject(discoveryUrl, DiscoveryMetadata.class);
-        }
-
-        @Bean
-        public RestTemplate restTemplate(RestTemplateBuilder builder) {
-            return builder.build();
-        }
     }
 }

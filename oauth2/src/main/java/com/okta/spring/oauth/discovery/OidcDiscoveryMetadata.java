@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.config;
+package com.okta.spring.oauth.discovery;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DiscoveryMetadata {
+public class OidcDiscoveryMetadata {
 
     private String issuer;
 
@@ -86,159 +86,179 @@ public class DiscoveryMetadata {
         return issuer;
     }
 
-    public void setIssuer(String issuer) {
+    public OidcDiscoveryMetadata setIssuer(String issuer) {
         this.issuer = issuer;
+        return this;
     }
 
     public String getAuthorizationEndpoint() {
         return authorizationEndpoint;
     }
 
-    public void setAuthorizationEndpoint(String authorizationEndpoint) {
+    public OidcDiscoveryMetadata setAuthorizationEndpoint(String authorizationEndpoint) {
         this.authorizationEndpoint = authorizationEndpoint;
+        return this;
     }
 
     public String getTokenEndpoint() {
         return tokenEndpoint;
     }
 
-    public void setTokenEndpoint(String tokenEndpoint) {
+    public OidcDiscoveryMetadata setTokenEndpoint(String tokenEndpoint) {
         this.tokenEndpoint = tokenEndpoint;
+        return this;
     }
 
     public String getUserinfoEndpoint() {
         return userinfoEndpoint;
     }
 
-    public void setUserinfoEndpoint(String userinfoEndpoint) {
+    public OidcDiscoveryMetadata setUserinfoEndpoint(String userinfoEndpoint) {
         this.userinfoEndpoint = userinfoEndpoint;
+        return this;
     }
 
     public String getRegistrationEndpoint() {
         return registrationEndpoint;
     }
 
-    public void setRegistrationEndpoint(String registrationEndpoint) {
+    public OidcDiscoveryMetadata setRegistrationEndpoint(String registrationEndpoint) {
         this.registrationEndpoint = registrationEndpoint;
+        return this;
     }
 
     public String getJwksUri() {
         return jwksUri;
     }
 
-    public void setJwksUri(String jwksUri) {
+    public OidcDiscoveryMetadata setJwksUri(String jwksUri) {
         this.jwksUri = jwksUri;
+        return this;
     }
 
     public String getIntrospectionEndpoint() {
         return introspectionEndpoint;
     }
 
-    public void setIntrospectionEndpoint(String introspectionEndpoint) {
+    public OidcDiscoveryMetadata setIntrospectionEndpoint(String introspectionEndpoint) {
         this.introspectionEndpoint = introspectionEndpoint;
+        return this;
     }
 
     public String getRevocationEndpoint() {
         return revocationEndpoint;
     }
 
-    public void setRevocationEndpoint(String revocationEndpoint) {
+    public OidcDiscoveryMetadata setRevocationEndpoint(String revocationEndpoint) {
         this.revocationEndpoint = revocationEndpoint;
+        return this;
     }
 
     public String getEndSessionEndpoint() {
         return endSessionEndpoint;
     }
 
-    public void setEndSessionEndpoint(String endSessionEndpoint) {
+    public OidcDiscoveryMetadata setEndSessionEndpoint(String endSessionEndpoint) {
         this.endSessionEndpoint = endSessionEndpoint;
+        return this;
     }
 
     public List<String> getResponseTypesSupported() {
         return responseTypesSupported;
     }
 
-    public void setResponseTypesSupported(List<String> responseTypesSupported) {
+    public OidcDiscoveryMetadata setResponseTypesSupported(List<String> responseTypesSupported) {
         this.responseTypesSupported = responseTypesSupported;
+        return this;
     }
 
     public List<String> getResponseModesSupported() {
         return responseModesSupported;
     }
 
-    public void setResponseModesSupported(List<String> responseModesSupported) {
+    public OidcDiscoveryMetadata setResponseModesSupported(List<String> responseModesSupported) {
         this.responseModesSupported = responseModesSupported;
+        return this;
     }
 
     public List<String> getGrantTypesSupported() {
         return grantTypesSupported;
     }
 
-    public void setGrantTypesSupported(List<String> grantTypesSupported) {
+    public OidcDiscoveryMetadata setGrantTypesSupported(List<String> grantTypesSupported) {
         this.grantTypesSupported = grantTypesSupported;
+        return this;
     }
 
     public List<String> getSubjectTypesSupported() {
         return subjectTypesSupported;
     }
 
-    public void setSubjectTypesSupported(List<String> subjectTypesSupported) {
+    public OidcDiscoveryMetadata setSubjectTypesSupported(List<String> subjectTypesSupported) {
         this.subjectTypesSupported = subjectTypesSupported;
+        return this;
     }
 
     public List<String> getIdTokenSigningAlgValuesSupported() {
         return idTokenSigningAlgValuesSupported;
     }
 
-    public void setIdTokenSigningAlgValuesSupported(List<String> idTokenSigningAlgValuesSupported) {
+    public OidcDiscoveryMetadata setIdTokenSigningAlgValuesSupported(List<String> idTokenSigningAlgValuesSupported) {
         this.idTokenSigningAlgValuesSupported = idTokenSigningAlgValuesSupported;
+        return this;
     }
 
     public List<String> getScopesSupported() {
         return scopesSupported;
     }
 
-    public void setScopesSupported(List<String> scopesSupported) {
+    public OidcDiscoveryMetadata setScopesSupported(List<String> scopesSupported) {
         this.scopesSupported = scopesSupported;
+        return this;
     }
 
     public List<String> getTokenEndpointAuthMethodsSupported() {
         return tokenEndpointAuthMethodsSupported;
     }
 
-    public void setTokenEndpointAuthMethodsSupported(List<String> tokenEndpointAuthMethodsSupported) {
+    public OidcDiscoveryMetadata setTokenEndpointAuthMethodsSupported(List<String> tokenEndpointAuthMethodsSupported) {
         this.tokenEndpointAuthMethodsSupported = tokenEndpointAuthMethodsSupported;
+        return this;
     }
 
     public List<String> getClaimsSupported() {
         return claimsSupported;
     }
 
-    public void setClaimsSupported(List<String> claimsSupported) {
+    public OidcDiscoveryMetadata setClaimsSupported(List<String> claimsSupported) {
         this.claimsSupported = claimsSupported;
+        return this;
     }
 
     public List<String> getCodeChallengeMethodsSupported() {
         return codeChallengeMethodsSupported;
     }
 
-    public void setCodeChallengeMethodsSupported(List<String> codeChallengeMethodsSupported) {
+    public OidcDiscoveryMetadata setCodeChallengeMethodsSupported(List<String> codeChallengeMethodsSupported) {
         this.codeChallengeMethodsSupported = codeChallengeMethodsSupported;
+        return this;
     }
 
     public List<String> getIntrospectionEndpointAuthMethodsSupported() {
         return introspectionEndpointAuthMethodsSupported;
     }
 
-    public void setIntrospectionEndpointAuthMethodsSupported(List<String> introspectionEndpointAuthMethodsSupported) {
+    public OidcDiscoveryMetadata setIntrospectionEndpointAuthMethodsSupported(List<String> introspectionEndpointAuthMethodsSupported) {
         this.introspectionEndpointAuthMethodsSupported = introspectionEndpointAuthMethodsSupported;
+        return this;
     }
 
     public List<String> getRevocationEndpointAuthMethodsSupported() {
         return revocationEndpointAuthMethodsSupported;
     }
 
-    public void setRevocationEndpointAuthMethodsSupported(List<String> revocationEndpointAuthMethodsSupported) {
+    public OidcDiscoveryMetadata setRevocationEndpointAuthMethodsSupported(List<String> revocationEndpointAuthMethodsSupported) {
         this.revocationEndpointAuthMethodsSupported = revocationEndpointAuthMethodsSupported;
+        return this;
     }
 }

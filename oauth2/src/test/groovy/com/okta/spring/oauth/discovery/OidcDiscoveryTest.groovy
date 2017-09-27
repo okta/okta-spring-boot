@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.config
+package com.okta.spring.oauth.discovery
 
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpInputMessage
@@ -23,17 +23,17 @@ import org.testng.annotations.Test
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.equalTo
 
-class DiscoveryMetadataTest {
+class OidcDiscoveryTest {
 
     @Test
     void basicParseTest() {
 
         def converter = new MappingJackson2HttpMessageConverter()
-        DiscoveryMetadata metadata = converter.read(DiscoveryMetadata, new HttpInputMessage() {
+        OidcDiscoveryMetadata metadata = converter.read(OidcDiscoveryMetadata, new HttpInputMessage() {
 
             @Override
             InputStream getBody() throws IOException {
-                return DiscoveryMetadataTest.getResource("/discovery-test.json").openStream()
+                return OidcDiscoveryTest.getResource("/discovery-test.json").openStream()
             }
 
             @Override
