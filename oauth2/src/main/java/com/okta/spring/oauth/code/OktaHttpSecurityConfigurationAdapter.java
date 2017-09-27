@@ -15,10 +15,12 @@
  */
 package com.okta.spring.oauth.code;
 
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.SecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 
+@Order(80)
 public class OktaHttpSecurityConfigurationAdapter implements SecurityConfigurer<DefaultSecurityFilterChain, HttpSecurity> {
 
     @Override
