@@ -13,15 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.oauth.code;
+package com.okta.spring.config;
 
-public class InvalidConfigurationException extends RuntimeException {
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
-    public InvalidConfigurationException(String message) {
-        super(message);
+@ConfigurationProperties("okta.client")
+public class OktaClientProperties {
+
+    private String orgUrl;
+
+    public String getOrgUrl() {
+        return orgUrl;
     }
 
-    public InvalidConfigurationException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    public void setOrgUrl(String orgUrl) {
+            this.orgUrl = orgUrl;
+        }
 }

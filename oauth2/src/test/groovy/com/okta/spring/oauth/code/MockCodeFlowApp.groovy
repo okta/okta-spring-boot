@@ -15,7 +15,7 @@
  */
 package com.okta.spring.oauth.code
 
-import com.okta.spring.oauth.discovery.DiscoveryMetadata
+import com.okta.spring.config.DiscoveryMetadata
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean

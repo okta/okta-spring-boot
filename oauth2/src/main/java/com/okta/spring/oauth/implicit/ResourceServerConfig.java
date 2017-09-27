@@ -15,12 +15,11 @@
  */
 package com.okta.spring.oauth.implicit;
 
-import com.okta.spring.oauth.OktaOAuth2Properties;
+import com.okta.spring.config.OktaOAuth2Properties;
 import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfiguration;
@@ -39,7 +38,6 @@ import org.springframework.util.Assert;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-@EnableConfigurationProperties(OktaOAuth2Properties.class)
 @ConditionalOnBean(ResourceServerConfiguration.class)
 @Configuration
 public class ResourceServerConfig {

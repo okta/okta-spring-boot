@@ -15,9 +15,9 @@
  */
 package com.okta.spring.oauth.code;
 
-import com.okta.spring.oauth.OktaClientProperties;
-import com.okta.spring.oauth.OktaOAuth2Properties;
-import com.okta.spring.oauth.discovery.DiscoveryMetadata;
+import com.okta.spring.config.OktaClientProperties;
+import com.okta.spring.config.OktaOAuth2Properties;
+import com.okta.spring.config.DiscoveryMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,6 @@ import org.springframework.boot.autoconfigure.security.oauth2.resource.Principal
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoTokenServices;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
@@ -54,7 +53,6 @@ import java.util.function.Consumer;
 @Import(OktaOAuthConfig.OktaPropertiesConfiguration.class)
 @ConditionalOnClass({OAuth2ClientConfiguration.class})
 @ConditionalOnBean(OAuth2ClientConfiguration.class)
-@EnableConfigurationProperties({OktaOAuth2Properties.class, OktaClientProperties.class})
 public class OktaOAuthConfig {
 
     @Autowired

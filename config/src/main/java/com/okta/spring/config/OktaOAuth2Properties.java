@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.oauth;
+package com.okta.spring.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

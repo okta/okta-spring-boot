@@ -13,20 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.oauth;
+package com.okta.spring.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
-@ConfigurationProperties("okta.client")
-public class OktaClientProperties {
-
-    private String orgUrl;
-
-    public String getOrgUrl() {
-        return orgUrl;
-    }
-
-    public void setOrgUrl(String orgUrl) {
-            this.orgUrl = orgUrl;
-        }
+@Configuration
+@EnableConfigurationProperties({OktaOAuth2Properties.class, OktaClientProperties.class})
+public class OktaPropertiesConfiguration {
 }

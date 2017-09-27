@@ -15,8 +15,7 @@
  */
 package com.okta.spring.example.controllers;
 
-import com.okta.spring.oauth.OktaOAuth2Properties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import com.okta.spring.config.OktaOAuth2Properties;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,8 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-
-@EnableConfigurationProperties(OktaOAuth2Properties.class)
 @RestController
 public class SignInWidgetConfigController {
 

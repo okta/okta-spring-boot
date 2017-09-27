@@ -15,8 +15,8 @@
  */
 package com.okta.spring.example.controllers;
 
-import com.okta.spring.oauth.OktaClientProperties;
-import com.okta.spring.oauth.OktaOAuth2Properties;
+import com.okta.spring.config.OktaClientProperties;
+import com.okta.spring.config.OktaOAuth2Properties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
