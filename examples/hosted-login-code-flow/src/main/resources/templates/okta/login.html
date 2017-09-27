@@ -15,8 +15,8 @@
   -->
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title th:text="#{okta.web.login.title}">|Login|</title>
-    <!--/*/ <th:block th:include="${headViewName} :: ${headFragmentSelector}"/> /*/-->
+    <title>Login</title>
+    <!--/*/ <th:block th:include="okta/head :: head"/> /*/-->
 </head>
 <body class="login">
   <div id="okta-login-container"></div>
@@ -24,12 +24,12 @@
 <script th:inline="javascript">
 /*<![CDATA[*/
 
-var config = /*[[${extraWidgetConfigMap}]]*/ {};
+var config = {};
 
 config.baseUrl = /*[[${oktaBaseUrl}]]*/ 'https://{yourOktaDomain}.com';
 config.clientId = /*[[${oktaClientId}]]*/ '{oktaClientId}';
 config.redirectUri = /*[[${#httpServletRequest.scheme + '://' + #httpServletRequest.serverName + ':'+#httpServletRequest.serverPort+#httpServletRequest.contextPath} + ${redirectUri}]]*/ '{redirectUri}';
-config.logo =/*[[${logoUri}]]*/ '/path/to/logo.png';
+config.logo = 'https://ok1static.oktacdn.com/assets/img/logos/okta-logo.png';
 config.authParams = {
   issuer: /*[[${issuerUri}]]*/ '{issuerUri}',
   responseType: 'code',

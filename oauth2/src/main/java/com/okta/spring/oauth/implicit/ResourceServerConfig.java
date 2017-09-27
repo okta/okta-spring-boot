@@ -15,7 +15,7 @@
  */
 package com.okta.spring.oauth.implicit;
 
-import com.okta.spring.oauth.OktaProperties;
+import com.okta.spring.oauth.OktaOAuth2Properties;
 import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -39,13 +39,13 @@ import org.springframework.util.Assert;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-@EnableConfigurationProperties(OktaProperties.class)
+@EnableConfigurationProperties(OktaOAuth2Properties.class)
 @ConditionalOnBean(ResourceServerConfiguration.class)
 @Configuration
 public class ResourceServerConfig {
 
     @Autowired
-    private OktaProperties OAuthProperties;
+    private OktaOAuth2Properties oktaOAuth2Properties;
 
     @Bean
     @ConditionalOnMissingBean
@@ -53,7 +53,7 @@ public class ResourceServerConfig {
         return new ResourceServerConfigurerAdapter() {
             @Override
             public void configure(final ResourceServerSecurityConfigurer config) {
-                config.resourceId(OAuthProperties.getOauth2().getAudience()); // set resourceId to the audience
+                config.resourceId(oktaOAuth2Properties.getAudience()); // set resourceId to the audience
                 config.tokenServices(tokenServices());
             }
         };
@@ -77,7 +77,7 @@ public class ResourceServerConfig {
     @ConditionalOnMissingBean
     public AccessTokenConverter accessTokenConverter() {
         JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
-        jwtAccessTokenConverter.setAccessTokenConverter(new ConfigurableAccessTokenConverter(OAuthProperties.getOauth2().getScopeClaim(), OAuthProperties.getOauth2().getRolesClaim()));
+        jwtAccessTokenConverter.setAccessTokenConverter(new ConfigurableAccessTokenConverter(oktaOAuth2Properties.getScopeClaim(), oktaOAuth2Properties.getRolesClaim()));
         return jwtAccessTokenConverter;
     }
 
@@ -92,7 +92,7 @@ public class ResourceServerConfig {
     }
 
     private String issuerUrl() {
-        String issuerUrl = OAuthProperties.getOauth2().getIssuer();
+        String issuerUrl = oktaOAuth2Properties.getIssuer();
         Assert.hasText(issuerUrl, "Property 'okta.oauth2.issuer' is required, must not be null or empty.");
         return issuerUrl;
     }

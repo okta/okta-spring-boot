@@ -37,7 +37,6 @@
 
     <modules>
         <module>oauth2</module>
-        <module>thymeleaf</module>
         <module>okta-spring-boot-starter</module>
         <module>examples</module>
     </modules>
@@ -88,11 +87,6 @@
             <dependency>
                 <groupId>com.okta.spring</groupId>
                 <artifactId>okta-spring-security-oauth2</artifactId>
-                <version>0.2.0-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>com.okta.spring</groupId>
-                <artifactId>okta-spring-boot-thymeleaf</artifactId>
                 <version>0.2.0-SNAPSHOT</version>
             </dependency>
 

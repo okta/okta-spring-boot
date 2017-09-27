@@ -15,8 +15,11 @@
  */
 package com.okta.spring.oauth.code;
 
-import com.okta.spring.oauth.OktaProperties;
+import com.okta.spring.oauth.OktaClientProperties;
+import com.okta.spring.oauth.OktaOAuth2Properties;
 import com.okta.spring.oauth.discovery.DiscoveryMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -28,10 +31,10 @@ import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoT
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
@@ -39,7 +42,6 @@ import org.springframework.security.oauth2.client.filter.OAuth2ClientAuthenticat
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.oauth2.common.AuthenticationScheme;
 import org.springframework.security.oauth2.config.annotation.web.configuration.OAuth2ClientConfiguration;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
@@ -52,23 +54,29 @@ import java.util.function.Consumer;
 @Import(OktaOAuthConfig.OktaPropertiesConfiguration.class)
 @ConditionalOnClass({OAuth2ClientConfiguration.class})
 @ConditionalOnBean(OAuth2ClientConfiguration.class)
-@EnableConfigurationProperties(OktaProperties.class)
-public class OktaOAuthConfig extends WebSecurityConfigurerAdapter {
+@EnableConfigurationProperties({OktaOAuth2Properties.class, OktaClientProperties.class})
+public class OktaOAuthConfig {
+
+    @Autowired
+    private OktaOAuth2Properties oktaOAuth2Properties;
+
+    @Autowired
+    private OktaClientProperties oktaClientProperties;
+
+    @Autowired
+    private DiscoveryMetadata discoveryMetadata;
+
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
 
     @Autowired
     private OAuth2ClientContext oauth2ClientContext;
-
-    @Autowired
-    private OktaProperties oktaProperties;
 
     @Autowired
     private PrincipalExtractor principalExtractor;
 
     @Autowired
     private AuthoritiesExtractor authoritiesExtractor;
-
-    @Autowired
-    private DiscoveryMetadata discoveryMetadata;
 
     @Autowired
     @Qualifier("oktaAuthorizationCodeResourceDetails")
@@ -78,21 +86,21 @@ public class OktaOAuthConfig extends WebSecurityConfigurerAdapter {
     @Qualifier("oktaResourceServerProperties")
     private ResourceServerProperties resourceServerProperties;
 
-
     @PostConstruct
     protected void init() {
 
         // update properties based on discovery if needed
 
-        updateIfNotSet(oktaProperties.getOauth2()::setIssuer,
-                       oktaProperties.getOauth2().getIssuer(),
+        updateIfNotSet(oktaOAuth2Properties::setIssuer,
+                       oktaOAuth2Properties.getIssuer(),
                        discoveryMetadata.getIssuer());
 
-        String issuer = oktaProperties.getOauth2().getIssuer();
+        Assert.hasText(oktaOAuth2Properties.getIssuer(), "Unset OAuth2 Issuer, set property `okta.oauth2.issuer`.");
+        String issuer = oktaOAuth2Properties.getIssuer();
         String baseUrl = issuer.substring(0, issuer.lastIndexOf("/oauth2/"));
 
-        updateIfNotSet(oktaProperties.getClient()::setOrgUrl,
-                       oktaProperties.getClient().getOrgUrl(),
+        updateIfNotSet(oktaClientProperties::setOrgUrl,
+                       oktaClientProperties.getOrgUrl(),
                        baseUrl);
     }
 
@@ -108,30 +116,58 @@ public class OktaOAuthConfig extends WebSecurityConfigurerAdapter {
         }
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    @Bean
+    PrincipalExtractor principalExtractor() {
+        return new ClaimsPrincipalExtractor(oktaOAuth2Properties.getPrincipalClaim());
+    }
 
-        // FIXME: MVC bleed
-        http.authorizeRequests().antMatchers("/okta/*.css").permitAll();
+    @Bean
+    public AuthoritiesExtractor authoritiesExtractor() {
+        return new ClaimsAuthoritiesExtractor(oktaOAuth2Properties.getRolesClaim());
+    }
 
-        // add the SSO Filter
-        http.addFilterBefore(ssoFilter(), UsernamePasswordAuthenticationFilter.class);
+    @Bean
+    public WebSecurityConfigurerAdapter oktaWebSecurityConfigurerAdapter() {
+        return new OktaWebSecurityConfigurerAdapter();
+    }
 
-        // configure the local login page if we have one, otherwise redirect
-        String loginPage = oktaProperties.getOauth2().getCustomLoginRoute();
-        if (!StringUtils.hasText(loginPage)) {
-            loginPage = oktaProperties.getOauth2().getRedirectUri();
-        }
-        http.authorizeRequests().antMatchers(loginPage).permitAll();
-        http.formLogin().loginPage(oktaProperties.getOauth2().getRedirectUri());
+    @Bean
+    @ConfigurationProperties("security.oauth2.client")
+    protected AuthorizationCodeResourceDetails oktaAuthorizationCodeResourceDetails(DiscoveryMetadata discoveryMetadata, OktaOAuth2Properties oktaOAuth2Properties) {
+        AuthorizationCodeResourceDetails details = new AuthorizationCodeResourceDetails();
+        details.setClientAuthenticationScheme(AuthenticationScheme.form);
+        details.setScope(oktaOAuth2Properties.getScopes());
 
-        // require full auth for all other resources
-        http.authorizeRequests().anyRequest().fullyAuthenticated();
+        details.setClientId(oktaOAuth2Properties.getClientId());
+        details.setClientSecret(oktaOAuth2Properties.getClientSecret());
+        details.setAccessTokenUri(discoveryMetadata.getTokenEndpoint());
+        details.setUserAuthorizationUri(discoveryMetadata.getAuthorizationEndpoint());
+
+        return details;
+    }
+
+    @Bean
+    @ConfigurationProperties("security.oauth2.resource")
+    protected ResourceServerProperties oktaResourceServerProperties(DiscoveryMetadata discoveryMetadata) {
+        ResourceServerProperties props = new ResourceServerProperties();
+        props.setPreferTokenInfo(false);
+
+        props.setUserInfoUri(discoveryMetadata.getUserinfoEndpoint());
+        props.setTokenInfoUri(discoveryMetadata.getIntrospectionEndpoint());
+
+        return props;
+    }
+
+    @Bean
+    protected OktaHttpSecurityConfigurationAdapter defaultOktaHttpSecurityConfigurationAdapter() {
+
+        return new DefaultOktaSecurityConfigurer(ssoFilter(), oktaOAuth2Properties.getRedirectUri());
     }
 
     private Filter ssoFilter() {
 
-        OAuth2ClientAuthenticationProcessingFilter oktaFilter = new OAuth2ClientAuthenticationProcessingFilter(oktaProperties.getOauth2().getRedirectUri());
+        OAuth2ClientAuthenticationProcessingFilter oktaFilter = new OAuth2ClientAuthenticationProcessingFilter(oktaOAuth2Properties.getRedirectUri());
+        oktaFilter.setApplicationEventPublisher(applicationEventPublisher);
         OAuth2RestTemplate oktaTemplate = new OAuth2RestTemplate(authorizationCodeResourceDetails, oauth2ClientContext);
         oktaFilter.setRestTemplate(oktaTemplate);
         UserInfoTokenServices tokenServices = new OktaUserInfoTokenServices(resourceServerProperties.getUserInfoUri(), authorizationCodeResourceDetails.getClientId(), oauth2ClientContext);
@@ -141,67 +177,26 @@ public class OktaOAuthConfig extends WebSecurityConfigurerAdapter {
         oktaFilter.setTokenServices(tokenServices);
         return oktaFilter;
     }
-
-    @Bean
-    PrincipalExtractor principalExtractor() {
-        return new ClaimsPrincipalExtractor(oktaProperties.getOauth2().getPrincipalClaim());
-    }
-
-    @Bean
-    public AuthoritiesExtractor authoritiesExtractor() {
-        return new ClaimsAuthoritiesExtractor(oktaProperties.getOauth2().getRolesClaim());
-    }
-
     /**
      * General configuration will take precedence over any discovery properties.
      */
     @Configuration
     static class OktaPropertiesConfiguration {
 
-        @Autowired
-        private OktaProperties oktaProperties;
-
-        @Autowired
-        private RestTemplate restTemplate;
+        private final Logger logger = LoggerFactory.getLogger(OktaPropertiesConfiguration.class);
 
         @Bean
-        @ConfigurationProperties("security.oauth2.client")
-        protected AuthorizationCodeResourceDetails oktaAuthorizationCodeResourceDetails(DiscoveryMetadata discoveryMetadata) {
-            AuthorizationCodeResourceDetails details = new AuthorizationCodeResourceDetails();
-            details.setClientAuthenticationScheme(AuthenticationScheme.form);
-            details.setScope(oktaProperties.getOauth2().getScopes());
+        protected DiscoveryMetadata discoveryMetadata(OktaOAuth2Properties oktaOAuth2Properties, RestTemplate restTemplate) {
 
-            details.setClientId(oktaProperties.getOauth2().getClientId());
-            details.setClientSecret(oktaProperties.getOauth2().getClientSecret());
-            details.setAccessTokenUri(discoveryMetadata.getTokenEndpoint());
-            details.setUserAuthorizationUri(discoveryMetadata.getAuthorizationEndpoint());
+            String discoveryUrl = oktaOAuth2Properties.getDiscoveryUri();
 
-            return details;
-        }
-
-        @Bean
-        @ConfigurationProperties("security.oauth2.resource")
-        protected ResourceServerProperties oktaResourceServerProperties(DiscoveryMetadata discoveryMetadata) {
-            ResourceServerProperties props = new ResourceServerProperties();
-            props.setPreferTokenInfo(false);
-
-            props.setUserInfoUri(discoveryMetadata.getUserinfoEndpoint());
-            props.setTokenInfoUri(discoveryMetadata.getIntrospectionEndpoint());
-
-            return props;
-        }
-
-        @Bean
-        protected DiscoveryMetadata discoveryMetadata() {
-
-            String discoveryUrl = oktaProperties.getOauth2().getDiscoveryUri();
-
-            if (!StringUtils.hasText(discoveryUrl)) {
-                discoveryUrl = oktaProperties.getOauth2().getIssuer() + "/.well-known/openid-configuration";
+            if (!StringUtils.hasText(discoveryUrl) && StringUtils.hasText(oktaOAuth2Properties.getIssuer())) {
+                discoveryUrl = oktaOAuth2Properties.getIssuer() + "/.well-known/openid-configuration";
             }
 
             if (!StringUtils.hasText(discoveryUrl)) {
-                Assert.hasText(discoveryUrl, "Unknown OIDC discovery endpoint, set property `okta.discoveryUrl` or `okta.issuer`.");
+                logger.warn("Could not perform OIDC discovery, property `okta.oauth2.discoveryUrl` or `okta.oauth2.issuer` was not set.");
+                return new DiscoveryMetadata();
             }
 
             return restTemplate.getForObject(discoveryUrl, DiscoveryMetadata.class);

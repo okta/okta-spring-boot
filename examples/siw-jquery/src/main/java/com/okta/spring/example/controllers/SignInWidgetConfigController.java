@@ -15,18 +15,17 @@
  */
 package com.okta.spring.example.controllers;
 
-import com.okta.spring.oauth.OktaProperties;
+import com.okta.spring.oauth.OktaOAuth2Properties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 
-@EnableConfigurationProperties(OktaProperties.class)
+@EnableConfigurationProperties(OktaOAuth2Properties.class)
 @RestController
 public class SignInWidgetConfigController {
 
@@ -34,11 +33,11 @@ public class SignInWidgetConfigController {
 
     private final  String clientId;
 
-    public SignInWidgetConfigController(OktaProperties OAuthProperties) {
+    public SignInWidgetConfigController(OktaOAuth2Properties oktaOAuth2Properties) {
 
-        Assert.notNull(OAuthProperties.getOauth2().getClientId(), "Property 'okta.oauth.clientId' is required.");
-        this.issuerUrl = OAuthProperties.getOauth2().getIssuer();
-        this.clientId = OAuthProperties.getOauth2().getClientId();
+        Assert.notNull(oktaOAuth2Properties.getClientId(), "Property 'okta.oauth.clientId' is required.");
+        this.issuerUrl = oktaOAuth2Properties.getIssuer();
+        this.clientId = oktaOAuth2Properties.getClientId();
     }
 
 
@@ -47,7 +46,6 @@ public class SignInWidgetConfigController {
         return new WidgetConfig(issuerUrl, clientId);
     }
 
-    @XmlRootElement
     public static class WidgetConfig {
         public String baseUrl;
         public String clientId;

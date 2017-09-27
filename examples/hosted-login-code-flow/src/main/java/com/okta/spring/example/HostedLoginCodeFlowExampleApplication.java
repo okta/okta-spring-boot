@@ -15,9 +15,14 @@
  */
 package com.okta.spring.example;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
+import org.springframework.security.authentication.event.AbstractAuthenticationFailureEvent;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
@@ -27,8 +32,11 @@ import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecur
 @EnableOAuth2Client
 public class HostedLoginCodeFlowExampleApplication {
 
+    private final Logger logger = LoggerFactory.getLogger(HostedLoginCodeFlowExampleApplication.class);
+
     /**
      * Enable OAuth claim checking from @PreAuthorize annotation.
+     *
      * @see com.okta.spring.example.controllers.WelcomeController
      */
     @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -41,5 +49,10 @@ public class HostedLoginCodeFlowExampleApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(HostedLoginCodeFlowExampleApplication.class, args);
+    }
+
+    @Bean
+    protected ApplicationListener<AbstractAuthenticationFailureEvent> authenticationFailureEventListener() {
+        return event -> logger.info("Authentication Failure: {}", event.getException().getMessage(), event.getException());
     }
 }

@@ -46,10 +46,6 @@
             <groupId>com.okta.spring</groupId>
             <artifactId>okta-spring-security-oauth2</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.okta.spring</groupId>
-            <artifactId>okta-spring-boot-thymeleaf</artifactId>
-        </dependency>
 
         <!-- Spring deps-->
         <dependency>
