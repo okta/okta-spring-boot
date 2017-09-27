@@ -21,7 +21,6 @@ import com.okta.spring.config.OktaPropertiesConfiguration;
 import com.okta.spring.oauth.discovery.OidcDiscoveryConfiguration;
 import com.okta.spring.oauth.discovery.OidcDiscoveryMetadata;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -52,7 +51,6 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.O
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.Filter;
 import java.util.function.Consumer;
 
@@ -62,51 +60,18 @@ import java.util.function.Consumer;
 @ConditionalOnBean(OAuth2ClientConfiguration.class)
 public class OktaOAuthConfig {
 
-    @Autowired
-    private OktaOAuth2Properties oktaOAuth2Properties;
+    private final OktaOAuth2Properties oktaOAuth2Properties;
 
-    @Autowired
-    private OktaClientProperties oktaClientProperties;
-
-    @Autowired
-    private OidcDiscoveryMetadata discoveryMetadata;
-
-    @Autowired
-    private ApplicationEventPublisher applicationEventPublisher;
-
-    @Autowired
-    private OAuth2ClientContext oauth2ClientContext;
-
-    @Autowired
-    private PrincipalExtractor principalExtractor;
-
-    @Autowired
-    private AuthoritiesExtractor authoritiesExtractor;
-
-    @Autowired
-    @Qualifier("oktaAuthorizationCodeResourceDetails")
-    private AuthorizationCodeResourceDetails authorizationCodeResourceDetails;
-
-    @Autowired
-    @Qualifier("oktaResourceServerProperties")
-    private ResourceServerProperties resourceServerProperties;
-
-    @PostConstruct
-    protected void init() {
-
-        // update properties based on discovery if needed
-
-        updateIfNotSet(oktaOAuth2Properties::setIssuer,
-                       oktaOAuth2Properties.getIssuer(),
-                       discoveryMetadata.getIssuer());
+    public OktaOAuthConfig(OktaOAuth2Properties oktaOAuth2Properties, OktaClientProperties oktaClientProperties) {
+        this.oktaOAuth2Properties = oktaOAuth2Properties;
 
         Assert.hasText(oktaOAuth2Properties.getIssuer(), "Unset OAuth2 Issuer, set property `okta.oauth2.issuer`.");
         String issuer = oktaOAuth2Properties.getIssuer();
         String baseUrl = issuer.substring(0, issuer.lastIndexOf("/oauth2/"));
 
         updateIfNotSet(oktaClientProperties::setOrgUrl,
-                       oktaClientProperties.getOrgUrl(),
-                       baseUrl);
+                oktaClientProperties.getOrgUrl(),
+                baseUrl);
     }
 
     /**
@@ -170,11 +135,17 @@ public class OktaOAuthConfig {
 
     @Bean
     @ConditionalOnMissingBean(name = "defaultOktaHttpSecurityConfigurationAdapter")
-    protected OktaHttpSecurityConfigurationAdapter defaultOktaHttpSecurityConfigurationAdapter() {
-        return new DefaultOktaSecurityConfigurer(ssoFilter(), oktaOAuth2Properties.getRedirectUri());
+    protected OktaHttpSecurityConfigurationAdapter defaultOktaHttpSecurityConfigurationAdapter(@Qualifier("oktaSsoFilter") Filter oktaSsoFilter) {
+        return new DefaultOktaSecurityConfigurer(oktaSsoFilter, oktaOAuth2Properties.getRedirectUri());
     }
 
-    private Filter ssoFilter() {
+    @Bean
+    protected Filter oktaSsoFilter(ApplicationEventPublisher applicationEventPublisher,
+                                   OAuth2ClientContext oauth2ClientContext,
+                                   PrincipalExtractor principalExtractor,
+                                   AuthoritiesExtractor authoritiesExtractor,
+                                   @Qualifier("oktaAuthorizationCodeResourceDetails") AuthorizationCodeResourceDetails authorizationCodeResourceDetails,
+                                   @Qualifier("oktaResourceServerProperties")  ResourceServerProperties resourceServerProperties) {
 
         OAuth2ClientAuthenticationProcessingFilter oktaFilter = new OAuth2ClientAuthenticationProcessingFilter(oktaOAuth2Properties.getRedirectUri());
         oktaFilter.setApplicationEventPublisher(applicationEventPublisher);
