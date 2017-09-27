@@ -18,6 +18,7 @@ package com.okta.spring.oauth.code;
 import com.okta.spring.config.OktaClientProperties;
 import com.okta.spring.config.OktaOAuth2Properties;
 import com.okta.spring.config.DiscoveryMetadata;
+import com.okta.spring.config.OktaPropertiesConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +51,7 @@ import javax.servlet.Filter;
 import java.util.function.Consumer;
 
 @Configuration
-@Import(OktaOAuthConfig.OktaPropertiesConfiguration.class)
+@Import({OktaPropertiesConfiguration.class, OktaOAuthConfig.OidcDiscoveryConfiguration.class})
 @ConditionalOnClass({OAuth2ClientConfiguration.class})
 @ConditionalOnBean(OAuth2ClientConfiguration.class)
 public class OktaOAuthConfig {
@@ -100,6 +101,12 @@ public class OktaOAuthConfig {
         updateIfNotSet(oktaClientProperties::setOrgUrl,
                        oktaClientProperties.getOrgUrl(),
                        baseUrl);
+
+        // force using the same clientID
+        // TODO: this is for debugging, there is something odd going on here
+        if (StringUtils.hasText(oktaOAuth2Properties.getClientId())) {
+            authorizationCodeResourceDetails.setClientId(oktaOAuth2Properties.getClientId());
+        }
     }
 
     /**
@@ -179,7 +186,9 @@ public class OktaOAuthConfig {
      * General configuration will take precedence over any discovery properties.
      */
     @Configuration
-    static class OktaPropertiesConfiguration {
+    static class OidcDiscoveryConfiguration {
+
+        // FIXME: looks like there should already be support for this in Spring Sec OAuth2
 
         private final Logger logger = LoggerFactory.getLogger(OktaPropertiesConfiguration.class);
 
