@@ -1,0 +1,49 @@
+<!--
+  ~ Copyright 2017 Okta, Inc.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Login</title>
+    <!--/*/ <th:block th:include="okta/head :: head"/> /*/-->
+</head>
+<body class="login">
+  <div id="okta-login-container"></div>
+
+<script th:inline="javascript">
+/*<![CDATA[*/
+
+var config = {};
+
+config.baseUrl = /*[[${oktaBaseUrl}]]*/ 'https://{yourOktaDomain}.com';
+config.clientId = /*[[${oktaClientId}]]*/ '{oktaClientId}';
+config.redirectUri = /*[[${#httpServletRequest.scheme + '://' + #httpServletRequest.serverName + ':'+#httpServletRequest.serverPort+#httpServletRequest.contextPath} + ${redirectUri}]]*/ '{redirectUri}';
+config.logo = 'https://ok1static.oktacdn.com/assets/img/logos/okta-logo.png';
+config.authParams = {
+  issuer: /*[[${issuerUri}]]*/ '{issuerUri}',
+  responseType: 'code',
+  state: /*[[${state}]]*/ '{state}' || false,
+  scopes: /*[[${scopes}]]*/ '[scopes]',
+  display: 'page'
+};
+
+new OktaSignIn(config).renderEl(
+  { el: '#okta-login-container' },
+  function (res) {}
+);
+/*]]>*/
+</script>
+
+</body>
+</html>

@@ -1,7 +1,7 @@
 Okta Spring Boot Starter
 ========================
 
-Okta's Spring Boot Starter will enable your Spring Boot application to work with an Okta access token via an OAuth implicit flow.  Jump to our [quickstart](https://developer.okta.com/quickstart/#/angular/java/spring) to see how to configure various clients or follow along below to use curl.
+Okta's Spring Boot Starter will enable your Spring Boot application to work with Okta via OAuth2.  Jump to our [quickstart](https://developer.okta.com/quickstart/#/angular/java/spring) to see how to configure various clients or follow along below to use curl.
 
 ## What you need
 
@@ -21,28 +21,38 @@ For Apache Maven:
 
 For Gradle:
 ```groovy
-compile 'com.okta.spring:okta-spring-security-starter:{{ site.versions.spring_security_starter }}'
+compile 'com.okta.spring:okta-spring-security-starter'
 ```
 
-## Configure your properties
+## Supporting client side applications - OAuth2 Implicit flow
+
+Are you writing a backend endpoints in order to support a client side application? If so follow along, otherwise skip to the next section.
+
+### Configure your properties
 
 You can configure your applications properties with environment variables, system properties, or configuration files. Take a look at the [Spring Boot documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html) for more details.
 
 | Property | Default | Details |
 |----------|---------|---------|
-| okta.oauth.issuer     | N/A | [Authorization Server](/docs/how-to/set-up-auth-server.html) issuer URL, i.e.: https://{yourOktaDomain}.com/oauth2/default |
-| okta.oauth.clientId   | N/A | The Client Id of your Okta OIDC application |
-| okta.oauth.audience   | api://default | The audience of your [Authorization Server](/docs/how-to/set-up-auth-server.html) |
-| okta.oauth.scopeClaim | scp | The scope claim key in the Access Token's JWT |
-| okta.oauth.rolesClaim | groups | The claim key in the Access Token's JWT that corresponds to an array of the users groups. |
+| okta.oauth2.issuer     | N/A | [Authorization Server](/docs/how-to/set-up-auth-server.html) issuer URL, i.e.: https://{yourOktaDomain}.com/oauth2/default |
+| okta.oauth2.clientId   | N/A | The Client Id of your Okta OIDC application |
+| okta.oauth2.audience   | api://default | The audience of your [Authorization Server](/docs/how-to/set-up-auth-server.html) |
+| okta.oauth2.scopeClaim | scp | The scope claim key in the Access Token's JWT |
+| okta.oauth2.rolesClaim | groups | The claim key in the Access Token's JWT that corresponds to an array of the users groups. |
 
-## Create a Controller 
+### Create a Controller
 
-The above client makes a request to `/hello-oauth`, you simply need to create a `Controller` to handle the response: 
+The above client makes a request to `/hello-oauth`, you simply need to create a Spring Boot application and `Controller` to handle the response: 
 
 ```java
+@EnableResourceServer
+@SpringBootApplication
 @RestController
-class ExampleRestController {
+public class ExampleApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(ExampleApplication.class, args);
+    }
 
     @GetMapping("/hello-oauth")
     public String sayHello(Principal principal) {
@@ -51,7 +61,9 @@ class ExampleRestController {
 }
 ```
 
-## That's it!
+Make sure to mark the application with Spring Security's `@EnableResourceServer` annotation, to enable handing of access tokens.
+
+### That's it!
 
 To test things out you can use curl:
 
@@ -68,6 +80,49 @@ Okta's Spring Security integration will [parse the JWT access token](https://dev
 
 Check out a minimal example that uses the [Okta Signin Widget and JQuery](examples/siw-jquery) or [this blog post](https://scotch.io/tutorials/build-a-secure-notes-application-with-kotlin-typescript-and-okta). 
 
+
+## Supporting server side applications - OAuth2 Code flow
+
+Building a server side application and just need to redirect to a login page? This OAuth2 code flow is for you.
+
+### Configure your properties
+
+You can configure your applications properties with environment variables, system properties, or configuration files. Take a look at the [Spring Boot documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html) for more details.
+
+| Property | Required | Details |
+|----------|---------|---------|
+| okta.oauth2.issuer     | true | [Authorization Server](/docs/how-to/set-up-auth-server.html) issuer URL, i.e.: https://{yourOktaDomain}.com/oauth2/default |
+| okta.oauth2.clientId   | true | The Client Id of your Okta OIDC application |
+| okta.oauth2.clientSecret   | true | The Client Secret of your Okta OIDC application |
+
+### Create a simple application
+
+Create a minimal Spring Boot application:
+
+```java
+@EnableOAuth2Client
+@SpringBootApplication
+@RestController
+public class ExampleApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(ExampleApplication.class, args);
+    }
+
+    @GetMapping("/")
+    public String getMessageOfTheDay(Principal principal) {
+        return principal.getName() +", this message of the day is boring";
+    }
+}
+```
+
+### That's it!
+
+Open up the this link in your browser: [http://localhost:8080/](http://localhost:8080/)
+
+You will be redirected automatically to an Okta login page. Once you successfully login, you will be redirected back to '[http://localhost:8080/](http://localhost:8080/)' and you will see the message of the day!
+
+This module integrates with Spring Security's OAuth support, all you need is the mark your application with the standard `@EnableOAuth2Client` annotation. 
 
 # Extra Credit
 

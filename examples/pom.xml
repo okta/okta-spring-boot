@@ -20,17 +20,19 @@
 
     <parent>
         <groupId>com.okta.spring</groupId>
-        <artifactId>okta-spring-security-parent</artifactId>
-        <version>0.1.1-SNAPSHOT</version>
+        <artifactId>okta-spring-boot-parent</artifactId>
+        <version>0.2.0-SNAPSHOT</version>
     </parent>
 
     <groupId>com.okta.spring.examples</groupId>
-    <artifactId>okta-spring-security-examples</artifactId>
-    <name>Okta Spring Security :: Examples</name>
+    <artifactId>okta-spring-boot-examples</artifactId>
+    <name>Okta Spring Boot :: Examples</name>
     <packaging>pom</packaging>
 
     <modules>
         <module>siw-jquery</module>
+        <module>redirect-code-flow</module>
+        <module>hosted-login-code-flow</module>
     </modules>
 
     <build>

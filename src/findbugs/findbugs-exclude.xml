@@ -15,9 +15,14 @@
   -->
 <FindBugsFilter>
 
+    <Match>
+        <Class name="com.okta.spring.oauth.code.mvc.LoginController" />
+        <Bug pattern="SPRING_ENDPOINT" />
+    </Match>
+
     <!-- allow for examples -->
     <Match>
-        <Pakage name="com.okta.spring.example.resources" />
+        <Pakage name="com.okta.spring.example.controllers" />
         <Bug pattern="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" />
     </Match>
     <Match>
@@ -25,7 +30,7 @@
         <Bug pattern="SIC_INNER_SHOULD_BE_STATIC_ANON" />
     </Match>
     <Match>
-        <Package name="com.okta.spring.example.resources" />
+        <Package name="com.okta.spring.example.controllers" />
         <Bug pattern="SPRING_ENDPOINT" />
     </Match>
 
