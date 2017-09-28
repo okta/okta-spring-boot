@@ -39,11 +39,9 @@ import static org.hamcrest.Matchers.equalTo
 class OktaOAuthConfigTest extends AbstractTestNGSpringContextTests {
 
     @Autowired
-    @Qualifier("oktaAuthorizationCodeResourceDetails")
     AuthorizationCodeResourceDetails authorizationCodeResourceDetails
 
     @Autowired
-    @Qualifier("oktaResourceServerProperties")
     ResourceServerProperties resourceServerProperties
 
     @Autowired

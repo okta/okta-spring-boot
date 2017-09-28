@@ -22,10 +22,12 @@ import com.okta.spring.oauth.discovery.OidcDiscoveryConfiguration;
 import com.okta.spring.oauth.discovery.OidcDiscoveryMetadata;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.boot.autoconfigure.security.oauth2.OAuth2AutoConfiguration;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.AuthoritiesExtractor;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.PrincipalExtractor;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
@@ -36,6 +38,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -58,6 +61,7 @@ import java.util.function.Consumer;
 @Import({OktaPropertiesConfiguration.class, OidcDiscoveryConfiguration.class, OktaOAuthConfig.ClientContextConfiguration.class})
 @ConditionalOnClass({OAuth2ClientConfiguration.class})
 @ConditionalOnBean(OAuth2ClientConfiguration.class)
+@AutoConfigureBefore(OAuth2AutoConfiguration.class)
 public class OktaOAuthConfig {
 
     private final OktaOAuth2Properties oktaOAuth2Properties;
@@ -105,7 +109,7 @@ public class OktaOAuthConfig {
     }
 
     @Bean
-    @ConditionalOnMissingBean(name = "oktaAuthorizationCodeResourceDetails")
+    @Primary
     @ConfigurationProperties("security.oauth2.client")
     protected AuthorizationCodeResourceDetails oktaAuthorizationCodeResourceDetails(OidcDiscoveryMetadata discoveryMetadata, OktaOAuth2Properties oktaOAuth2Properties) {
         AuthorizationCodeResourceDetails details = new AuthorizationCodeResourceDetails();
@@ -121,10 +125,10 @@ public class OktaOAuthConfig {
     }
 
     @Bean
-    @ConditionalOnMissingBean(name = "oktaResourceServerProperties")
+    @Primary
     @ConfigurationProperties("security.oauth2.resource")
-    protected ResourceServerProperties oktaResourceServerProperties(OidcDiscoveryMetadata discoveryMetadata) {
-        ResourceServerProperties props = new ResourceServerProperties();
+    protected ResourceServerProperties oktaResourceServerProperties(OidcDiscoveryMetadata discoveryMetadata, OktaOAuth2Properties oktaOAuth2Properties) {
+        ResourceServerProperties props = new ResourceServerProperties(oktaOAuth2Properties.getClientId(), oktaOAuth2Properties.getClientSecret());
         props.setPreferTokenInfo(false);
 
         props.setUserInfoUri(discoveryMetadata.getUserinfoEndpoint());
@@ -145,7 +149,7 @@ public class OktaOAuthConfig {
                                    PrincipalExtractor principalExtractor,
                                    AuthoritiesExtractor authoritiesExtractor,
                                    @Qualifier("oktaAuthorizationCodeResourceDetails") AuthorizationCodeResourceDetails authorizationCodeResourceDetails,
-                                   @Qualifier("oktaResourceServerProperties")  ResourceServerProperties resourceServerProperties) {
+                                   @Qualifier("oktaResourceServerProperties") ResourceServerProperties resourceServerProperties) {
 
         OAuth2ClientAuthenticationProcessingFilter oktaFilter = new OAuth2ClientAuthenticationProcessingFilter(oktaOAuth2Properties.getRedirectUri());
         oktaFilter.setApplicationEventPublisher(applicationEventPublisher);
