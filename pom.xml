@@ -25,20 +25,84 @@
     </parent>
 
     <groupId>com.okta.spring</groupId>
-    <artifactId>okta-spring-security-parent</artifactId>
-    <version>0.1.1-SNAPSHOT</version>
+    <artifactId>okta-spring-boot-parent</artifactId>
+    <version>0.2.0-SNAPSHOT</version>
     <name>Okta Spring Security</name>
     <packaging>pom</packaging>
 
     <properties>
-        <spring-boot.version>1.5.4.RELEASE</spring-boot.version>
+        <spring-boot.version>1.5.7.RELEASE</spring-boot.version>
         <github.slug>okta/okta-spring-security</github.slug>
     </properties>
 
     <modules>
-        <module>okta-spring-security-starter</module>
+        <module>config</module>
+        <module>oauth2</module>
+        <module>okta-spring-boot-starter</module>
         <module>examples</module>
     </modules>
+
+    <dependencyManagement>
+        <dependencies>
+
+            <dependency>
+                <!-- Import dependency management from Spring Boot -->
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- User newer oauth2 module, this will be removed when this version is include in the above BOM  -->
+            <dependency>
+                <groupId>org.springframework.security.oauth</groupId>
+                <artifactId>spring-security-oauth2</artifactId>
+                <version>2.2.0.RELEASE</version>
+                <exclusions>
+                    <!-- don't let these transitive dependencies mess with the bom above -->
+                    <exclusion>
+                        <groupId>*</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-core</artifactId>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <!-- this project's modules -->
+            <dependency>
+                <groupId>com.okta.spring</groupId>
+                <artifactId>okta-spring-boot-starter</artifactId>
+                <version>0.2.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.okta.spring</groupId>
+                <artifactId>okta-spring-security-oauth2</artifactId>
+                <version>0.2.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.okta.spring</groupId>
+                <artifactId>okta-spring-config</artifactId>
+                <version>0.2.0-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>2.10.0</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <profiles>
         <profile>

@@ -1,0 +1,1 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration = com.okta.spring.oauth.implicit.ResourceServerConfig
