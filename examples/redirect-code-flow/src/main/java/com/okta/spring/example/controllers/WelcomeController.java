@@ -30,7 +30,7 @@ public class WelcomeController {
      * @return a static welcome message
      */
     @GetMapping("/")
-    @PreAuthorize("#oauth2.clientHasRole('Everyone') || #oauth2.hasScope('email')")
+    @PreAuthorize("#oauth2.hasScope('email')")
     public Welcome getMessageOfTheDay(Principal principal) {
         return new Welcome("The message of the day is boring.", principal.getName());
     }
@@ -45,5 +45,11 @@ public class WelcomeController {
             this.messageOfTheDay = messageOfTheDay;
             this.username = username;
         }
+    }
+
+    @GetMapping("/everyone")
+    @PreAuthorize("hasAuthority('Everyone')")
+    public String everyoneRole() {
+        return "Okta Groups have been mapped to Spring Security authorities correctly!";
     }
 }

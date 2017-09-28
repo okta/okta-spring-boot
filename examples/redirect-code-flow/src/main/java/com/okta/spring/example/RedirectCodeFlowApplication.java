@@ -25,19 +25,20 @@ import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecur
 
 @SpringBootApplication
 @EnableOAuth2Sso
+//@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class RedirectCodeFlowApplication {
 
-//    /**
-//     * Enable OAuth claim checking from @PreAuthorize annotation.
-//     * @see com.okta.spring.example.controllers.WelcomeController
-//     */
-//    @EnableGlobalMethodSecurity(prePostEnabled = true)
-//    protected static class GlobalSecurityConfiguration extends GlobalMethodSecurityConfiguration {
-//        @Override
-//        protected MethodSecurityExpressionHandler createExpressionHandler() {
-//            return new OAuth2MethodSecurityExpressionHandler();
-//        }
-//    }
+    /**
+     * Enable OAuth claim checking from @PreAuthorize annotation.
+     * @see com.okta.spring.example.controllers.WelcomeController
+     */
+    @EnableGlobalMethodSecurity(prePostEnabled = true)
+    protected static class GlobalSecurityConfiguration extends GlobalMethodSecurityConfiguration {
+        @Override
+        protected MethodSecurityExpressionHandler createExpressionHandler() {
+            return new OAuth2MethodSecurityExpressionHandler();
+        }
+    }
 
     public static void main(String[] args) {
         SpringApplication.run(RedirectCodeFlowApplication.class, args);
