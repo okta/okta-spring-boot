@@ -25,6 +25,9 @@ import static org.hamcrest.Matchers.emptyCollectionOf
 import static org.hamcrest.Matchers.containsInAnyOrder
 import static org.hamcrest.Matchers.hasSize
 
+/**
+ * @since 0.2.0
+ */
 class ClaimsAuthoritiesExtractorTest {
 
     private Map<String, Object> dataMap = [

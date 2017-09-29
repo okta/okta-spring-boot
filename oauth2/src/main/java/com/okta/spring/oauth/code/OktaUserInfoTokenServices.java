@@ -23,6 +23,10 @@ import org.springframework.security.oauth2.provider.OAuth2Request;
 
 import java.util.Collection;
 
+/**
+ * Okta UserInfoTokenServices that supports OAuth scopes. The default {@link UserInfoTokenServices} does not.
+ * @since 0.2.0
+ */
 public class OktaUserInfoTokenServices extends UserInfoTokenServices {
 
     private final OAuth2ClientContext oauth2ClientContext;
@@ -43,6 +47,9 @@ public class OktaUserInfoTokenServices extends UserInfoTokenServices {
         return new OAuth2Authentication(customOAuth2Request, originalOAuth.getUserAuthentication());
     }
 
+    /**
+     * Extend OAuth2Request to expose {code}setScope{code} so it can be used above.
+     */
     private static class CustomOAuth2Request extends OAuth2Request {
 
         private static final long serialVersionUID = 42L;

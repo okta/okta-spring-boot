@@ -23,6 +23,9 @@ import org.testng.annotations.Test
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.equalTo
 
+/**
+ * @since 0.2.0
+ */
 class OidcDiscoveryTest {
 
     @Test
