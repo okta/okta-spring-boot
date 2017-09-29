@@ -27,6 +27,9 @@ import static org.hamcrest.Matchers.containsInAnyOrder
 import static org.hamcrest.Matchers.hasSize
 import static org.hamcrest.Matchers.nullValue
 
+/**
+ * @since 0.1.0
+ */
 class ConfigurableAccessTokenConverterTest {
 
     @Test

@@ -20,6 +20,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
+/**
+ * OIDC discovery metadata represented as a simple bean.
+ * @since 0.2.0
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OidcDiscoveryMetadata {
 

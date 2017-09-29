@@ -31,6 +31,18 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 
+/**
+ * Spring Configuration which adds a little Okta sugar to the standard Spring Boot OAuth2 support.
+ * <p>
+ * Features:
+ * </p>
+ * <ul>
+ *   <li>Customizable PrincipalExtractor based on the property {code}okta.oauth2.rolesClaim{code}</li>
+ *   <li>Customizable AuthoritiesExtractor based on the property {code}okta.oauth2.principalClaim{code}</li>
+ *   <li>UserInfoTokenServices that supports OAuth2 scopes from the current request</li>
+ *   </ul>
+ * @since 0.2.0
+ */
 @Configuration
 @AutoConfigureBefore(OAuth2SsoDefaultConfiguration.class)
 @ConditionalOnBean(OAuth2SsoDefaultConfiguration.class)

@@ -38,6 +38,10 @@ import org.springframework.util.Assert;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+/**
+ * Configuration for OAuth2 Implicit flow.
+ * @since 0.1.0
+ */
 @ConditionalOnBean(ResourceServerConfiguration.class)
 @Configuration
 public class ResourceServerConfig {

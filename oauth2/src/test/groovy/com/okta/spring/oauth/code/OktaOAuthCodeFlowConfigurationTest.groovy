@@ -24,6 +24,9 @@ import org.testng.annotations.Test
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.notNullValue
 
+/**
+ * @since 0.2.0
+ */
 @SpringBootTest(classes    = [MockCodeFlowApp, OktaOAuthCodeFlowConfiguration],
                 properties = ["okta.oauth2.issuer=https://okta.example.com/oauth2/my_issuer",
                               "okta.oauth2.principalClaim=customPrincipalClaim",
