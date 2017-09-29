@@ -57,5 +57,4 @@ public class OktaUserInfoTokenServices extends UserInfoTokenServices {
             super.setScope(scope);
         }
     }
-
 }

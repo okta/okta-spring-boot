@@ -31,7 +31,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 
-
 @Configuration
 @AutoConfigureBefore(OAuth2SsoDefaultConfiguration.class)
 @ConditionalOnBean(OAuth2SsoDefaultConfiguration.class)
