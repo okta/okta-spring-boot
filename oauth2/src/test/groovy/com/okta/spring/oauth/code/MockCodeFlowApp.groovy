@@ -20,18 +20,17 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client
 
 @Configuration
 @EnableOAuth2Sso
 @EnableAutoConfiguration
 class MockCodeFlowApp {
 
-//    @Bean
-//    OidcDiscoveryMetadata oktaOidcDiscoveryMetadata() {
-//        return new OidcDiscoveryMetadata()
-//            .setUserinfoEndpoint("https://okta.example.com/userinfoEndpoint")
-//            .setIntrospectionEndpoint("https://okta.example.com/introspectionEndpoint")
-//            .setIssuer("https://okta.example.com/oauth2/my_issuer")
-//    }
+    @Bean
+    OidcDiscoveryMetadata oktaOidcDiscoveryMetadata() {
+        return new OidcDiscoveryMetadata()
+            .setUserinfoEndpoint("https://okta.example.com/userinfoEndpoint")
+            .setIntrospectionEndpoint("https://okta.example.com/introspectionEndpoint")
+            .setIssuer("https://okta.example.com/oauth2/my_issuer")
+    }
 }
