@@ -25,7 +25,6 @@ import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecur
 
 @SpringBootApplication
 @EnableOAuth2Sso
-//@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class RedirectCodeFlowApplication {
 
     /**
