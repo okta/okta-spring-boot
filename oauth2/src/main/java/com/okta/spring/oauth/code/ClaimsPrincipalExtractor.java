@@ -19,6 +19,11 @@ import org.springframework.boot.autoconfigure.security.oauth2.resource.Principal
 
 import java.util.Map;
 
+/**
+ * A {@link PrincipalExtractor} pulls a {@link java.security.Principal Principal}, out of a configurable claim
+ * based on the {code}principalClaimKey{code}.
+ * @since 0.2.0
+ */
 public class ClaimsPrincipalExtractor implements PrincipalExtractor {
 
     private final String principalClaimKey;

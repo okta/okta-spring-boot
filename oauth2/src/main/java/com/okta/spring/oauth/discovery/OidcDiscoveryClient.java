@@ -22,7 +22,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 
 /**
+ * OIDC discovery client.
  * NOTE: parts of this class were heavily borrowed from {code}org.springframework.security.oauth2.client.discovery.ProviderDiscoveryClient{code}
+ * @since 0.2.0
  */
 public class OidcDiscoveryClient {
 

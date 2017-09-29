@@ -24,6 +24,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * A {@link AuthoritiesExtractor} converts a list of Groups/Roles in an JWT token into Spring Security
+ * {@link GrantedAuthority}.
+ * @since 0.2.0
+ */
 public class ClaimsAuthoritiesExtractor implements AuthoritiesExtractor {
 
     private final String rolesClaimKey;
