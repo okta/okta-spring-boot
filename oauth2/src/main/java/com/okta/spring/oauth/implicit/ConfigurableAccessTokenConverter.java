@@ -27,6 +27,7 @@ import java.util.Map;
 
 /**
  * Adjusts the default map of JWT access token claims based on a configurable scope and role claim field.
+ * @since 0.1.0
  */
 public class ConfigurableAccessTokenConverter extends DefaultAccessTokenConverter {
 

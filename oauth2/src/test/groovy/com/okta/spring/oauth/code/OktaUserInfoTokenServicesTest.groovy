@@ -28,6 +28,9 @@ import static org.hamcrest.Matchers.equalTo
 import static org.mockito.Mockito.mock
 import static org.mockito.Mockito.when
 
+/**
+ * @since 0.2.0
+ */
 class OktaUserInfoTokenServicesTest {
 
     @Test
