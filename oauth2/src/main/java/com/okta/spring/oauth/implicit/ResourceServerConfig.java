@@ -16,38 +16,34 @@
 package com.okta.spring.oauth.implicit;
 
 import com.okta.spring.config.OktaOAuth2Properties;
-import org.springframework.beans.InvalidPropertyException;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.okta.spring.oauth.OktaTokenServicesConfig;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfiguration;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
-import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
-import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
-import org.springframework.security.oauth2.provider.token.TokenStore;
-import org.springframework.security.oauth2.provider.token.store.IssuerClaimVerifier;
-import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
-import org.springframework.security.oauth2.provider.token.store.JwtClaimsSetVerifier;
-import org.springframework.security.oauth2.provider.token.store.jwk.JwkTokenStore;
-import org.springframework.util.Assert;
-
-import java.net.MalformedURLException;
-import java.net.URL;
 
 /**
  * Configuration for OAuth2 Implicit flow.
  * @since 0.1.0
  */
-@ConditionalOnBean(ResourceServerConfiguration.class)
 @Configuration
+@ConditionalOnBean(ResourceServerConfiguration.class)
+@Import(OktaTokenServicesConfig.class)
 public class ResourceServerConfig {
 
-    @Autowired
-    private OktaOAuth2Properties oktaOAuth2Properties;
+    private final OktaOAuth2Properties oktaOAuth2Properties;
+
+    private final ResourceServerTokenServices tokenServices;
+
+    public ResourceServerConfig(OktaOAuth2Properties oktaOAuth2Properties, ResourceServerTokenServices tokenServices) {
+        this.oktaOAuth2Properties = oktaOAuth2Properties;
+        this.tokenServices = tokenServices;
+    }
 
     @Bean
     @ConditionalOnMissingBean
@@ -56,47 +52,8 @@ public class ResourceServerConfig {
             @Override
             public void configure(final ResourceServerSecurityConfigurer config) {
                 config.resourceId(oktaOAuth2Properties.getAudience()); // set resourceId to the audience
-                config.tokenServices(tokenServices());
+                config.tokenServices(tokenServices);
             }
         };
     }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public ResourceServerTokenServices tokenServices() {
-        final DefaultTokenServices defaultTokenServices = new DefaultTokenServices();
-        defaultTokenServices.setTokenStore(tokenStore());
-        return defaultTokenServices;
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public TokenStore tokenStore() {
-        return new JwkTokenStore(issuerUrl() + "/v1/keys", accessTokenConverter(), jwtClaimsSetVerifier());
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public AccessTokenConverter accessTokenConverter() {
-        JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
-        jwtAccessTokenConverter.setAccessTokenConverter(new ConfigurableAccessTokenConverter(oktaOAuth2Properties.getScopeClaim(), oktaOAuth2Properties.getRolesClaim()));
-        return jwtAccessTokenConverter;
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public JwtClaimsSetVerifier jwtClaimsSetVerifier() {
-        try {
-            return new IssuerClaimVerifier(new URL(issuerUrl()));
-        } catch (MalformedURLException e) {
-            throw new InvalidPropertyException(JwtClaimsSetVerifier.class, "okta.oauth2.issuer", "Failed to parse issuer URL", e);
-        }
-    }
-
-    private String issuerUrl() {
-        String issuerUrl = oktaOAuth2Properties.getIssuer();
-        Assert.hasText(issuerUrl, "Property 'okta.oauth2.issuer' is required, must not be null or empty.");
-        return issuerUrl;
-    }
-
 }
