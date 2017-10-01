@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.oauth.code;
+package com.okta.spring.oauth;
 
 import org.springframework.boot.autoconfigure.security.oauth2.resource.AuthoritiesExtractor;
 import org.springframework.security.core.GrantedAuthority;

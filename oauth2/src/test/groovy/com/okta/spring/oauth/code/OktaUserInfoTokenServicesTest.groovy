@@ -15,6 +15,7 @@
  */
 package com.okta.spring.oauth.code
 
+import com.okta.spring.oauth.OktaUserInfoTokenServices
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.oauth2.client.OAuth2ClientContext

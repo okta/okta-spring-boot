@@ -35,13 +35,17 @@ trait HttpMock {
     private WireMockServer wireMockServer
     private int port
 
+    Map getBindingMap() {
+        return [baseUrl: getBaseUrl()]
+    }
+
     @BeforeClass
     void startMockServer() {
         if (wireMockServer == null) {
             wireMockServer = new WireMockServer(wireMockConfig()
                     .port(getMockPort())
                     .fileSource(new ClasspathFileSource("stubs"))
-                    .extensions(new GStringTransformer([baseUrl: getBaseUrl()]))
+                    .extensions(new GStringTransformer(getBindingMap()))
             )
 
             configureHttpMock(wireMockServer)
