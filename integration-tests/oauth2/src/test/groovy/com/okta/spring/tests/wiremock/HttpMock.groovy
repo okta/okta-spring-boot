@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.example.wiremock
+package com.okta.spring.tests.wiremock
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.common.ClasspathFileSource
@@ -24,9 +24,7 @@ import com.github.tomakehurst.wiremock.http.Request
 import com.github.tomakehurst.wiremock.http.Response
 import groovy.text.StreamingTemplateEngine
 import org.testng.annotations.AfterClass
-import org.testng.annotations.AfterMethod
 import org.testng.annotations.BeforeClass
-import org.testng.annotations.BeforeMethod
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 
