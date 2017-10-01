@@ -1,0 +1,16 @@
+{
+  "sub": "00uid4BxXw6I6TV4m0g3",
+  "name" :"Joe Coder",
+  "nickname":"Joey",
+  "given_name":"Joe",
+  "middle_name":"E",
+  "family_name":"Coder",
+  "profile":"https://profile.wordpress.com/joe.coder",
+  "zoneinfo":"America/Los_Angeles",
+  "locale":"en-US",
+  "updated_at":1311280970,
+  "email":"joe.coder@example.com",
+  "email_verified":true,
+  "address" : { "street_address": "123 Hollywood Blvd.", "locality": "Los Angeles", "region": "CA", "postal_code": "90210", "country": "US" },
+  "phone_number":"+1 (425) 555-1212"
+}
