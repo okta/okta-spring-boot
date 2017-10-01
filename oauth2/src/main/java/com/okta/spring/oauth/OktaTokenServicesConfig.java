@@ -97,16 +97,26 @@ public class OktaTokenServicesConfig {
         }
 
         @Bean
-        @Primary
-        protected ResourceServerTokenServices resourceServerTokenServices() {
-            DefaultTokenServices services = new DefaultTokenServices();
-            services.setTokenStore(tokenStore());
-
-            return services;
+        @ConditionalOnMissingBean
+        protected AuthoritiesExtractor authoritiesExtractor() {
+            return new ClaimsAuthoritiesExtractor(oktaOAuth2Properties.getRolesClaim());
         }
 
         @Bean
         @ConditionalOnMissingBean
+        protected PrincipalExtractor principalExtractor() {
+            return new ClaimsPrincipalExtractor(oktaOAuth2Properties.getPrincipalClaim());
+        }
+
+        @Bean
+        @Primary
+        protected ResourceServerTokenServices resourceServerTokenServices(TokenStore tokenStore) {
+            DefaultTokenServices services = new DefaultTokenServices();
+            services.setTokenStore(tokenStore);
+            return services;
+        }
+
+        @Bean
         public TokenStore tokenStore() {
             return new JwkTokenStore(oktaOAuth2Properties.getIssuer() + "/v1/keys", accessTokenConverter(), jwtClaimsSetVerifier());
         }

@@ -37,7 +37,6 @@ public class SignInWidgetConfigController {
         this.clientId = oktaOAuth2Properties.getClientId();
     }
 
-
     @GetMapping("/sign-in-widget-config")
     public WidgetConfig getWidgetConfig() {
         return new WidgetConfig(issuerUrl, clientId);

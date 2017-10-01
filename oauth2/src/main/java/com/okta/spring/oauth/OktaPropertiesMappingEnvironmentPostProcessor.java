@@ -141,6 +141,8 @@ public class OktaPropertiesMappingEnvironmentPostProcessor implements Environmen
                 tmpValues.put(OAUTH_CLIENT_PREFIX + "accessTokenUri", discoveryMetadata.getTokenEndpoint());
                 tmpValues.put(OAUTH_CLIENT_PREFIX + "userAuthorizationUri", discoveryMetadata.getAuthorizationEndpoint());
                 tmpValues.put(OAUTH_RESOURCE_PREFIX + "userInfoUri", discoveryMetadata.getUserinfoEndpoint());
+                tmpValues.put(OAUTH_RESOURCE_PREFIX + "jwk.keySetUri", discoveryMetadata.getJwksUri());
+                tmpValues.put(OAUTH_RESOURCE_PREFIX + "tokenInfoUri", discoveryMetadata.getIntrospectionEndpoint());
                 return new MapBasedPropertySource("discovery-to-oauth2", Collections.unmodifiableMap(tmpValues));
             } catch (ResourceAccessException e) {
                 logger.warn("Failed to discover oauth metadata from url: {}", issuerUrl, e);

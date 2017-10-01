@@ -13,15 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.tests.oauth2.code
+package com.okta.spring.tests.oauth2.implicit
 
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.okta.spring.tests.oauth2.TestUtils
 import com.okta.spring.tests.wiremock.HttpMock
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.restassured.http.ContentType
-import io.restassured.response.ExtractableResponse
 import org.apache.commons.codec.binary.Base64
 import org.hamcrest.Matchers
 import org.springframework.boot.context.embedded.LocalServerPort
@@ -37,21 +35,18 @@ import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.util.regex.Pattern
 
 import static com.okta.spring.tests.oauth2.TestUtils.toIntegerBytes
 import static com.github.tomakehurst.wiremock.client.WireMock.*
 import static io.restassured.RestAssured.given
-import static org.hamcrest.Matchers.is
-import static org.hamcrest.text.MatchesPattern.matchesPattern
+import static org.hamcrest.Matchers.startsWith
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-                classes = [BasicRedirectCodeFlowApplication],
-                properties = ["okta.oauth2.issuer=http://localhost:9988/oauth2/default",
+                classes = [BasicImplicitFlowApplication],
+                properties = ["okta.oauth2.issuer=http://localhost:9986/oauth2/default",
                               "okta.oauth2.clientId=OOICU812",
-                              "okta.oauth2.clientSecret=VERY_SECRET",
                               "server.session.trackingModes=cookie"])
-class LocalTokenValidationIT extends AbstractTestNGSpringContextTests implements HttpMock {
+class LocalImplicitTokenValidationIT extends AbstractTestNGSpringContextTests implements HttpMock {
 
     @LocalServerPort
     int applicationPort
@@ -64,7 +59,7 @@ class LocalTokenValidationIT extends AbstractTestNGSpringContextTests implements
     RSAPrivateKey privateKey
     RSAPublicKey publicKey
 
-    LocalTokenValidationIT() {
+    LocalImplicitTokenValidationIT() {
 
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA")
         keyPairGenerator.initialize(4096)
@@ -80,6 +75,7 @@ class LocalTokenValidationIT extends AbstractTestNGSpringContextTests implements
                 .setSubject("joe.coder@example.com")
                 .setAudience("api://default")
                 .claim("scp", ["profile", "openid", "email"])
+                .claim("groups", ["Everyone", "Test-Group"])
                 .setIssuedAt(Date.from(now))
                 .setNotBefore(Date.from(now))
                 .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
@@ -108,12 +104,6 @@ class LocalTokenValidationIT extends AbstractTestNGSpringContextTests implements
     }
 
     @Override
-    void run(IHookCallBack callBack, ITestResult testResult) {
-
-        super.run(callBack, testResult)
-    }
-
-    @Override
     Map getBindingMap() {
         return [
                 accessTokenJwt: accessTokenJwt,
@@ -126,7 +116,7 @@ class LocalTokenValidationIT extends AbstractTestNGSpringContextTests implements
 
     @Override
     int doGetMockPort() {
-        return 9988
+        return 9986
     }
 
     @Override
@@ -139,28 +129,6 @@ class LocalTokenValidationIT extends AbstractTestNGSpringContextTests implements
                             .withTransformers("gstring-template")))
 
         wireMockServer.stubFor(
-                get(urlPathEqualTo("/oauth2/default/v1/authorize"))
-                        .withQueryParam("client_id", matching("OOICU812"))
-                        .withQueryParam("redirect_uri", matching(Pattern.quote("http://localhost:")+ "\\d+/login"))
-                        .withQueryParam("response_type", matching("code"))
-                        .withQueryParam("scope", matching("profile email openid"))
-                        .withQueryParam("state", matching(".{6}"))
-                        .willReturn(aResponse()
-                            .withBody("<html>fake_login_page<html/>")))
-
-        wireMockServer.stubFor(
-                post(urlPathEqualTo("/oauth2/default/v1/token"))
-                        .withRequestBody(containing("grant_type=authorization_code"))
-                        .withRequestBody(containing("code=TEST_CODE"))
-                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Flogin") +".*"))
-                        .withRequestBody(containing("client_id=OOICU812"))
-                        .withRequestBody(containing("client_secret=VERY_SECRET"))
-                        .willReturn(aResponse()
-                            .withHeader("Content-Type", "application/json;charset=UTF-8")
-                            .withBodyFile("token.json")
-                            .withTransformers("gstring-template")))
-
-        wireMockServer.stubFor(
                 get(urlPathEqualTo("/oauth2/default/v1/keys"))
                     .willReturn(aResponse()
                         .withHeader("Content-Type", "application/json;charset=UTF-8")
@@ -169,82 +137,41 @@ class LocalTokenValidationIT extends AbstractTestNGSpringContextTests implements
     }
 
     @Test
-    void redirectToLogin() {
+    void noToken401() {
         given()
             .redirects()
-                .follow(false)
+            .follow(false)
             .accept(ContentType.JSON)
         .when()
             .get("http://localhost:${applicationPort}/")
         .then()
-            .statusCode(302)
-            .header("Location", is("http://localhost:${applicationPort}/login".toString()))
+            .statusCode(401)
+            .header("WWW-Authenticate", startsWith("Bearer realm="))
     }
 
     @Test
-    ExtractableResponse redirectToRemoteLogin() {
-
-        String expectedRedirect = Pattern.quote(
-                "http://localhost:${doGetMockPort()}/oauth2/default/v1/authorize" +
-                "?client_id=OOICU812" +
-                "&redirect_uri=http://localhost:${applicationPort}/login" +
-                "&response_type=code" +
-                "&scope=profile%20email%20openid" +
-                "&state=")+".{6}"
-
-        return given()
-            .redirects()
-                .follow(false)
-            .accept(ContentType.JSON)
-        .when()
-            .get("http://localhost:${applicationPort}/login")
-        .then()
-            .statusCode(302)
-            .header("Location", matchesPattern(expectedRedirect))
-        .extract()
-    }
-
-    @Test
-    void followRedirect() {
-        given()
-            .accept(ContentType.JSON)
-        .when()
-            .get("http://localhost:${applicationPort}/")
-        .then()
-            .statusCode(200)
-            .body(Matchers.equalTo("<html>fake_login_page<html/>"))
-    }
-
-    @Test
-    void respondWithCode() {
-        ExtractableResponse response = redirectToRemoteLogin()
-        String redirectUrl = response.header("Location")
-        String state = redirectUrl.substring(redirectUrl.lastIndexOf('=')+1)
-        String code = "TEST_CODE"
-        String requestUrl = "http://localhost:${applicationPort}/login?code=${code}&state=${state}"
-
-        ExtractableResponse response2 = given()
-            .accept(ContentType.JSON)
-            .cookies(response.cookies())
-            .redirects()
-                .follow(false)
-        .when()
-            .get(requestUrl)
-        .then()
-            .statusCode(302)
-                .header("Location", Matchers.equalTo("http://localhost:${applicationPort}/".toString()))
-        .extract()
+    void scopeAccessTest() {
 
         given()
-            .accept(ContentType.JSON)
-            .cookies(response2.cookies())
+            .header("Authorization", "Bearer ${accessTokenJwt}")
             .redirects()
                 .follow(false)
         .when()
             .get("http://localhost:${applicationPort}/")
         .then()
             .body(Matchers.equalTo("The message of the day is boring: joe.coder@example.com"))
-
     }
 
+    @Test
+    void groupAccessTest() {
+
+        given()
+            .header("Authorization", "Bearer ${accessTokenJwt}")
+            .redirects()
+                .follow(false)
+        .when()
+            .get("http://localhost:${applicationPort}/everyone")
+        .then()
+            .body(Matchers.equalTo("Everyone has Access: joe.coder@example.com"))
+    }
 }
