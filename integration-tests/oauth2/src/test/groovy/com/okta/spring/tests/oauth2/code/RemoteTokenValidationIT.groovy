@@ -13,30 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.example.it
+package com.okta.spring.tests.oauth2.code
 
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.okta.spring.example.RedirectCodeFlowApplication
-import com.okta.spring.example.wiremock.HttpMock
-import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
+import com.okta.spring.tests.wiremock.HttpMock
 import io.restassured.http.ContentType
 import io.restassured.response.ExtractableResponse
-import org.apache.commons.codec.binary.Base64
 import org.hamcrest.Matchers
 import org.springframework.boot.context.embedded.LocalServerPort
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests
-import org.testng.IHookCallBack
-import org.testng.ITestResult
 import org.testng.annotations.Test
 
-import java.security.KeyPair
-import java.security.KeyPairGenerator
-import java.security.interfaces.RSAPrivateKey
-import java.security.interfaces.RSAPublicKey
-import java.time.Instant
-import java.time.temporal.ChronoUnit
 import java.util.regex.Pattern
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*
@@ -45,111 +33,24 @@ import static org.hamcrest.Matchers.is
 import static org.hamcrest.text.MatchesPattern.matchesPattern
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-                classes = [RedirectCodeFlowApplication],
-                properties = ["okta.oauth2.issuer=http://localhost:9988/oauth2/default",
+                classes = [BasicRedirectCodeFlowApplication],
+                properties = ["okta.oauth2.issuer=http://localhost:9987/oauth2/default",
                               "okta.oauth2.clientId=OOICU812",
                               "okta.oauth2.clientSecret=VERY_SECRET",
-                              "server.session.trackingModes=cookie"])
-class LocalTokenValidationIT extends AbstractTestNGSpringContextTests implements HttpMock {
+                              "server.session.trackingModes=cookie",
+                              "okta.oauth2.localTokenValidation=false"])
+class RemoteTokenValidationIT extends AbstractTestNGSpringContextTests implements HttpMock {
 
     @LocalServerPort
     int applicationPort
 
-    String pubKeyE
-    String pubKeyN
-    String accessTokenJwt
-    String idTokenjwt
-
-    RSAPrivateKey privateKey
-    RSAPublicKey publicKey
-
-    LocalTokenValidationIT() {
-
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA")
-        keyPairGenerator.initialize(4096)
-        KeyPair keyPair = keyPairGenerator.generateKeyPair()
-        privateKey = keyPair.private
-        publicKey = keyPair.public
-
-        pubKeyE = Base64.encodeBase64URLSafeString(toIntegerBytes(publicKey.getPublicExponent()))
-        pubKeyN = Base64.encodeBase64URLSafeString(toIntegerBytes(publicKey.getModulus()))
-
-        Instant now = Instant.now()
-        accessTokenJwt =  Jwts.builder()
-                .setSubject("joe.coder@example.com")
-                .setAudience("api://default")
-                .claim("scp", ["profile", "openid", "email"])
-                .setIssuedAt(Date.from(now))
-                .setNotBefore(Date.from(now))
-                .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
-                .setHeader(Jwts.jwsHeader()
-                    .setKeyId('TEST_PUB_KEY_ID'))
-                .signWith(SignatureAlgorithm.RS256, privateKey)
-                .compact()
-
-
-        idTokenjwt =  Jwts.builder()
-                .setSubject("a_subject_id")
-                .claim("name", "Joe Coder")
-                .claim("email", "joe.coder@example.com")
-                .claim("preferred_username", "jod.coder@example.com")
-                .setAudience("api://default")
-                .setIssuer("http://localhost:9988/oauth2/default")
-                .setIssuedAt(Date.from(now))
-                .setNotBefore(Date.from(now))
-                .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
-                .setHeader(Jwts.jwsHeader()
-                    .setKeyId('TEST_PUB_KEY_ID'))
-                .signWith(SignatureAlgorithm.RS256, privateKey)
-                .compact()
-
+    RemoteTokenValidationIT() {
         startMockServer()
     }
 
     @Override
-    void run(IHookCallBack callBack, ITestResult testResult) {
-
-        super.run(callBack, testResult)
-    }
-
-    static byte[] toIntegerBytes(final BigInteger bigInt) {
-        int bitlen = bigInt.bitLength();
-        // round bitlen
-        bitlen = ((bitlen + 7) >> 3) << 3;
-        final byte[] bigBytes = bigInt.toByteArray();
-
-        if (((bigInt.bitLength() % 8) != 0) && (((bigInt.bitLength() / 8) + 1) == (bitlen / 8))) {
-            return bigBytes;
-        }
-        // set up params for copying everything but sign bit
-        int startSrc = 0;
-        int len = bigBytes.length;
-
-        // if bigInt is exactly byte-aligned, just skip signbit in copy
-        if ((bigInt.bitLength() % 8) == 0) {
-            startSrc = 1;
-            len--;
-        }
-        final int startDst = bitlen / 8 - len; // to pad w/ nulls as per spec
-        final byte[] resizedBytes = new byte[bitlen / 8];
-        System.arraycopy(bigBytes, startSrc, resizedBytes, startDst, len);
-        return resizedBytes;
-    }
-
-    @Override
-    Map getBindingMap() {
-        return [
-                accessTokenJwt: accessTokenJwt,
-                baseUrl: getBaseUrl(),
-                pubKeyE: pubKeyE,
-                pubKeyN: pubKeyN,
-                idTokenjwt: idTokenjwt
-        ]
-    }
-
-    @Override
     int doGetMockPort() {
-        return 9988
+        return 9987
     }
 
     @Override
@@ -180,15 +81,14 @@ class LocalTokenValidationIT extends AbstractTestNGSpringContextTests implements
                         .withRequestBody(containing("client_secret=VERY_SECRET"))
                         .willReturn(aResponse()
                             .withHeader("Content-Type", "application/json;charset=UTF-8")
-                            .withBodyFile("token.json")
-                            .withTransformers("gstring-template")))
+                            .withBodyFile("remote-validation-token.json")))
 
         wireMockServer.stubFor(
-                get(urlPathEqualTo("/oauth2/default/v1/keys"))
-                    .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json;charset=UTF-8")
-                        .withBodyFile("keys.json")
-                        .withTransformers("gstring-template")))
+                get(urlPathEqualTo("/oauth2/default/v1/userinfo"))
+                        .withHeader("Authorization", containing("Bearer accessTokenJwt"))
+                        .willReturn(aResponse()
+                            .withHeader("Content-Type", "application/json;charset=UTF-8")
+                            .withBodyFile("userinfo.json")))
     }
 
     @Test
@@ -266,7 +166,7 @@ class LocalTokenValidationIT extends AbstractTestNGSpringContextTests implements
         .when()
             .get("http://localhost:${applicationPort}/")
         .then()
-            .body(Matchers.equalTo("{\"messageOfTheDay\":\"The message of the day is boring.\",\"username\":\"joe.coder@example.com\"}"))
+            .body(Matchers.equalTo("The message of the day is boring: joe.coder@example.com"))
 
     }
 

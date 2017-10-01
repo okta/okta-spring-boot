@@ -18,32 +18,18 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.okta.spring.examples</groupId>
-        <artifactId>okta-spring-boot-examples</artifactId>
+        <groupId>com.okta.spring</groupId>
+        <artifactId>okta-spring-boot-parent</artifactId>
         <version>0.2.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>okta-spring-boot-redirect-code-flow-example</artifactId>
-    <name>Okta Spring Boot :: Examples :: Redirect Code Flow</name>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <spring-boot.version>1.5.7.RELEASE</spring-boot.version>
-    </properties>
+    <artifactId>okta-spring-boot-integration-tests-oauth2</artifactId>
+    <name>Okta Spring Boot :: ITs :: OAuth2</name>
 
     <dependencies>
-
         <dependency>
             <groupId>com.okta.spring</groupId>
             <artifactId>okta-spring-boot-starter</artifactId>
-        </dependency>
-
-        <!-- Other standard Spring starters -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-rest</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -51,16 +37,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>
         </dependency>
 
         <!-- Logging -->
@@ -75,9 +52,35 @@
             <artifactId>logback-classic</artifactId>
             <scope>runtime</scope>
         </dependency>
-    </dependencies>
 
-    <build>
-        <defaultGoal>spring-boot:run</defaultGoal>
-    </build>
+        <!-- Test deps -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock</artifactId>
+            <version>2.8.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>3.0.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>0.7.0</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 </project>
