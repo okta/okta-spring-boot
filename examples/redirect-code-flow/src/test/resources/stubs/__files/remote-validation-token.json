@@ -1,7 +1,7 @@
 {
-  "access_token":"${accessTokenJwt}",
+  "access_token":"accessTokenJwt",
   "token_type":"Bearer",
   "expires_in":3600,
   "scope":"profile openid email",
-  "id_token":"${idTokenjwt}"
+  "id_token":"idTokenjwt"
 }

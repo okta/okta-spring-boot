@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.oauth.code
+package com.okta.spring.oauth
 
+import com.okta.spring.oauth.ClaimsAuthoritiesExtractor
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.testng.annotations.Test
