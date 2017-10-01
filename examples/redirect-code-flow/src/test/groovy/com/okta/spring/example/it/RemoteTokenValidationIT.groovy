@@ -26,6 +26,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests
 import org.testng.annotations.Test
 
+import javax.annotation.PostConstruct
 import java.util.regex.Pattern
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse
@@ -41,23 +42,23 @@ import static org.hamcrest.text.MatchesPattern.matchesPattern
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
                 classes = [RedirectCodeFlowApplication],
-                properties = ["okta.oauth2.issuer=http://localhost:9988/oauth2/default",
+                properties = ["okta.oauth2.issuer=http://localhost:9987/oauth2/default",
                               "okta.oauth2.clientId=OOICU812",
                               "okta.oauth2.clientSecret=VERY_SECRET",
-                              "server.session.trackingModes=cookie"])
-class ExampleIT extends AbstractTestNGSpringContextTests implements HttpMock {
+                              "server.session.trackingModes=cookie",
+                              "okta.oauth2.localTokenValidation=false"])
+class RemoteTokenValidationIT extends AbstractTestNGSpringContextTests implements HttpMock {
 
     @LocalServerPort
     int applicationPort
 
-    ExampleIT() {
+    RemoteTokenValidationIT() {
         startMockServer()
     }
 
-
     @Override
     int doGetMockPort() {
-        return 9988
+        return 9987
     }
 
     @Override
@@ -88,11 +89,11 @@ class ExampleIT extends AbstractTestNGSpringContextTests implements HttpMock {
                         .withRequestBody(containing("client_secret=VERY_SECRET"))
                         .willReturn(aResponse()
                             .withHeader("Content-Type", "application/json;charset=UTF-8")
-                            .withBodyFile("token.json")))
+                            .withBodyFile("remote-validation-token.json")))
 
         wireMockServer.stubFor(
                 get(urlPathEqualTo("/oauth2/default/v1/userinfo"))
-                        .withHeader("Authorization", containing("Bearer eyJhbGciOiJSUzI1NiIs")) // TODO: fix validation
+                        .withHeader("Authorization", containing("Bearer accessTokenJwt"))
                         .willReturn(aResponse()
                             .withHeader("Content-Type", "application/json;charset=UTF-8")
                             .withBodyFile("userinfo.json")))
