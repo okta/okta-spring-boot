@@ -17,13 +17,15 @@ package com.okta.spring.example;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
+import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecurityExpressionHandler;
 
 @EnableResourceServer
@@ -43,17 +45,36 @@ public class ImplicitFlowApplication {
     }
 
     @Bean
-    protected WebSecurityConfigurerAdapter webSecurityConfigurerAdapter() {
-        return new WebSecurityConfigurerAdapter() {
-            @Override
-            public void configure(WebSecurity web) throws Exception {
-                // allow access to the index page and our custom sign-in-widget-config
-                web.ignoring().antMatchers("/", "/index.html", "/sign-in-widget-config");
-            }
-        };
+    protected ResourceServerConfigurerAdapter securityConfigurer(ResourceServerProperties rsp) {
+        return new ResourceSecurityConfigurer(rsp);
     }
+
 
     public static void main(String[] args) {
         SpringApplication.run(ImplicitFlowApplication.class, args);
+    }
+
+
+    private static class ResourceSecurityConfigurer
+            extends ResourceServerConfigurerAdapter {
+
+        private ResourceServerProperties resource;
+
+        ResourceSecurityConfigurer(ResourceServerProperties resource) {
+            this.resource = resource;
+        }
+
+        @Override
+        public void configure(ResourceServerSecurityConfigurer resources)
+                throws Exception {
+            resources.resourceId(this.resource.getResourceId());
+        }
+
+        @Override
+        public void configure(HttpSecurity http) throws Exception {
+            http.authorizeRequests()
+                    .antMatchers("/", "/index.html", "/sign-in-widget-config").permitAll()
+                    .anyRequest().authenticated();
+        }
     }
 }
