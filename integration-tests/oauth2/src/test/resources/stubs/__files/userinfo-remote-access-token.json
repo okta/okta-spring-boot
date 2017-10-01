@@ -1,0 +1,9 @@
+{
+  "sub": "OOTESTOO",
+  "email": "joe.coder@example.com",
+  "email_verified": true,
+  "groups": [
+    "Everyone",
+    "Test-Group"
+  ]
+}

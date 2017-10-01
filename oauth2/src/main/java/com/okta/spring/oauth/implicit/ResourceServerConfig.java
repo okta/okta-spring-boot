@@ -18,36 +18,33 @@ package com.okta.spring.oauth.implicit;
 import com.okta.spring.config.OktaOAuth2Properties;
 import com.okta.spring.oauth.OktaTokenServicesConfig;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfiguration;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
-
 /**
  * Configuration for OAuth2 Implicit flow.
  * @since 0.1.0
  */
-@Configuration
 @ConditionalOnBean(ResourceServerConfiguration.class)
+@Configuration
 @Import(OktaTokenServicesConfig.class)
 public class ResourceServerConfig {
 
     private final OktaOAuth2Properties oktaOAuth2Properties;
 
-    private final ResourceServerTokenServices tokenServices;
-
-    public ResourceServerConfig(OktaOAuth2Properties oktaOAuth2Properties, ResourceServerTokenServices tokenServices) {
+    public ResourceServerConfig(OktaOAuth2Properties oktaOAuth2Properties) {
         this.oktaOAuth2Properties = oktaOAuth2Properties;
-        this.tokenServices = tokenServices;
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    public ResourceServerConfigurerAdapter resourceServerConfigurerAdapter() {
+    @Primary
+    @ConditionalOnBean(ResourceServerTokenServices.class)
+    public ResourceServerConfigurerAdapter resourceServerConfigurerAdapter(ResourceServerTokenServices tokenServices) {
         return new ResourceServerConfigurerAdapter() {
             @Override
             public void configure(final ResourceServerSecurityConfigurer config) {
