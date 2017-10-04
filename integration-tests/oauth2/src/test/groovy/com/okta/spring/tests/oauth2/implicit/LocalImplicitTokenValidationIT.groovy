@@ -25,8 +25,6 @@ import org.hamcrest.Matchers
 import org.springframework.boot.context.embedded.LocalServerPort
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests
-import org.testng.IHookCallBack
-import org.testng.ITestResult
 import org.testng.annotations.Test
 
 import java.security.KeyPair
@@ -54,21 +52,21 @@ class LocalImplicitTokenValidationIT extends AbstractTestNGSpringContextTests im
     String pubKeyE
     String pubKeyN
     String accessTokenJwt
+    String wrongScopeAccessTokenJwt
+    String invalidAccessTokenJwt
+    String wrongAudienceAccessToken
     String idTokenjwt
-
-    RSAPrivateKey privateKey
-    RSAPublicKey publicKey
 
     LocalImplicitTokenValidationIT() {
 
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA")
         keyPairGenerator.initialize(4096)
-        KeyPair keyPair = keyPairGenerator.generateKeyPair()
-        privateKey = keyPair.private
-        publicKey = keyPair.public
+        KeyPair invalidKeyPair = keyPairGenerator.generateKeyPair()
 
-        pubKeyE = Base64.encodeBase64URLSafeString(toIntegerBytes(publicKey.getPublicExponent()))
-        pubKeyN = Base64.encodeBase64URLSafeString(toIntegerBytes(publicKey.getModulus()))
+        KeyPair keyPair = keyPairGenerator.generateKeyPair()
+
+        pubKeyE = Base64.encodeBase64URLSafeString(toIntegerBytes(keyPair.publicKey.getPublicExponent()))
+        pubKeyN = Base64.encodeBase64URLSafeString(toIntegerBytes(keyPair.publicKey.getModulus()))
 
         Instant now = Instant.now()
         accessTokenJwt =  Jwts.builder()
@@ -81,9 +79,47 @@ class LocalImplicitTokenValidationIT extends AbstractTestNGSpringContextTests im
                 .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
                 .setHeader(Jwts.jwsHeader()
                     .setKeyId('TEST_PUB_KEY_ID'))
-                .signWith(SignatureAlgorithm.RS256, privateKey)
+                .signWith(SignatureAlgorithm.RS256, keyPair.privateKey)
                 .compact()
 
+        wrongScopeAccessTokenJwt =  Jwts.builder()
+                .setSubject("joe.coder@example.com")
+                .setAudience("api://default")
+                .claim("scp", ["profile", "openid"])
+                .claim("groups", ["Everyone", "Test-Group"])
+                .setIssuedAt(Date.from(now))
+                .setNotBefore(Date.from(now))
+                .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
+                .setHeader(Jwts.jwsHeader()
+                .setKeyId('TEST_PUB_KEY_ID'))
+                .signWith(SignatureAlgorithm.RS256, keyPair.privateKey)
+                .compact()
+
+        invalidAccessTokenJwt =  Jwts.builder()
+                .setSubject("joe.coder@example.com")
+                .setAudience("api://default")
+                .claim("scp", ["profile", "openid", "email"])
+                .claim("groups", ["Everyone", "Test-Group"])
+                .setIssuedAt(Date.from(now))
+                .setNotBefore(Date.from(now))
+                .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
+                .setHeader(Jwts.jwsHeader()
+                .setKeyId('TEST_PUB_KEY_ID'))
+                .signWith(SignatureAlgorithm.RS256, invalidKeyPair.private)
+                .compact()
+
+        wrongAudienceAccessToken =  Jwts.builder()
+                .setSubject("joe.coder@example.com")
+                .setAudience("api://something-else")
+                .claim("scp", ["profile", "openid", "email"])
+                .claim("groups", ["Everyone", "Test-Group"])
+                .setIssuedAt(Date.from(now))
+                .setNotBefore(Date.from(now))
+                .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
+                .setHeader(Jwts.jwsHeader()
+                .setKeyId('TEST_PUB_KEY_ID'))
+                .signWith(SignatureAlgorithm.RS256, invalidKeyPair.private)
+                .compact()
 
         idTokenjwt =  Jwts.builder()
                 .setSubject("a_subject_id")
@@ -97,7 +133,7 @@ class LocalImplicitTokenValidationIT extends AbstractTestNGSpringContextTests im
                 .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
                 .setHeader(Jwts.jwsHeader()
                     .setKeyId('TEST_PUB_KEY_ID'))
-                .signWith(SignatureAlgorithm.RS256, privateKey)
+                .signWith(SignatureAlgorithm.RS256, keyPair.privateKey)
                 .compact()
 
         startMockServer()
@@ -150,8 +186,46 @@ class LocalImplicitTokenValidationIT extends AbstractTestNGSpringContextTests im
     }
 
     @Test
-    void scopeAccessTest() {
+    void accessKeyNonTrustedKey() {
+        given()
+            .header("Authorization", "Bearer ${invalidAccessTokenJwt}")
+            .redirects()
+                .follow(false)
+        .when()
+            .get("http://localhost:${applicationPort}/")
+        .then()
+            .statusCode(401)
+            .header("WWW-Authenticate", startsWith("Bearer realm="))
+    }
 
+    @Test
+    void nonJWTAccessKey() {
+        given()
+            .header("Authorization", "Bearer not-a-jwt")
+            .redirects()
+                .follow(false)
+        .when()
+            .get("http://localhost:${applicationPort}/")
+        .then()
+            .statusCode(401)
+            .header("WWW-Authenticate", startsWith("Bearer realm="))
+    }
+
+    @Test
+    void wrongAudienceAccessTokenTest() {
+        given()
+            .header("Authorization", "Bearer ${wrongAudienceAccessToken}")
+            .redirects()
+                .follow(false)
+        .when()
+            .get("http://localhost:${applicationPort}/")
+        .then()
+            .statusCode(401)
+            .header("WWW-Authenticate", startsWith("Bearer realm="))
+    }
+
+    @Test
+    void scopeAccessTest() {
         given()
             .header("Authorization", "Bearer ${accessTokenJwt}")
             .redirects()
@@ -163,8 +237,19 @@ class LocalImplicitTokenValidationIT extends AbstractTestNGSpringContextTests im
     }
 
     @Test
-    void groupAccessTest() {
+    void wrongScopeAccessToken() {
+        given()
+            .header("Authorization", "Bearer ${wrongScopeAccessTokenJwt}")
+            .redirects()
+                .follow(false)
+        .when()
+            .get("http://localhost:${applicationPort}/")
+        .then()
+            .statusCode(403)
+    }
 
+    @Test
+    void groupAccessTest() {
         given()
             .header("Authorization", "Bearer ${accessTokenJwt}")
             .redirects()
