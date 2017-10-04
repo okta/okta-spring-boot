@@ -18,6 +18,7 @@ package com.okta.spring.oauth.implicit;
 import com.okta.spring.config.OktaOAuth2Properties;
 import com.okta.spring.oauth.OktaTokenServicesConfig;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -25,7 +26,10 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfiguration;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
+import org.springframework.security.oauth2.provider.token.TokenStore;
+
 /**
  * Configuration for OAuth2 Implicit flow.
  * @since 0.1.0
@@ -52,5 +56,17 @@ public class ResourceServerConfig {
                 config.tokenServices(tokenServices);
             }
         };
+    }
+
+    @Configuration
+    @ConditionalOnProperty(name = "okta.oauth2.localTokenValidation", matchIfMissing = true)
+    public static class LocalTokenValidationConfig {
+        @Bean
+        @Primary
+        protected ResourceServerTokenServices resourceServerTokenServices(TokenStore tokenStore) {
+            DefaultTokenServices services = new Non500ErrorDefaultTokenServices();
+            services.setTokenStore(tokenStore);
+            return services;
+        }
     }
 }

@@ -59,21 +59,19 @@ class LocalTokenValidationIT extends AbstractTestNGSpringContextTests implements
     String pubKeyE
     String pubKeyN
     String accessTokenJwt
+    String wrongKeyIdAccessTokenJwt
+    String wrongScopeAccessTokenJwt
+    String wrongAudienceAccessTokenJwt
     String idTokenjwt
-
-    RSAPrivateKey privateKey
-    RSAPublicKey publicKey
 
     LocalTokenValidationIT() {
 
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA")
         keyPairGenerator.initialize(4096)
         KeyPair keyPair = keyPairGenerator.generateKeyPair()
-        privateKey = keyPair.private
-        publicKey = keyPair.public
 
-        pubKeyE = Base64.encodeBase64URLSafeString(toIntegerBytes(publicKey.getPublicExponent()))
-        pubKeyN = Base64.encodeBase64URLSafeString(toIntegerBytes(publicKey.getModulus()))
+        pubKeyE = Base64.encodeBase64URLSafeString(toIntegerBytes(keyPair.publicKey.getPublicExponent()))
+        pubKeyN = Base64.encodeBase64URLSafeString(toIntegerBytes(keyPair.publicKey.getModulus()))
 
         Instant now = Instant.now()
         accessTokenJwt =  Jwts.builder()
@@ -85,9 +83,44 @@ class LocalTokenValidationIT extends AbstractTestNGSpringContextTests implements
                 .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
                 .setHeader(Jwts.jwsHeader()
                     .setKeyId('TEST_PUB_KEY_ID'))
-                .signWith(SignatureAlgorithm.RS256, privateKey)
+                .signWith(SignatureAlgorithm.RS256, keyPair.privateKey)
                 .compact()
 
+        wrongKeyIdAccessTokenJwt =  Jwts.builder()
+                .setSubject("joe.coder@example.com")
+                .setAudience("api://default")
+                .claim("scp", ["profile", "openid", "email"])
+                .setIssuedAt(Date.from(now))
+                .setNotBefore(Date.from(now))
+                .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
+                .setHeader(Jwts.jwsHeader()
+                    .setKeyId('WRONG_TEST_PUB_KEY_ID'))
+                .signWith(SignatureAlgorithm.RS256, keyPair.privateKey)
+                .compact()
+
+        wrongScopeAccessTokenJwt =  Jwts.builder()
+                .setSubject("joe.coder@example.com")
+                .setAudience("api://default")
+                .claim("scp", ["profile", "openid"])
+                .setIssuedAt(Date.from(now))
+                .setNotBefore(Date.from(now))
+                .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
+                .setHeader(Jwts.jwsHeader()
+                    .setKeyId('TEST_PUB_KEY_ID'))
+                .signWith(SignatureAlgorithm.RS256, keyPair.privateKey)
+                .compact()
+
+        wrongAudienceAccessTokenJwt =  Jwts.builder()
+                .setSubject("joe.coder@example.com")
+                .setAudience("api://wrong-default")
+                .claim("scp", ["profile", "openid"])
+                .setIssuedAt(Date.from(now))
+                .setNotBefore(Date.from(now))
+                .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
+                .setHeader(Jwts.jwsHeader()
+                .setKeyId('TEST_PUB_KEY_ID'))
+                    .signWith(SignatureAlgorithm.RS256, keyPair.privateKey)
+                .compact()
 
         idTokenjwt =  Jwts.builder()
                 .setSubject("a_subject_id")
@@ -101,16 +134,10 @@ class LocalTokenValidationIT extends AbstractTestNGSpringContextTests implements
                 .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
                 .setHeader(Jwts.jwsHeader()
                     .setKeyId('TEST_PUB_KEY_ID'))
-                .signWith(SignatureAlgorithm.RS256, privateKey)
+                .signWith(SignatureAlgorithm.RS256, keyPair.privateKey)
                 .compact()
 
         startMockServer()
-    }
-
-    @Override
-    void run(IHookCallBack callBack, ITestResult testResult) {
-
-        super.run(callBack, testResult)
     }
 
     @Override
@@ -151,7 +178,7 @@ class LocalTokenValidationIT extends AbstractTestNGSpringContextTests implements
         wireMockServer.stubFor(
                 post(urlPathEqualTo("/oauth2/default/v1/token"))
                         .withRequestBody(containing("grant_type=authorization_code"))
-                        .withRequestBody(containing("code=TEST_CODE"))
+                        .withRequestBody(containing("code=TEST_CODE&"))
                         .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Flogin") +".*"))
                         .withRequestBody(containing("client_id=OOICU812"))
                         .withRequestBody(containing("client_secret=VERY_SECRET"))
@@ -159,6 +186,42 @@ class LocalTokenValidationIT extends AbstractTestNGSpringContextTests implements
                             .withHeader("Content-Type", "application/json;charset=UTF-8")
                             .withBodyFile("token.json")
                             .withTransformers("gstring-template")))
+
+        wireMockServer.stubFor(
+                post(urlPathEqualTo("/oauth2/default/v1/token"))
+                        .withRequestBody(containing("grant_type=authorization_code"))
+                        .withRequestBody(containing("code=TEST_CODE_wrongKeyIdAccessTokenJwt&"))
+                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Flogin") +".*"))
+                        .withRequestBody(containing("client_id=OOICU812"))
+                        .withRequestBody(containing("client_secret=VERY_SECRET"))
+                        .willReturn(aResponse()
+                            .withHeader("Content-Type", "application/json;charset=UTF-8")
+                            .withBodyFile("token.json")
+                            .withTransformer("gstring-template", "accessTokenJwt", wrongKeyIdAccessTokenJwt)))
+
+        wireMockServer.stubFor(
+                post(urlPathEqualTo("/oauth2/default/v1/token"))
+                        .withRequestBody(containing("grant_type=authorization_code"))
+                        .withRequestBody(containing("code=TEST_CODE_wrongScopeAccessTokenJwt&"))
+                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Flogin") +".*"))
+                        .withRequestBody(containing("client_id=OOICU812"))
+                        .withRequestBody(containing("client_secret=VERY_SECRET"))
+                        .willReturn(aResponse()
+                            .withHeader("Content-Type", "application/json;charset=UTF-8")
+                            .withBodyFile("token.json")
+                            .withTransformer("gstring-template", "accessTokenJwt", wrongScopeAccessTokenJwt)))
+
+        wireMockServer.stubFor(
+                post(urlPathEqualTo("/oauth2/default/v1/token"))
+                        .withRequestBody(containing("grant_type=authorization_code"))
+                        .withRequestBody(containing("code=TEST_CODE_wrongAudienceAccessTokenJwt&"))
+                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Flogin") +".*"))
+                        .withRequestBody(containing("client_id=OOICU812"))
+                        .withRequestBody(containing("client_secret=VERY_SECRET"))
+                        .willReturn(aResponse()
+                            .withHeader("Content-Type", "application/json;charset=UTF-8")
+                            .withBodyFile("token.json")
+                            .withTransformer("gstring-template", "accessTokenJwt", wrongAudienceAccessTokenJwt)))
 
         wireMockServer.stubFor(
                 get(urlPathEqualTo("/oauth2/default/v1/keys"))
@@ -232,7 +295,7 @@ class LocalTokenValidationIT extends AbstractTestNGSpringContextTests implements
             .get(requestUrl)
         .then()
             .statusCode(302)
-                .header("Location", Matchers.equalTo("http://localhost:${applicationPort}/".toString()))
+            .header("Location", Matchers.equalTo("http://localhost:${applicationPort}/".toString()))
         .extract()
 
         given()
@@ -244,7 +307,74 @@ class LocalTokenValidationIT extends AbstractTestNGSpringContextTests implements
             .get("http://localhost:${applicationPort}/")
         .then()
             .body(Matchers.equalTo("The message of the day is boring: joe.coder@example.com"))
-
     }
 
+    @Test
+    void wrongKeyIdAccessTokenJwtTest() {
+        ExtractableResponse response = redirectToRemoteLogin()
+        String redirectUrl = response.header("Location")
+        String state = redirectUrl.substring(redirectUrl.lastIndexOf('=')+1)
+        String code = "TEST_CODE_wrongKeyIdAccessTokenJwt"
+        String requestUrl = "http://localhost:${applicationPort}/login?code=${code}&state=${state}"
+
+        given()
+            .accept(ContentType.JSON)
+            .cookies(response.cookies())
+            .redirects()
+                .follow(false)
+        .when()
+            .get(requestUrl)
+        .then()
+            .statusCode(401)
+    }
+
+    @Test
+    void wrongScopeAccessTokenJwtTest() {
+        ExtractableResponse response = redirectToRemoteLogin()
+        String redirectUrl = response.header("Location")
+        String state = redirectUrl.substring(redirectUrl.lastIndexOf('=')+1)
+        String code = "TEST_CODE_wrongScopeAccessTokenJwt"
+        String requestUrl = "http://localhost:${applicationPort}/login?code=${code}&state=${state}"
+
+        ExtractableResponse response2 = given()
+            .accept(ContentType.JSON)
+            .cookies(response.cookies())
+            .redirects()
+               .follow(false)
+        .when()
+            .get(requestUrl)
+        .then().log().everything()
+            .statusCode(302)
+            .header("Location", Matchers.equalTo("http://localhost:${applicationPort}/".toString()))
+        .extract()
+
+        given()
+            .accept(ContentType.JSON)
+            .cookies(response2.cookies())
+            .redirects()
+                .follow(false)
+        .when()
+            .get("http://localhost:${applicationPort}/")
+        .then().log().everything()
+            .statusCode(403)
+    }
+
+    @Test
+    void wrongAudienceAccessTokenJwtTest() {
+        ExtractableResponse response = redirectToRemoteLogin()
+        String redirectUrl = response.header("Location")
+        String state = redirectUrl.substring(redirectUrl.lastIndexOf('=')+1)
+        String code = "TEST_CODE_wrongAudienceAccessTokenJwt"
+        String requestUrl = "http://localhost:${applicationPort}/login?code=${code}&state=${state}"
+
+        given()
+            .accept(ContentType.JSON)
+            .cookies(response.cookies())
+            .redirects()
+                .follow(false)
+        .when()
+            .get(requestUrl)
+        .then()
+            .statusCode(401)
+    }
 }

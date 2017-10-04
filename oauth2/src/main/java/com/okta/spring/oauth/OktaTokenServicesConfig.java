@@ -32,7 +32,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;
 import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
-import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.IssuerClaimVerifier;
@@ -106,14 +105,6 @@ public class OktaTokenServicesConfig {
         @ConditionalOnMissingBean
         protected PrincipalExtractor principalExtractor() {
             return new ClaimsPrincipalExtractor(oktaOAuth2Properties.getPrincipalClaim());
-        }
-
-        @Bean
-        @Primary
-        protected ResourceServerTokenServices resourceServerTokenServices(TokenStore tokenStore) {
-            DefaultTokenServices services = new DefaultTokenServices();
-            services.setTokenStore(tokenStore);
-            return services;
         }
 
         @Bean
