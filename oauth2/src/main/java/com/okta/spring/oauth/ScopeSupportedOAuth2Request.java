@@ -15,13 +15,21 @@
  */
 package com.okta.spring.oauth;
 
-public class InvalidConfigurationException extends RuntimeException {
+import org.springframework.security.oauth2.provider.OAuth2Request;
 
-    public InvalidConfigurationException(String message) {
-        super(message);
+import java.util.Collection;
+
+public class ScopeSupportedOAuth2Request extends OAuth2Request {
+
+    private static final long serialVersionUID = 42L;
+
+    public ScopeSupportedOAuth2Request(OAuth2Request other) {
+        super(other);
     }
 
-    public InvalidConfigurationException(String message, Throwable cause) {
-        super(message, cause);
+    @Override
+    @SuppressWarnings("PMD.UselessOverridingMethod")
+    public void setScope(Collection<String> scope) {
+        super.setScope(scope);
     }
 }

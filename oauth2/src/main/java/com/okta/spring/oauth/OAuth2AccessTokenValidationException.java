@@ -13,22 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.oauth.code;
+package com.okta.spring.oauth;
 
-import org.springframework.boot.autoconfigure.security.oauth2.resource.PrincipalExtractor;
+import org.springframework.security.core.AuthenticationException;
 
-import java.util.Map;
-
-public class ClaimsPrincipalExtractor implements PrincipalExtractor {
-
-    private final String principalClaimKey;
-
-    public ClaimsPrincipalExtractor(String principalClaimKey) {
-        this.principalClaimKey = principalClaimKey;
+public class OAuth2AccessTokenValidationException extends AuthenticationException {
+    public OAuth2AccessTokenValidationException(String msg, Throwable t) {
+        super(msg, t);
     }
 
-    @Override
-    public Object extractPrincipal(Map<String, Object> map) {
-        return map.get(principalClaimKey);
+    public OAuth2AccessTokenValidationException(String msg) {
+        super(msg);
     }
 }

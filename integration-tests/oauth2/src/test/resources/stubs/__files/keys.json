@@ -1,0 +1,12 @@
+{
+  "keys": [
+    {
+      "alg": "RS256",
+      "e": "${pubKeyE}",
+      "n": "${pubKeyN}",
+      "kid": "TEST_PUB_KEY_ID",
+      "kty": "RSA",
+      "use": "sig"
+    }
+  ]
+}

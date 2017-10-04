@@ -15,31 +15,58 @@
  */
 package com.okta.spring.oauth.code
 
+import com.okta.spring.oauth.OktaTokenServicesConfig
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.security.oauth2.resource.AuthoritiesExtractor
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.security.oauth2.provider.token.TokenStore
+import org.springframework.security.oauth2.provider.token.store.jwk.JwkTokenStore
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests
 import org.testng.annotations.Test
 
 import static org.hamcrest.MatcherAssert.assertThat
+import static org.hamcrest.Matchers.isA
 import static org.hamcrest.Matchers.notNullValue
 
-@SpringBootTest(classes    = [MockCodeFlowApp, OktaOAuthCodeFlowConfiguration],
-                properties = ["okta.oauth2.issuer=https://okta.example.com/oauth2/my_issuer",
-                              "okta.oauth2.principalClaim=customPrincipalClaim",
-                              "okta.oauth2.rolesClaim=customRoleClaim",
-                              "okta.oauth2.discoveryDisabled=true"])
+/**
+ * @since 0.2.0
+ */
 class OktaOAuthCodeFlowConfigurationTest extends AbstractTestNGSpringContextTests {
 
-    @Autowired
-    OktaOAuthCodeFlowConfiguration codeFlowConfiguration
+    @SpringBootTest(classes    = [MockCodeFlowApp, OktaOAuthCodeFlowConfiguration],
+                    properties = ["okta.oauth2.issuer=https://okta.example.com/oauth2/my_issuer",
+                                  "okta.oauth2.discoveryDisabled=true",
+                                  "okta.oauth2.localTokenValidation=false"])
+    static class RemoteValidationConfigTest extends AbstractTestNGSpringContextTests {
 
-    @Autowired
-    AuthoritiesExtractor authoritiesExtractor
+        @Autowired
+        OktaTokenServicesConfig oktaTokenServicesConfig
 
-    @Test
-    void theBasics() {
-        assertThat authoritiesExtractor, notNullValue()
-        assertThat codeFlowConfiguration, notNullValue()
+        @Autowired
+        AuthoritiesExtractor authoritiesExtractor
+
+        @Test
+        void theBasics() {
+            assertThat authoritiesExtractor, notNullValue()
+            assertThat oktaTokenServicesConfig, notNullValue()
+        }
+    }
+
+    @SpringBootTest(classes    = [MockCodeFlowApp, OktaOAuthCodeFlowConfiguration],
+                    properties = ["okta.oauth2.issuer=https://okta.example.com/oauth2/my_issuer",
+                                  "okta.oauth2.discoveryDisabled=true"])
+    static class LocalValidationConfigTest extends AbstractTestNGSpringContextTests {
+
+        @Autowired
+        OktaTokenServicesConfig oktaTokenServicesConfig
+
+        @Autowired
+        TokenStore tokenStore
+
+        @Test
+        void theBasics() {
+            assertThat tokenStore, isA(JwkTokenStore)
+            assertThat oktaTokenServicesConfig, notNullValue()
+        }
     }
 }

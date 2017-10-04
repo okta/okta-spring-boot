@@ -31,6 +31,8 @@
 
     <modules>
         <module>siw-jquery</module>
+        <module>redirect-code-flow</module>
+        <module>hosted-login-code-flow</module>
     </modules>
 
     <build>
@@ -47,10 +49,6 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
-                <configuration>
-                    <!--<fork>true</fork>-->
-                    <jvmArguments>-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000</jvmArguments>
-                </configuration>
             </plugin>
         </plugins>
     </build>

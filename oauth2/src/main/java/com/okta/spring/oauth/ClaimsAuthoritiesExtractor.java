@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.oauth.code;
+package com.okta.spring.oauth;
 
 import org.springframework.boot.autoconfigure.security.oauth2.resource.AuthoritiesExtractor;
 import org.springframework.security.core.GrantedAuthority;
@@ -24,6 +24,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * A {@link AuthoritiesExtractor} converts a list of Groups/Roles in an JWT token into Spring Security
+ * {@link GrantedAuthority}.
+ * @since 0.2.0
+ */
 public class ClaimsAuthoritiesExtractor implements AuthoritiesExtractor {
 
     private final String rolesClaimKey;

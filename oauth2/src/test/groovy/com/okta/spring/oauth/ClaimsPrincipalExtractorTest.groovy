@@ -13,14 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.oauth.code
+package com.okta.spring.oauth
 
+import com.okta.spring.oauth.ClaimsPrincipalExtractor
 import org.testng.annotations.Test
 
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.nullValue
 
+/**
+ * @since 0.2.0
+ */
 class ClaimsPrincipalExtractorTest {
 
     private Map<String, Object> dataMap = [

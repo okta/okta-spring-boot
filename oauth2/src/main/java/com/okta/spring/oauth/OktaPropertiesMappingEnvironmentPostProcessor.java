@@ -35,6 +35,52 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This {@link EnvironmentPostProcessor} configures additional {@link PropertySource}s that map OIDC discovery metadata
+ * and standard Okta properties to standard Spring Boot OAuth2 properties.
+ *
+ * <p>
+ *     <table summary="Property mapping">
+ *         <tr>
+ *             <th>Okta Property</th>
+ *             <th>Spring Boot Property</th>
+ *         </tr>
+ *         <tr>
+ *             <td>okta.oauth2.clientId</td>
+ *             <td>security.oauth2.client.clientId</td>
+ *         </tr>
+ *         <tr>
+ *             <td>okta.oauth2.clientSecret</td>
+ *             <td>security.oauth2.client.clientSecret</td>
+ *         </tr>
+ *     </table>
+ * Discovery properties:
+ * <p>
+ *     <table summary="Property mapping">
+ *         <tr>
+ *             <th>Discovery Property</th>
+ *             <th>Spring Boot Property</th>
+ *         </tr>
+ *         <tr>
+ *             <td>OidcDiscoveryMetadata.getTokenEndpoint()</td>
+ *             <td>security.oauth2.client.accessTokenUri</td>
+ *         </tr>
+ *         <tr>
+ *             <td>OidcDiscoveryMetadata.getAuthorizationEndpoint()</td>
+ *             <td>security.oauth2.client.userAuthorizationUri</td>
+ *         </tr>
+ *         <tr>
+ *             <td>OidcDiscoveryMetadata.getUserinfoEndpoint()</td>
+ *             <td>security.oauth2.resource.userInfoUri</td>
+ *         </tr>
+ *     </table>
+ * As well as updating default properties values from 'com.okta.spring.okta.yml'. And setting 'okta.client.orgUrl' based
+ * on 'okta.oauth2.issuer'
+ *
+ * NOTE: for discovery cavn be disabled by setting the property {code}okta.oauth2.discoveryDisabled=true{code}.
+ *
+ * @since 0.2.0
+ */
 public class OktaPropertiesMappingEnvironmentPostProcessor implements EnvironmentPostProcessor {
 
     private static final String OAUTH_CLIENT_PREFIX = "security.oauth2.client.";
@@ -89,9 +135,14 @@ public class OktaPropertiesMappingEnvironmentPostProcessor implements Environmen
             try {
                 OidcDiscoveryMetadata discoveryMetadata = new OidcDiscoveryClient(issuerUrl).discover();
                 Map<String, String> tmpValues = new HashMap<>();
+
+                String baseUrl = issuerUrl.substring(0, issuerUrl.lastIndexOf("/oauth2/"));
+                tmpValues.put("okta.client.orgUrl", baseUrl);
                 tmpValues.put(OAUTH_CLIENT_PREFIX + "accessTokenUri", discoveryMetadata.getTokenEndpoint());
                 tmpValues.put(OAUTH_CLIENT_PREFIX + "userAuthorizationUri", discoveryMetadata.getAuthorizationEndpoint());
                 tmpValues.put(OAUTH_RESOURCE_PREFIX + "userInfoUri", discoveryMetadata.getUserinfoEndpoint());
+                tmpValues.put(OAUTH_RESOURCE_PREFIX + "jwk.keySetUri", discoveryMetadata.getJwksUri());
+                tmpValues.put(OAUTH_RESOURCE_PREFIX + "tokenInfoUri", discoveryMetadata.getIntrospectionEndpoint());
                 return new MapBasedPropertySource("discovery-to-oauth2", Collections.unmodifiableMap(tmpValues));
             } catch (ResourceAccessException e) {
                 logger.warn("Failed to discover oauth metadata from url: {}", issuerUrl, e);

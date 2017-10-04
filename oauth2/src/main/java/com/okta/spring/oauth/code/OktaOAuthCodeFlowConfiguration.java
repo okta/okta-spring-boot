@@ -16,55 +16,70 @@
 package com.okta.spring.oauth.code;
 
 import com.okta.spring.config.OktaOAuth2Properties;
+import com.okta.spring.oauth.OAuth2AccessTokenValidationException;
+import com.okta.spring.oauth.OktaTokenServicesConfig;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2SsoDefaultConfiguration;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.AuthoritiesExtractor;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.PrincipalExtractor;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoRestTemplateFactory;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoTokenServices;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
-import org.springframework.security.oauth2.client.OAuth2ClientContext;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
+import org.springframework.security.oauth2.provider.token.TokenStore;
 
+/**
+ * Spring Configuration which adds a little Okta sugar to the standard Spring Boot OAuth2 support.
+ * <p>
+ * Features:
+ * </p>
+ * <ul>
+ *   <li>Customizable PrincipalExtractor based on the property {code}okta.oauth2.rolesClaim{code}</li>
+ *   <li>Customizable AuthoritiesExtractor based on the property {code}okta.oauth2.principalClaim{code}</li>
+ *   <li>UserInfoTokenServices that supports OAuth2 scopes from the current request</li>
+ *   </ul>
+ * @since 0.2.0
+ */
 @Configuration
 @AutoConfigureBefore(OAuth2SsoDefaultConfiguration.class)
 @ConditionalOnBean(OAuth2SsoDefaultConfiguration.class)
+@Import(OktaTokenServicesConfig.class)
 public class OktaOAuthCodeFlowConfiguration {
 
-    private final OktaOAuth2Properties oktaOAuth2Properties;
-
-    public OktaOAuthCodeFlowConfiguration(OktaOAuth2Properties oktaOAuth2Properties) {
-        this.oktaOAuth2Properties = oktaOAuth2Properties;
+    @Configuration
+    @ConditionalOnProperty(name = "okta.oauth2.localTokenValidation", matchIfMissing = true)
+    public static class LocalTokenValidationConfig {
+        @Bean
+        @Primary
+        protected ResourceServerTokenServices resourceServerTokenServices(TokenStore tokenStore, OktaOAuth2Properties properties) {
+            DefaultTokenServices services = new Non500ErrorDefaultTokenServices(properties.getAudience());
+            services.setTokenStore(tokenStore);
+            return services;
+        }
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    protected AuthoritiesExtractor authoritiesExtractor() {
-        return new ClaimsAuthoritiesExtractor(oktaOAuth2Properties.getRolesClaim());
-    }
+    static class Non500ErrorDefaultTokenServices extends DefaultTokenServices {
 
-    @Bean
-    @ConditionalOnMissingBean
-    protected PrincipalExtractor principalExtractor() {
-        return new ClaimsPrincipalExtractor(oktaOAuth2Properties.getPrincipalClaim());
-    }
+        private final String audience;
 
-    @Bean
-    @Primary
-    protected ResourceServerTokenServices resourceServerTokenServices(ResourceServerProperties sso,
-                                                                      OAuth2ClientContext oauth2ClientContext,
-                                                                      UserInfoRestTemplateFactory restTemplateFactory) {
+        Non500ErrorDefaultTokenServices(String audience) {
+            this.audience = audience;
+        }
 
-        UserInfoTokenServices services = new OktaUserInfoTokenServices(sso.getUserInfoUri(), sso.getClientId(), oauth2ClientContext);
-        services.setRestTemplate(restTemplateFactory.getUserInfoRestTemplate());
-        services.setTokenType(sso.getTokenType());
-        services.setAuthoritiesExtractor(authoritiesExtractor());
-        services.setPrincipalExtractor(principalExtractor());
-        return services;
+        @Override
+        public OAuth2Authentication loadAuthentication(String accessTokenValue) {
+
+            OAuth2Authentication originalOAuth = super.loadAuthentication(accessTokenValue);
+
+            // validate audience
+            if (!originalOAuth.getOAuth2Request().getResourceIds().contains(audience)) {
+                throw new OAuth2AccessTokenValidationException("Invalid token, 'aud' claim does not contain the expected audience of: " + audience);
+            }
+
+            return originalOAuth;
+        }
     }
 }

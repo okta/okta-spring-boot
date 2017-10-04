@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.oauth.code
+package com.okta.spring.oauth
 
+import com.okta.spring.oauth.ClaimsAuthoritiesExtractor
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.testng.annotations.Test
@@ -25,6 +26,9 @@ import static org.hamcrest.Matchers.emptyCollectionOf
 import static org.hamcrest.Matchers.containsInAnyOrder
 import static org.hamcrest.Matchers.hasSize
 
+/**
+ * @since 0.2.0
+ */
 class ClaimsAuthoritiesExtractorTest {
 
     private Map<String, Object> dataMap = [
