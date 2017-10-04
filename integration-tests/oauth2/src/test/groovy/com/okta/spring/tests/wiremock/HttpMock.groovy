@@ -86,10 +86,16 @@ class GStringTransformer extends ResponseTransformer {
     }
 
     @Override
+    boolean applyGlobally() {
+        return false
+    }
+
+    @Override
     Response transform(Request request, Response response, FileSource files, Parameters parameters) {
+        Map params = (parameters == null) ? binding : binding + parameters
         return Response.Builder
                 .like(response)
-                .body(new StreamingTemplateEngine().createTemplate(response.bodyAsString).make(binding).toString())
+                .body(new StreamingTemplateEngine().createTemplate(response.bodyAsString).make(params).toString())
                 .build()
     }
 
