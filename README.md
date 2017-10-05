@@ -1,7 +1,7 @@
 Okta Spring Boot Starter
 ========================
 
-Okta's Spring Boot Starter will enable your Spring Boot application to work with Okta via OAuth2.  Jump to our [quickstart](https://developer.okta.com/quickstart/#/angular/java/spring) to see how to configure various clients or follow along below to use curl.
+Okta's Spring Boot Starter will enable your Spring Boot application to work with Okta via OAuth 2.0.  Jump to our [quickstart](https://developer.okta.com/quickstart/#/angular/java/spring) to see how to configure various clients or follow along below to use curl.
 
 ## What you need
 
@@ -24,7 +24,7 @@ For Gradle:
 compile 'com.okta.spring:okta-spring-security-starter'
 ```
 
-## Supporting client side applications - OAuth2 Implicit flow
+## Supporting client side applications - OAuth Implicit flow
 
 Are you writing a backend endpoints in order to support a client side application? If so follow along, otherwise skip to the next section.
 
@@ -78,12 +78,12 @@ Hello, joe.coder@example.com
 
 Okta's Spring Security integration will [parse the JWT access token](https://developer.okta.com/blog/2017/06/21/what-the-heck-is-oauth#oauth-flows) from the HTTP request's `Authorization: Bearer` header value.
 
-Check out a minimal example that uses the [Okta Signin Widget and JQuery](examples/siw-jquery) or [this blog post](https://scotch.io/tutorials/build-a-secure-notes-application-with-kotlin-typescript-and-okta). 
+Check out a minimal example that uses the [Okta Signin Widget and JQuery](examples/siw-jquery) or [this blog post](https://developer.okta.com/blog/2017/09/19/build-a-secure-notes-application-with-kotlin-typescript-and-okta). 
 
 
-## Supporting server side applications - OAuth2 Code flow
+## Supporting server side applications - OAuth Code flow
 
-Building a server side application and just need to redirect to a login page? This OAuth2 code flow is for you.
+Building a server side application and just need to redirect to a login page? This OAuth 2.0 code flow is for you.
 
 ### Configure your properties
 
@@ -111,7 +111,7 @@ public class ExampleApplication {
 
     @GetMapping("/")
     public String getMessageOfTheDay(Principal principal) {
-        return principal.getName() +", this message of the day is boring";
+        return principal.getName() + ", this message of the day is boring";
     }
 }
 ```

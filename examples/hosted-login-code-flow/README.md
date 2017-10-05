@@ -1,4 +1,4 @@
-Okta Spring Security OAuth2 Code Flow Example
+Okta Spring Security OAuth Code Flow Example
 =============================================
 
 Clone the project and build it!
@@ -17,5 +17,5 @@ cd examples/hosted-login-code-flow
 
 Run the example:
 ```bash
-mvn spring-boot:run -Dokta.client.clientId={yourClientId} -Dokta.client.clientSecret={yourClientSecret} -Dokta.issuer={yourOktaIssuerUrl} 
+mvn spring-boot:run -Dokta.oauth.clientId={yourClientId} -Dokta.oauth.clientSecret={yourClientSecret} -Dokta.oauth.issuer={yourOktaIssuerUrl} 
 ```
