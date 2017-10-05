@@ -53,7 +53,6 @@ class BasicImplicitFlowApplication {
         return "Everyone has Access: " + principal.getName()
     }
 
-
     static void main(String[] args) {
         SpringApplication.run(BasicImplicitFlowApplication.class, args)
     }
