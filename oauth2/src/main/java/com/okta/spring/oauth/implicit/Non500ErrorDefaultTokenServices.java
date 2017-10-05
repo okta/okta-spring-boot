@@ -29,7 +29,6 @@ class Non500ErrorDefaultTokenServices extends DefaultTokenServices {
     public OAuth2Authentication loadAuthentication(String accessTokenValue) {
         try {
             return super.loadAuthentication(accessTokenValue);
-
         } catch(InvalidSignatureException e) {
             logger.debug("Invalid Token Signature: {}", e.getMessage(), e);
             return null;
