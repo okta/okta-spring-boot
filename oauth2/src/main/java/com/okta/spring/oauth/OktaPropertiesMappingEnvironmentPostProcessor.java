@@ -118,6 +118,7 @@ public class OktaPropertiesMappingEnvironmentPostProcessor implements Environmen
         Map<String, String> tmpValues = new HashMap<>();
         tmpValues.put(OAUTH_CLIENT_PREFIX + "clientId", environment.getProperty(OKTA_OAUTH_PREFIX + "clientId"));
         tmpValues.put(OAUTH_CLIENT_PREFIX + "clientSecret", environment.getProperty(OKTA_OAUTH_PREFIX + "clientSecret"));
+        tmpValues.put(OAUTH_RESOURCE_PREFIX + "serviceId", environment.getProperty(OKTA_OAUTH_PREFIX + "audience"));
         return new MapBasedPropertySource("okta-to-oauth2", Collections.unmodifiableMap(tmpValues));
     }
 
