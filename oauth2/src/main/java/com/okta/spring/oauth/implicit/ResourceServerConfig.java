@@ -48,7 +48,7 @@ public class ResourceServerConfig {
     @Bean
     @Primary
     @ConditionalOnBean(ResourceServerTokenServices.class)
-    public ResourceServerConfigurerAdapter resourceServerConfigurerAdapter(ResourceServerTokenServices tokenServices) {
+    public ResourceServerConfigurerAdapter oktaResourceServerConfigurerAdapter(ResourceServerTokenServices tokenServices) {
         return new ResourceServerConfigurerAdapter() {
             @Override
             public void configure(final ResourceServerSecurityConfigurer config) {
