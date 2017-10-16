@@ -20,8 +20,7 @@
     <parent>
         <groupId>com.okta.spring</groupId>
         <artifactId>okta-spring-boot-parent</artifactId>
-        <version>0.2.1-SNAPSHOT</version>
-        <relativePath>../..</relativePath>
+        <version>0.3.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>okta-spring-boot-integration-tests-oauth2</artifactId>

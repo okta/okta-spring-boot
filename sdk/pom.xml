@@ -23,52 +23,62 @@
         <version>0.3.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>okta-spring-security-oauth2</artifactId>
-    <name>Okta Spring Boot :: OAuth2</name>
+    <artifactId>okta-spring-sdk</artifactId>
+    <name>Okta Spring Boot :: SDK</name>
+
+    <properties>
+        <okta.sdk.version>0.7.0</okta.sdk.version>
+    </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.okta.spring</groupId>
             <artifactId>okta-spring-config</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-        </dependency>
-
-        <!-- Spring deps-->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
+            <groupId>com.okta.sdk</groupId>
+            <artifactId>okta-sdk-api</artifactId>
+            <version>${okta.sdk.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-jwt</artifactId>
+            <groupId>com.okta.sdk</groupId>
+            <artifactId>okta-sdk-impl</artifactId>
+            <version>${okta.sdk.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework.security.oauth</groupId>
-            <artifactId>spring-security-oauth2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
+            <groupId>com.okta.sdk</groupId>
+            <artifactId>okta-sdk-httpclient</artifactId>
+            <version>${okta.sdk.version}</version>
+            <scope>runtime</scope>
         </dependency>
 
         <!-- Test deps -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-test</artifactId>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -27,9 +27,11 @@ import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.web.client.ResourceAccessException;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -77,7 +79,7 @@ import java.util.Map;
  * As well as updating default properties values from 'com.okta.spring.okta.yml'. And setting 'okta.client.orgUrl' based
  * on 'okta.oauth2.issuer'
  *
- * NOTE: for discovery cavn be disabled by setting the property {code}okta.oauth2.discoveryDisabled=true{code}.
+ * NOTE: for discovery can be disabled by setting the property {code}okta.oauth2.discoveryDisabled=true{code}.
  *
  * @since 0.2.0
  */
@@ -92,20 +94,25 @@ public class OktaPropertiesMappingEnvironmentPostProcessor implements Environmen
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
         environment.getPropertySources().addLast(remappedOktaToStandardOAuthPropertySource(environment));
+        environment.getPropertySources().addLast(loadYaml(new FileSystemResource(new File(System.getProperty("user.home"), "okta/okta.yml")), false));
         environment.getPropertySources().addLast(discoveryPropertiesSource(environment));
-        environment.getPropertySources().addLast(loadYaml(new ClassPathResource("com/okta/spring/okta.yml")));
+        environment.getPropertySources().addLast(loadYaml(new ClassPathResource("com/okta/spring/okta.yml"), true));
     }
 
-    private PropertySource<?> loadYaml(Resource resource) {
+    private PropertySource<?> loadYaml(Resource resource, boolean required) {
         YamlPropertySourceLoader loader = new YamlPropertySourceLoader();
-        if (!resource.exists()) {
+        if (!resource.exists() && required) {
             throw new IllegalArgumentException("Resource " + resource + " does not exist");
         }
-        try {
-            return loader.load("okta-defaults", resource, null);
-        }
-        catch (IOException ex) {
-            throw new IllegalStateException("Failed to load yaml configuration from " + resource, ex);
+
+        if (resource.exists()) {
+            try {
+                return loader.load(resource.getFilename(), resource, null);
+            } catch (IOException ex) {
+                throw new IllegalStateException("Failed to load yaml configuration from " + resource, ex);
+            }
+        } else {
+            return new MapBasedPropertySource("missing "+ resource.getFilename(), Collections.emptyMap());
         }
     }
 
