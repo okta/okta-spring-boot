@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.oauth.implicit
+package com.okta.spring.oauth
 
+import com.okta.spring.oauth.ConfigurableAccessTokenConverter
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.oauth2.provider.token.UserAuthenticationConverter
 import org.testng.annotations.Test
@@ -131,5 +132,6 @@ class ConfigurableAccessTokenConverterTest {
         ]
         def auth = converter.extractAuthentication(initialClaimMap)
         assertThat auth.getUserAuthentication().name, equalTo(email)
+        assertThat auth.getUserAuthentication().details, equalTo(initialClaimMap)
     }
 }
