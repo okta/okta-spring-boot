@@ -17,7 +17,6 @@ package com.okta.spring.oauth;
 
 
 import com.okta.spring.config.OktaOAuth2Properties;
-import com.okta.spring.oauth.implicit.ConfigurableAccessTokenConverter;
 import org.springframework.beans.InvalidPropertyException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

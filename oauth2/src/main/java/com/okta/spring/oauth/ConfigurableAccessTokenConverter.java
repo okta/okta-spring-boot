@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.oauth.implicit;
+package com.okta.spring.oauth;
 
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
@@ -22,6 +24,7 @@ import org.springframework.security.oauth2.provider.token.UserAuthenticationConv
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -74,7 +77,16 @@ public class ConfigurableAccessTokenConverter extends DefaultAccessTokenConverte
 
     @Override
     public OAuth2Authentication extractAuthentication(Map<String, ?> map) {
-        return super.extractAuthentication(tweakScopeMap(map));
-    }
+        OAuth2Authentication originalOAuth2Authentication = super.extractAuthentication(tweakScopeMap(map));
 
+        Authentication originalUserAuthentication = originalOAuth2Authentication.getUserAuthentication();
+        if (originalUserAuthentication != null) {
+            UsernamePasswordAuthenticationToken newToken = new UsernamePasswordAuthenticationToken(originalUserAuthentication.getPrincipal(),
+                    "N/A",
+                    originalUserAuthentication.getAuthorities());
+            newToken.setDetails(Collections.unmodifiableMap(map));
+            return new OAuth2Authentication(originalOAuth2Authentication.getOAuth2Request(), newToken);
+        }
+        return originalOAuth2Authentication;
+    }
 }
