@@ -77,13 +77,17 @@ public class ConfigurableAccessTokenConverter extends DefaultAccessTokenConverte
 
     @Override
     public OAuth2Authentication extractAuthentication(Map<String, ?> map) {
+        // call super with the updated map
         OAuth2Authentication originalOAuth2Authentication = super.extractAuthentication(tweakScopeMap(map));
 
+        // If this token has UserAuthentication we need to rebuild it (we do not call setDetails() directly,
+        // as the implementation might change, currently it is a UsernamePasswordAuthenticationToken)
         Authentication originalUserAuthentication = originalOAuth2Authentication.getUserAuthentication();
         if (originalUserAuthentication != null) {
             UsernamePasswordAuthenticationToken newToken = new UsernamePasswordAuthenticationToken(originalUserAuthentication.getPrincipal(),
                     "N/A",
                     originalUserAuthentication.getAuthorities());
+            // now set the details on the new token directly, and return a new OAuth2Authentication
             newToken.setDetails(Collections.unmodifiableMap(map));
             return new OAuth2Authentication(originalOAuth2Authentication.getOAuth2Request(), newToken);
         }
