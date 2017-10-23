@@ -16,25 +16,18 @@
 package com.okta.spring.tests.oauth2.code
 
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.okta.spring.tests.oauth2.TestUtils
-import com.okta.spring.tests.wiremock.HttpMock
+import com.okta.test.mock.Scenario
+import com.okta.test.mock.application.ApplicationTestRunner
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.restassured.http.ContentType
 import io.restassured.response.ExtractableResponse
 import org.apache.commons.codec.binary.Base64
 import org.hamcrest.Matchers
-import org.springframework.boot.context.embedded.LocalServerPort
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests
-import org.testng.IHookCallBack
-import org.testng.ITestResult
 import org.testng.annotations.Test
 
 import java.security.KeyPair
 import java.security.KeyPairGenerator
-import java.security.interfaces.RSAPrivateKey
-import java.security.interfaces.RSAPublicKey
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.regex.Pattern
@@ -45,16 +38,8 @@ import static io.restassured.RestAssured.given
 import static org.hamcrest.Matchers.is
 import static org.hamcrest.text.MatchesPattern.matchesPattern
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-                classes = [BasicRedirectCodeFlowApplication],
-                properties = ["okta.oauth2.issuer=http://localhost:9988/oauth2/default",
-                              "okta.oauth2.clientId=OOICU812",
-                              "okta.oauth2.clientSecret=VERY_SECRET",
-                              "server.session.trackingModes=cookie"])
-class LocalTokenValidationIT extends AbstractTestNGSpringContextTests implements HttpMock {
-
-    @LocalServerPort
-    int applicationPort
+@Scenario("code-flow-local-validation")
+class LocalTokenValidationIT extends ApplicationTestRunner {
 
     String pubKeyE
     String pubKeyN
@@ -149,11 +134,6 @@ class LocalTokenValidationIT extends AbstractTestNGSpringContextTests implements
                 pubKeyN: pubKeyN,
                 idTokenjwt: idTokenjwt
         ]
-    }
-
-    @Override
-    int doGetMockPort() {
-        return 9988
     }
 
     @Override

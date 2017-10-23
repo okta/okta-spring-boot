@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.tests.wiremock
+package com.okta.test.mock.wiremock
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.common.ClasspathFileSource
@@ -65,10 +65,7 @@ trait HttpMock {
         return port
     }
 
-    int doGetMockPort() {
-        int port = new ServerSocket(0).withCloseable {it.getLocalPort()}
-        return port
-    }
+    abstract int doGetMockPort()
 
     String getBaseUrl() {
         return "http://localhost:${getMockPort()}"
@@ -104,5 +101,3 @@ class GStringTransformer extends ResponseTransformer {
         return "gstring-template"
     }
 }
-
-

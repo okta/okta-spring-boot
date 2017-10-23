@@ -13,48 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.tests.oauth2.implicit
+package com.okta.test.mock.tests
 
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.okta.spring.tests.wiremock.HttpMock
+import com.okta.test.mock.Scenario
+import com.okta.test.mock.application.ApplicationTestRunner
 import io.restassured.http.ContentType
 import org.hamcrest.Matchers
-import org.springframework.boot.context.embedded.LocalServerPort
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests
-import org.testng.IHookCallBack
-import org.testng.ITestResult
 import org.testng.annotations.Test
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*
 import static io.restassured.RestAssured.given
 import static org.hamcrest.Matchers.startsWith
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-                classes = [BasicImplicitFlowApplication],
-                properties = ["okta.oauth2.issuer=http://localhost:9985/oauth2/default",
-                              "okta.oauth2.clientId=OOICU812",
-                              "server.session.trackingModes=cookie",
-                              "okta.oauth2.localTokenValidation=false"])
-class RemoteImplicitTokenValidationIT extends AbstractTestNGSpringContextTests implements HttpMock {
+@Scenario("implicit-flow-remote-validation")
+class ImplicitRemoteValidationIT extends ApplicationTestRunner {
 
-    @LocalServerPort
-    int applicationPort
-
-    RemoteImplicitTokenValidationIT() {
-        startMockServer()
-    }
-
-    @Override
-    void run(IHookCallBack callBack, ITestResult testResult) {
-
-        super.run(callBack, testResult)
-    }
-
-    @Override
-    int doGetMockPort() {
-        return 9985
-    }
 
     @Override
     void configureHttpMock(WireMockServer wireMockServer) {

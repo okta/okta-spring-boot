@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.tests.wiremock
+package com.okta.test.mock.wiremock
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.okta.spring.oauth.discovery.OidcDiscoveryClient
@@ -31,6 +31,12 @@ class QuickHttpMockTest implements HttpMock {
     void quick() {
         OidcDiscoveryMetadata discoveryMetadata = new OidcDiscoveryClient("${getBaseUrl()}/oauth2/default").discover()
         assertThat discoveryMetadata.jwksUri, equalTo(getBaseUrl()+"/oauth2/default/v1/keys")
+    }
+
+    @Override
+    int doGetMockPort() {
+        int port = new ServerSocket(0).withCloseable {it.getLocalPort()}
+        return port
     }
 
     @Override

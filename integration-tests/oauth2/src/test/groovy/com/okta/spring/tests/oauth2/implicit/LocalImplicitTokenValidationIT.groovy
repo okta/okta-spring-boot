@@ -16,7 +16,9 @@
 package com.okta.spring.tests.oauth2.implicit
 
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.okta.spring.tests.wiremock.HttpMock
+import com.okta.test.mock.Scenario
+import com.okta.test.mock.application.ApplicationTestRunner
+import com.okta.test.mock.wiremock.HttpMock
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.restassured.http.ContentType
@@ -29,8 +31,6 @@ import org.testng.annotations.Test
 
 import java.security.KeyPair
 import java.security.KeyPairGenerator
-import java.security.interfaces.RSAPrivateKey
-import java.security.interfaces.RSAPublicKey
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -39,15 +39,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 import static io.restassured.RestAssured.given
 import static org.hamcrest.Matchers.startsWith
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-                classes = [BasicImplicitFlowApplication],
-                properties = ["okta.oauth2.issuer=http://localhost:9986/oauth2/default",
-                              "okta.oauth2.clientId=OOICU812",
-                              "server.session.trackingModes=cookie"])
-class LocalImplicitTokenValidationIT extends AbstractTestNGSpringContextTests implements HttpMock {
-
-    @LocalServerPort
-    int applicationPort
+@Scenario("implicit-flow-local-validation")
+class LocalImplicitTokenValidationIT extends ApplicationTestRunner {
 
     String pubKeyE
     String pubKeyN
@@ -135,8 +128,6 @@ class LocalImplicitTokenValidationIT extends AbstractTestNGSpringContextTests im
                     .setKeyId('TEST_PUB_KEY_ID'))
                 .signWith(SignatureAlgorithm.RS256, keyPair.privateKey)
                 .compact()
-
-        startMockServer()
     }
 
     @Override
@@ -148,11 +139,6 @@ class LocalImplicitTokenValidationIT extends AbstractTestNGSpringContextTests im
                 pubKeyN: pubKeyN,
                 idTokenjwt: idTokenjwt
         ]
-    }
-
-    @Override
-    int doGetMockPort() {
-        return 9986
     }
 
     @Override

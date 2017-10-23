@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.tests.oauth2.code
+package com.okta.test.mock.tests
 
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.okta.spring.tests.wiremock.HttpMock
+import com.okta.test.mock.Scenario
+import com.okta.test.mock.application.ApplicationTestRunner
 import io.restassured.http.ContentType
 import io.restassured.response.ExtractableResponse
 import org.hamcrest.Matchers
-import org.springframework.boot.context.embedded.LocalServerPort
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests
 import org.testng.annotations.Test
 
 import java.util.regex.Pattern
@@ -32,26 +30,8 @@ import static io.restassured.RestAssured.given
 import static org.hamcrest.Matchers.is
 import static org.hamcrest.text.MatchesPattern.matchesPattern
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-                classes = [BasicRedirectCodeFlowApplication],
-                properties = ["okta.oauth2.issuer=http://localhost:9987/oauth2/default",
-                              "okta.oauth2.clientId=OOICU812",
-                              "okta.oauth2.clientSecret=VERY_SECRET",
-                              "server.session.trackingModes=cookie",
-                              "okta.oauth2.localTokenValidation=false"])
-class RemoteTokenValidationIT extends AbstractTestNGSpringContextTests implements HttpMock {
-
-    @LocalServerPort
-    int applicationPort
-
-    RemoteTokenValidationIT() {
-        startMockServer()
-    }
-
-    @Override
-    int doGetMockPort() {
-        return 9987
-    }
+@Scenario("code-flow-remote-validation")
+class CodeFlowRemoteValidationIT extends ApplicationTestRunner {
 
     @Override
     void configureHttpMock(WireMockServer wireMockServer) {
@@ -123,7 +103,7 @@ class RemoteTokenValidationIT extends AbstractTestNGSpringContextTests implement
             .get("http://localhost:${applicationPort}/login")
         .then()
             .statusCode(302)
-            .header("Location", matchesPattern(expectedRedirect))
+            .header("Location", org.hamcrest.text.MatchesPattern.matchesPattern(expectedRedirect))
         .extract()
     }
 
