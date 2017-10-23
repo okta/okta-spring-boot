@@ -33,6 +33,15 @@
         <Package name="com.okta.spring.example.controllers" />
         <Bug pattern="SPRING_ENDPOINT" />
     </Match>
+    <!-- Allow for any endpoints for tests -->
+    <Match>
+        <Package name="~com\.okta\.spring\.tests\.oauth2.*"/>
+        <Bug pattern="SPRING_ENDPOINT" />
+    </Match>
+    <!-- Findbugs does NOT like how we are compiling groovy -->
+    <Match>
+        <Package name="~com\.okta\.test\.mock.*" />
+    </Match>
 
 
 </FindBugsFilter>

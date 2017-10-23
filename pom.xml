@@ -40,6 +40,7 @@
         <module>oauth2</module>
         <module>okta-spring-boot-starter</module>
         <module>integration-tests/oauth2</module>
+        <module>integration-tests/oauth-mock-test-runner</module>
         <module>examples</module>
         <module>coverage</module>
     </modules>

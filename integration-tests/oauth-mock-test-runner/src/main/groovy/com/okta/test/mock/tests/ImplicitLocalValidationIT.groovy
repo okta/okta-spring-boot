@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.tests.oauth2.implicit
+package com.okta.test.mock.tests
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.okta.test.mock.Scenario
@@ -24,9 +24,6 @@ import io.jsonwebtoken.SignatureAlgorithm
 import io.restassured.http.ContentType
 import org.apache.commons.codec.binary.Base64
 import org.hamcrest.Matchers
-import org.springframework.boot.context.embedded.LocalServerPort
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests
 import org.testng.annotations.Test
 
 import java.security.KeyPair
@@ -34,13 +31,12 @@ import java.security.KeyPairGenerator
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-import static com.okta.spring.tests.oauth2.TestUtils.toIntegerBytes
 import static com.github.tomakehurst.wiremock.client.WireMock.*
 import static io.restassured.RestAssured.given
 import static org.hamcrest.Matchers.startsWith
 
 @Scenario("implicit-flow-local-validation")
-class LocalImplicitTokenValidationIT extends ApplicationTestRunner {
+class ImplicitLocalValidationIT extends ApplicationTestRunner {
 
     String pubKeyE
     String pubKeyN
@@ -50,7 +46,7 @@ class LocalImplicitTokenValidationIT extends ApplicationTestRunner {
     String wrongAudienceAccessToken
     String idTokenjwt
 
-    LocalImplicitTokenValidationIT() {
+    ImplicitLocalValidationIT() {
 
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA")
         keyPairGenerator.initialize(4096)
@@ -58,8 +54,8 @@ class LocalImplicitTokenValidationIT extends ApplicationTestRunner {
 
         KeyPair keyPair = keyPairGenerator.generateKeyPair()
 
-        pubKeyE = Base64.encodeBase64URLSafeString(toIntegerBytes(keyPair.publicKey.getPublicExponent()))
-        pubKeyN = Base64.encodeBase64URLSafeString(toIntegerBytes(keyPair.publicKey.getModulus()))
+        pubKeyE = Base64.encodeBase64URLSafeString(TestUtils.toIntegerBytes(keyPair.publicKey.getPublicExponent()))
+        pubKeyN = Base64.encodeBase64URLSafeString(TestUtils.toIntegerBytes(keyPair.publicKey.getModulus()))
 
         Instant now = Instant.now()
         accessTokenJwt =  Jwts.builder()
@@ -232,17 +228,5 @@ class LocalImplicitTokenValidationIT extends ApplicationTestRunner {
             .get("http://localhost:${applicationPort}/")
         .then()
             .statusCode(403)
-    }
-
-    @Test
-    void groupAccessTest() {
-        given()
-            .header("Authorization", "Bearer ${accessTokenJwt}")
-            .redirects()
-                .follow(false)
-        .when()
-            .get("http://localhost:${applicationPort}/everyone")
-        .then()
-            .body(Matchers.equalTo("Everyone has Access: joe.coder@example.com"))
     }
 }

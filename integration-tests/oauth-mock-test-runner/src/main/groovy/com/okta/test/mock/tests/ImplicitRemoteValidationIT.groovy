@@ -79,17 +79,4 @@ class ImplicitRemoteValidationIT extends ApplicationTestRunner {
         .then()
             .statusCode(403)
     }
-
-    @Test
-    void groupAccessTest() {
-
-        given()
-            .header("Authorization", "Bearer some.random.jwt")
-            .redirects()
-            .follow(false)
-        .when()
-            .get("http://localhost:${applicationPort}/everyone")
-        .then()
-            .body(Matchers.equalTo("Everyone has Access: joe.coder@example.com"))
-    }
 }

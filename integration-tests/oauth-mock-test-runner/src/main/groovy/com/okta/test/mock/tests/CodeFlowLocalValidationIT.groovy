@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.tests.oauth2.code
+package com.okta.test.mock.tests
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.okta.test.mock.Scenario
@@ -32,14 +32,14 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.regex.Pattern
 
-import static com.okta.spring.tests.oauth2.TestUtils.toIntegerBytes
+import static TestUtils.toIntegerBytes
 import static com.github.tomakehurst.wiremock.client.WireMock.*
 import static io.restassured.RestAssured.given
 import static org.hamcrest.Matchers.is
 import static org.hamcrest.text.MatchesPattern.matchesPattern
 
 @Scenario("code-flow-local-validation")
-class LocalTokenValidationIT extends ApplicationTestRunner {
+class CodeFlowLocalValidationIT extends ApplicationTestRunner {
 
     String pubKeyE
     String pubKeyN
@@ -49,14 +49,14 @@ class LocalTokenValidationIT extends ApplicationTestRunner {
     String wrongAudienceAccessTokenJwt
     String idTokenjwt
 
-    LocalTokenValidationIT() {
+    CodeFlowLocalValidationIT() {
 
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA")
         keyPairGenerator.initialize(4096)
         KeyPair keyPair = keyPairGenerator.generateKeyPair()
 
-        pubKeyE = Base64.encodeBase64URLSafeString(toIntegerBytes(keyPair.publicKey.getPublicExponent()))
-        pubKeyN = Base64.encodeBase64URLSafeString(toIntegerBytes(keyPair.publicKey.getModulus()))
+        pubKeyE = Base64.encodeBase64URLSafeString(TestUtils.toIntegerBytes(keyPair.publicKey.getPublicExponent()))
+        pubKeyN = Base64.encodeBase64URLSafeString(TestUtils.toIntegerBytes(keyPair.publicKey.getModulus()))
 
         Instant now = Instant.now()
         accessTokenJwt =  Jwts.builder()
