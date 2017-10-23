@@ -27,10 +27,6 @@
     <artifactId>okta-spring-boot-integration-tests-oauth2</artifactId>
     <name>Okta Spring Boot :: ITs :: OAuth2</name>
 
-    <properties>
-        <groovy.version>2.4.12</groovy.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.okta.spring</groupId>
