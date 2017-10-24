@@ -40,7 +40,8 @@ else
         # else try to run the ITs if possible (for someone who has push access to the repo
         if [ "$RUN_ITS" = true ] ; then
             echo "Running mvn install"
-            $MVN_CMD install -Pci
+            $MVN_CMD install -Pci || \
+            (find . -type f | grep target/mvn- | xargs -I{} sh -c 'echo "file: {}"; cat {}' && exit 1)
         else
             # fall back to running an install and skip the ITs
             echo "Skipping ITs, likely this build is a pull request from a fork"

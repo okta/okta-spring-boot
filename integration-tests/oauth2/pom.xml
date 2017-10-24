@@ -126,7 +126,7 @@
                     <version>2.20.1</version>
                     <configuration>
                         <dependenciesToScan>
-                            <dependency>com.okta.spring:okta-oauth-mock-test-runner</dependency>
+                            <dependency>com.okta.tests:okta-oauth-mock-test-runner</dependency>
                         </dependenciesToScan>
                         <reuseForks>false</reuseForks>
                     </configuration>
