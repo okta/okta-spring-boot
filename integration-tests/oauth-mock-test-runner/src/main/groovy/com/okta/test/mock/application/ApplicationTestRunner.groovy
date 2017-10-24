@@ -60,7 +60,7 @@ abstract class ApplicationTestRunner implements HttpMock {
         startMockServer()
         app.start()
 
-        pollForStartedApplication(applicationPort, 8000) // about a minute max
+        pollForStartedApplication(applicationPort, 10000) // a little over a minute
 
     }
     
