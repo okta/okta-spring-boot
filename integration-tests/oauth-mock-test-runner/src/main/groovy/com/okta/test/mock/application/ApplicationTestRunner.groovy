@@ -36,8 +36,8 @@ abstract class ApplicationTestRunner implements HttpMock {
 
     private ApplicationUnderTest app = getApplicationUnderTest(getScenarioName())
 
-    private mockPort
-    private applicationPort
+    private int mockPort
+    private int applicationPort
 
     String getScenarioName() {
         Scenario scenario = getClass().getAnnotation(Scenario)
@@ -60,8 +60,12 @@ abstract class ApplicationTestRunner implements HttpMock {
         startMockServer()
         app.start()
 
-        pollForStartedApplication(applicationPort, 10000) // a little over a minute
+        // allow for CI to configure the timeout
+        String retryCountKey = "okta.test.startPollCount"
+        String envRetryCountKey = retryCountKey.replace('.', '_').toUpperCase(Locale.ENGLISH)
+        String value = System.getenv(envRetryCountKey) ?: System.getProperty(retryCountKey, "10000") // a little over a minute
 
+        pollForStartedApplication(applicationPort, value.toInteger())
     }
     
     @AfterClass
