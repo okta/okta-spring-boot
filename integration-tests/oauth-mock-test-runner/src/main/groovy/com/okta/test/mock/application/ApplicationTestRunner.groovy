@@ -28,8 +28,7 @@ import org.yaml.snakeyaml.Yaml
 
 import java.util.stream.Collectors
 
-import static org.hamcrest.Matchers.either
-import static org.hamcrest.Matchers.is
+import static io.restassured.RestAssured.given
 import static org.hamcrest.MatcherAssert.assertThat
 
 abstract class ApplicationTestRunner implements HttpMock {
@@ -77,15 +76,12 @@ abstract class ApplicationTestRunner implements HttpMock {
     boolean pollForStartedApplication(int port, int times) {
 
         for (int ii=0; ii<times; ii++) {
-
-            Socket socket = new Socket()
             try {
-                socket.connect(new InetSocketAddress(port), 500) // try for 500ms
+                given().get("http://localhost:${port}/")
                 return true
-            } catch (Exception ex) {
-                // failed to connect, try again
-            } finally {
-                socket.close()
+            } catch (ConnectException e) {
+                // ignore connection exception
+                Thread.sleep(500)
             }
         }
         return false
