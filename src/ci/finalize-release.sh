@@ -28,23 +28,27 @@ MVN_CMD="mvn"
 cd target/checkout
 
 NEW_VERSION="$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)"
-TAG_NAME="okta-sdk-root-${NEW_VERSION}" # default release plugin tag format
-
-##Release
+TAG_NAME="okta-spring-boot-parent-${NEW_VERSION}" # default release plugin tag format
+#
+###Release
 #$MVN_CMD org.sonatype.plugins:nexus-staging-maven-plugin:release
+
+git clone -b gh-pages git@github.com:okta/okta-spring-boot.git target/gh-pages
 
 # publish once to the versioned dir
 $MVN_CMD javadoc:aggregate -Ppub-docs -Djavadoc.version.dir=''
 # and again to the unversioned dir
 $MVN_CMD javadoc:aggregate -Ppub-docs -Djavadoc.version.dir="${NEW_VERSION}/"
 
-$MVN_CMD scm-publish:publish-scm -Ppub-docs
+cd target/gh-pages
+git add .
+git commit -m "deploying javadocs for v${NEW_VERSION}"
+git push origin gh-pages
 
-
-cd ../..
+cd ../../../..
 
 git push origin $(git rev-parse --abbrev-ref HEAD)
 git push origin ${TAG_NAME}
 
 #notify for new release
-send_tag_notification "${TAG_NAME}"
+#send_tag_notification "${TAG_NAME}"
