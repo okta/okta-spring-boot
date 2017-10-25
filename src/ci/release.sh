@@ -22,7 +22,7 @@ source "${COMMON_SCRIPT}"
 
 OLD_VERSION="$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)"
 NEW_VERSION="${OLD_VERSION/-SNAPSHOT}"
-TAG_NAME="okta-sdk-root-${NEW_VERSION}" # default release plugin tag format
+TAG_NAME="okta-spring-security-parent-${NEW_VERSION}" # default release plugin tag format
 
 # TODO: we must use our local maven settings file as this script is NOT ready for triggered by travis
 # GPG agent configuration needed to sign artifacts
