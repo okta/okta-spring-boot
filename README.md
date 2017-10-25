@@ -1,8 +1,6 @@
 Okta Spring Boot Starter
 ========================
 
-NOTE: current version is pending release, untill then read the docs for the [previous version](https://github.com/okta/okta-spring-security/tree/okta-spring-security-parent-0.1.0)
-
 Okta's Spring Boot Starter will enable your Spring Boot application to work with Okta via OAuth 2.0.  Jump to our [quickstart](https://developer.okta.com/quickstart/#/angular/java/spring) to see how to configure various clients or follow along below to use curl.
 
 ## What you need
@@ -17,13 +15,13 @@ For Apache Maven:
 ```xml
 <dependency>
     <groupId>com.okta.spring</groupId>
-    <artifactId>okta-spring-security-starter</artifactId>
+    <artifactId>okta-spring-boot-starter</artifactId>
 </dependency>
 ```
 
 For Gradle:
 ```groovy
-compile 'com.okta.spring:okta-spring-security-starter'
+compile 'com.okta.spring:okta-spring-boot-starter'
 ```
 
 ## Supporting client side applications - OAuth Implicit flow
@@ -133,7 +131,18 @@ Want to build this project?
 Just clone it and run:
 
 ```bash
-$ git clone https://github.com/okta/okta-spring-security.git
-$ cd okta-spring-security
+$ git clone https://github.com/okta/okta-spring-boot.git
+$ cd okta-spring-boot
 $ mvn install
 ```
+
+## Change Log
+
+### 0.2.0
+
+* Add support for authorization code flow
+* Standardized Okta OAuth 2.0 properties as `okta.oauth2.*`
+* Added integration test suite
+
+
+
