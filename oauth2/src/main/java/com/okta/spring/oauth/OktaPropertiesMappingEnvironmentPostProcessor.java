@@ -29,6 +29,7 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.ResourceAccessException;
 
 import java.io.File;
@@ -96,6 +97,7 @@ public class OktaPropertiesMappingEnvironmentPostProcessor implements Environmen
         environment.getPropertySources().addLast(remappedOktaToStandardOAuthPropertySource(environment));
         environment.getPropertySources().addLast(loadYaml(new FileSystemResource(new File(System.getProperty("user.home"), "okta/okta.yml")), false));
         environment.getPropertySources().addLast(discoveryPropertiesSource(environment));
+        environment.getPropertySources().addLast(oauthToClientPropertiesSource(environment));
         environment.getPropertySources().addLast(loadYaml(new ClassPathResource("com/okta/spring/okta.yml"), true));
     }
 
@@ -130,6 +132,22 @@ public class OktaPropertiesMappingEnvironmentPostProcessor implements Environmen
     }
 
     /**
+     * Maps the baseUrl of {code}okta.oauth2.issuer{code} to {code}okta.client.orgUrl{code}.
+     * @param environment Environment used to read the {code}okta.oauth2.*{code} properties from.
+     * @return A PropertySource containing the newly mapped values.
+     */
+    private PropertySource oauthToClientPropertiesSource(Environment environment) {
+        Map<String, String> tmpValues = new HashMap<>();
+
+        String issuerUrl = environment.getProperty(OKTA_OAUTH_PREFIX +"issuer");
+        if (StringUtils.hasText(issuerUrl)) {
+            String baseUrl = issuerUrl.substring(0, issuerUrl.lastIndexOf("/oauth2/"));
+            tmpValues.put("okta.client.orgUrl", baseUrl);
+        }
+        return new MapBasedPropertySource("okta-oauth-to-client", Collections.unmodifiableMap(tmpValues));
+    }
+
+    /**
      * Maps OIDC discovery metadata properties to {code}security.oauth2.*{code}.
      * @param environment Environment used to read the {code}okta.oauth2.issuer{code} property from.
      * @return A PropertySource containing the newly mapped values.
@@ -144,8 +162,6 @@ public class OktaPropertiesMappingEnvironmentPostProcessor implements Environmen
                 OidcDiscoveryMetadata discoveryMetadata = new OidcDiscoveryClient(issuerUrl).discover();
                 Map<String, String> tmpValues = new HashMap<>();
 
-                String baseUrl = issuerUrl.substring(0, issuerUrl.lastIndexOf("/oauth2/"));
-                tmpValues.put("okta.client.orgUrl", baseUrl);
                 tmpValues.put(OAUTH_CLIENT_PREFIX + "accessTokenUri", discoveryMetadata.getTokenEndpoint());
                 tmpValues.put(OAUTH_CLIENT_PREFIX + "userAuthorizationUri", discoveryMetadata.getAuthorizationEndpoint());
                 tmpValues.put(OAUTH_RESOURCE_PREFIX + "userInfoUri", discoveryMetadata.getUserinfoEndpoint());
