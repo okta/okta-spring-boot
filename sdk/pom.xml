@@ -26,10 +26,6 @@
     <artifactId>okta-spring-sdk</artifactId>
     <name>Okta Spring Boot :: SDK</name>
 
-    <properties>
-        <okta.sdk.version>0.7.0</okta.sdk.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -46,7 +42,6 @@
         <dependency>
             <groupId>com.okta.sdk</groupId>
             <artifactId>okta-sdk-api</artifactId>
-            <version>${okta.sdk.version}</version>
         </dependency>
         <dependency>
             <groupId>com.okta.sdk</groupId>
@@ -73,8 +68,13 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

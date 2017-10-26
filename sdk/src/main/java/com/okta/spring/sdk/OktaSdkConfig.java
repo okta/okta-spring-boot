@@ -29,6 +29,7 @@ import com.okta.spring.sdk.cache.SpringCacheManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionMessage;
 import org.springframework.boot.autoconfigure.condition.ConditionOutcome;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.SpringBootCondition;
 import org.springframework.boot.bind.RelaxedPropertyResolver;
@@ -46,6 +47,7 @@ import org.springframework.util.StringUtils;
  */
 @Configuration
 @Conditional(OktaSdkConfig.OktaApiTokenCondition.class)
+@ConditionalOnClass(Client.class)
 public class OktaSdkConfig {
 
     private final OktaClientProperties oktaClientProperties;

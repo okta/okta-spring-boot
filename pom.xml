@@ -32,7 +32,7 @@
 
     <properties>
         <spring-boot.version>1.5.8.RELEASE</spring-boot.version>
-        <github.slug>okta/okta-spring-security</github.slug>
+        <github.slug>okta/okta-spring-boot</github.slug>
     </properties>
 
     <modules>
@@ -108,7 +108,11 @@
                 <artifactId>okta-spring-boot-integration-tests-oauth2</artifactId>
                 <version>0.3.0-SNAPSHOT</version>
             </dependency>
-
+            <dependency>
+                <groupId>com.okta.sdk</groupId>
+                <artifactId>okta-sdk-api</artifactId>
+                <version>${okta.sdk.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>

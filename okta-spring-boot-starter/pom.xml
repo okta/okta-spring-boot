@@ -39,6 +39,12 @@
             <groupId>com.okta.spring</groupId>
             <artifactId>okta-spring-sdk</artifactId>
         </dependency>
+        <!-- force the SDK to be optional from the starter -->
+        <dependency>
+            <groupId>com.okta.sdk</groupId>
+            <artifactId>okta-sdk-api</artifactId>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
     <build>
