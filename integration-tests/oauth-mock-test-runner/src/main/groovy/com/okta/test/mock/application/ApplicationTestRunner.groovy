@@ -31,7 +31,7 @@ import java.util.stream.Collectors
 import static io.restassured.RestAssured.given
 import static org.hamcrest.MatcherAssert.assertThat
 
-abstract class ApplicationTestRunner implements HttpMock {
+abstract class ApplicationTestRunner extends HttpMock {
 
     private ApplicationUnderTest app = getApplicationUnderTest(getScenarioName())
 
@@ -43,6 +43,7 @@ abstract class ApplicationTestRunner implements HttpMock {
         if (scenario == null || Strings.isNullOrEmpty(scenario.value())) {
             Assert.fail("@Scenario was not found on class '${getClass()}', you must annotate this class or override the 'getScenarioName()' method.")
         }
+        setScenario(scenario.value())
         return scenario.value()
     }
 

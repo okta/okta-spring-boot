@@ -29,7 +29,6 @@ class CliApplicationUnderTest implements ApplicationUnderTest {
 
     @Override
     void start() {
-
         String[] command = [testScenario.command] + testScenario.args
         File logFile = new File("target", "${testScenario.command}-${new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))}" )
         logger.info("Starting process: ${command}, logging to file: ${logFile}")

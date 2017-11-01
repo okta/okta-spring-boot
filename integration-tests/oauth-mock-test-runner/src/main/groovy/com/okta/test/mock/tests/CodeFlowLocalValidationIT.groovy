@@ -15,202 +15,20 @@
  */
 package com.okta.test.mock.tests
 
-import com.github.tomakehurst.wiremock.WireMockServer
 import com.okta.test.mock.Scenario
 import com.okta.test.mock.application.ApplicationTestRunner
-import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
 import io.restassured.http.ContentType
 import io.restassured.response.ExtractableResponse
-import org.apache.commons.codec.binary.Base64
 import org.hamcrest.Matchers
 import org.testng.annotations.Test
-
-import java.security.KeyPair
-import java.security.KeyPairGenerator
-import java.time.Instant
-import java.time.temporal.ChronoUnit
 import java.util.regex.Pattern
 
-import static TestUtils.toIntegerBytes
-import static com.github.tomakehurst.wiremock.client.WireMock.*
 import static io.restassured.RestAssured.given
 import static org.hamcrest.Matchers.is
 import static org.hamcrest.text.MatchesPattern.matchesPattern
 
 @Scenario("code-flow-local-validation")
 class CodeFlowLocalValidationIT extends ApplicationTestRunner {
-
-    String pubKeyE
-    String pubKeyN
-    String accessTokenJwt
-    String wrongKeyIdAccessTokenJwt
-    String wrongScopeAccessTokenJwt
-    String wrongAudienceAccessTokenJwt
-    String idTokenjwt
-
-    CodeFlowLocalValidationIT() {
-
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA")
-        keyPairGenerator.initialize(4096)
-        KeyPair keyPair = keyPairGenerator.generateKeyPair()
-
-        pubKeyE = Base64.encodeBase64URLSafeString(TestUtils.toIntegerBytes(keyPair.publicKey.getPublicExponent()))
-        pubKeyN = Base64.encodeBase64URLSafeString(TestUtils.toIntegerBytes(keyPair.publicKey.getModulus()))
-
-        Instant now = Instant.now()
-        accessTokenJwt =  Jwts.builder()
-                .setSubject("joe.coder@example.com")
-                .setAudience("api://default")
-                .claim("scp", ["profile", "openid", "email"])
-                .setIssuedAt(Date.from(now))
-                .setNotBefore(Date.from(now))
-                .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
-                .setHeader(Jwts.jwsHeader()
-                    .setKeyId('TEST_PUB_KEY_ID'))
-                .signWith(SignatureAlgorithm.RS256, keyPair.privateKey)
-                .compact()
-
-        wrongKeyIdAccessTokenJwt =  Jwts.builder()
-                .setSubject("joe.coder@example.com")
-                .setAudience("api://default")
-                .claim("scp", ["profile", "openid", "email"])
-                .setIssuedAt(Date.from(now))
-                .setNotBefore(Date.from(now))
-                .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
-                .setHeader(Jwts.jwsHeader()
-                    .setKeyId('WRONG_TEST_PUB_KEY_ID'))
-                .signWith(SignatureAlgorithm.RS256, keyPair.privateKey)
-                .compact()
-
-        wrongScopeAccessTokenJwt =  Jwts.builder()
-                .setSubject("joe.coder@example.com")
-                .setAudience("api://default")
-                .claim("scp", ["profile", "openid"])
-                .setIssuedAt(Date.from(now))
-                .setNotBefore(Date.from(now))
-                .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
-                .setHeader(Jwts.jwsHeader()
-                    .setKeyId('TEST_PUB_KEY_ID'))
-                .signWith(SignatureAlgorithm.RS256, keyPair.privateKey)
-                .compact()
-
-        wrongAudienceAccessTokenJwt =  Jwts.builder()
-                .setSubject("joe.coder@example.com")
-                .setAudience("api://wrong-default")
-                .claim("scp", ["profile", "openid"])
-                .setIssuedAt(Date.from(now))
-                .setNotBefore(Date.from(now))
-                .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
-                .setHeader(Jwts.jwsHeader()
-                .setKeyId('TEST_PUB_KEY_ID'))
-                    .signWith(SignatureAlgorithm.RS256, keyPair.privateKey)
-                .compact()
-
-        idTokenjwt =  Jwts.builder()
-                .setSubject("a_subject_id")
-                .claim("name", "Joe Coder")
-                .claim("email", "joe.coder@example.com")
-                .claim("preferred_username", "jod.coder@example.com")
-                .setAudience("api://default")
-                .setIssuer("http://localhost:9988/oauth2/default")
-                .setIssuedAt(Date.from(now))
-                .setNotBefore(Date.from(now))
-                .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
-                .setHeader(Jwts.jwsHeader()
-                    .setKeyId('TEST_PUB_KEY_ID'))
-                .signWith(SignatureAlgorithm.RS256, keyPair.privateKey)
-                .compact()
-
-        startMockServer()
-    }
-
-    @Override
-    Map getBindingMap() {
-        return [
-                accessTokenJwt: accessTokenJwt,
-                baseUrl: getBaseUrl(),
-                pubKeyE: pubKeyE,
-                pubKeyN: pubKeyN,
-                idTokenjwt: idTokenjwt
-        ]
-    }
-
-    @Override
-    void configureHttpMock(WireMockServer wireMockServer) {
-        wireMockServer.stubFor(
-                get("/oauth2/default/.well-known/openid-configuration")
-                        .willReturn(aResponse()
-                            .withHeader("Content-Type", "application/json")
-                            .withBodyFile("discovery.json")
-                            .withTransformers("gstring-template")))
-
-        wireMockServer.stubFor(
-                get(urlPathEqualTo("/oauth2/default/v1/authorize"))
-                        .withQueryParam("client_id", matching("OOICU812"))
-                        .withQueryParam("redirect_uri", matching(Pattern.quote("http://localhost:")+ "\\d+/login"))
-                        .withQueryParam("response_type", matching("code"))
-                        .withQueryParam("scope", matching("profile email openid"))
-                        .withQueryParam("state", matching(".{6}"))
-                        .willReturn(aResponse()
-                            .withBody("<html>fake_login_page<html/>")))
-
-        wireMockServer.stubFor(
-                post(urlPathEqualTo("/oauth2/default/v1/token"))
-                        .withRequestBody(containing("grant_type=authorization_code"))
-                        .withRequestBody(containing("code=TEST_CODE&"))
-                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Flogin") +".*"))
-                        .withRequestBody(containing("client_id=OOICU812"))
-                        .withRequestBody(containing("client_secret=VERY_SECRET"))
-                        .willReturn(aResponse()
-                            .withHeader("Content-Type", "application/json;charset=UTF-8")
-                            .withBodyFile("token.json")
-                            .withTransformers("gstring-template")))
-
-        wireMockServer.stubFor(
-                post(urlPathEqualTo("/oauth2/default/v1/token"))
-                        .withRequestBody(containing("grant_type=authorization_code"))
-                        .withRequestBody(containing("code=TEST_CODE_wrongKeyIdAccessTokenJwt&"))
-                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Flogin") +".*"))
-                        .withRequestBody(containing("client_id=OOICU812"))
-                        .withRequestBody(containing("client_secret=VERY_SECRET"))
-                        .willReturn(aResponse()
-                            .withHeader("Content-Type", "application/json;charset=UTF-8")
-                            .withBodyFile("token.json")
-                            .withTransformer("gstring-template", "accessTokenJwt", wrongKeyIdAccessTokenJwt)))
-
-        wireMockServer.stubFor(
-                post(urlPathEqualTo("/oauth2/default/v1/token"))
-                        .withRequestBody(containing("grant_type=authorization_code"))
-                        .withRequestBody(containing("code=TEST_CODE_wrongScopeAccessTokenJwt&"))
-                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Flogin") +".*"))
-                        .withRequestBody(containing("client_id=OOICU812"))
-                        .withRequestBody(containing("client_secret=VERY_SECRET"))
-                        .willReturn(aResponse()
-                            .withHeader("Content-Type", "application/json;charset=UTF-8")
-                            .withBodyFile("token.json")
-                            .withTransformer("gstring-template", "accessTokenJwt", wrongScopeAccessTokenJwt)))
-
-        wireMockServer.stubFor(
-                post(urlPathEqualTo("/oauth2/default/v1/token"))
-                        .withRequestBody(containing("grant_type=authorization_code"))
-                        .withRequestBody(containing("code=TEST_CODE_wrongAudienceAccessTokenJwt&"))
-                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Flogin") +".*"))
-                        .withRequestBody(containing("client_id=OOICU812"))
-                        .withRequestBody(containing("client_secret=VERY_SECRET"))
-                        .willReturn(aResponse()
-                            .withHeader("Content-Type", "application/json;charset=UTF-8")
-                            .withBodyFile("token.json")
-                            .withTransformer("gstring-template", "accessTokenJwt", wrongAudienceAccessTokenJwt)))
-
-        wireMockServer.stubFor(
-                get(urlPathEqualTo("/oauth2/default/v1/keys"))
-                    .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json;charset=UTF-8")
-                        .withBodyFile("keys.json")
-                        .withTransformers("gstring-template")))
-    }
-
     @Test
     void redirectToLogin() {
         given()
@@ -226,7 +44,6 @@ class CodeFlowLocalValidationIT extends ApplicationTestRunner {
 
     @Test
     ExtractableResponse redirectToRemoteLogin() {
-
         String expectedRedirect = Pattern.quote(
                 "http://localhost:${doGetMockPort()}/oauth2/default/v1/authorize" +
                 "?client_id=OOICU812" +
@@ -287,6 +104,64 @@ class CodeFlowLocalValidationIT extends ApplicationTestRunner {
             .get("http://localhost:${applicationPort}/")
         .then()
             .body(Matchers.equalTo("The message of the day is boring: joe.coder@example.com"))
+    }
+
+    @Test
+    void wrongStateTest() {
+        ExtractableResponse response = redirectToRemoteLogin()
+        String redirectUrl = response.header("Location")
+        String state = redirectUrl.substring(redirectUrl.lastIndexOf('=')+1) + "wrong"
+        String code = "TEST_CODE"
+        String requestUrl = "http://localhost:${applicationPort}/login?code=${code}&state=${state}"
+
+        ExtractableResponse response2 = given()
+            .accept(ContentType.JSON)
+            .cookies(response.cookies())
+            .redirects()
+                .follow(false)
+        .when()
+            .get(requestUrl)
+        .then()
+            .statusCode(401)
+        .extract()
+    }
+
+    @Test
+    void noAuthCodeTest() {
+        ExtractableResponse response = redirectToRemoteLogin()
+        String redirectUrl = response.header("Location")
+        String state = redirectUrl.substring(redirectUrl.lastIndexOf('=')+1)
+        String requestUrl = "http://localhost:${applicationPort}/login?state=${state}"
+
+        ExtractableResponse response2 = given()
+            .accept(ContentType.JSON)
+            .cookies(response.cookies())
+            .redirects()
+                .follow(false)
+        .when()
+            .get(requestUrl)
+        .then()
+            .statusCode(500)
+        .extract()
+    }
+
+    @Test
+    void invalidSignatureAccessTokenJwtTest() {
+        ExtractableResponse response = redirectToRemoteLogin()
+        String redirectUrl = response.header("Location")
+        String state = redirectUrl.substring(redirectUrl.lastIndexOf('=')+1)
+        String code = "TEST_CODE_invalidSignatureAccessTokenJwt"
+        String requestUrl = "http://localhost:${applicationPort}/login?code=${code}&state=${state}"
+
+        given()
+            .accept(ContentType.JSON)
+            .cookies(response.cookies())
+            .redirects()
+                .follow(false)
+        .when()
+            .get(requestUrl)
+        .then()
+            .statusCode(500)
     }
 
     @Test

@@ -18,7 +18,7 @@ package com.okta.spring.tests.oauth2.implicit
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.okta.test.mock.Scenario
 import com.okta.test.mock.application.ApplicationTestRunner
-import com.okta.test.mock.tests.TestUtils
+import com.okta.test.mock.wiremock.TestUtils
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import org.apache.commons.codec.binary.Base64

@@ -15,145 +15,17 @@
  */
 package com.okta.test.mock.tests
 
-import com.github.tomakehurst.wiremock.WireMockServer
 import com.okta.test.mock.Scenario
 import com.okta.test.mock.application.ApplicationTestRunner
-import com.okta.test.mock.wiremock.HttpMock
-import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
 import io.restassured.http.ContentType
-import org.apache.commons.codec.binary.Base64
 import org.hamcrest.Matchers
 import org.testng.annotations.Test
 
-import java.security.KeyPair
-import java.security.KeyPairGenerator
-import java.time.Instant
-import java.time.temporal.ChronoUnit
-
-import static com.github.tomakehurst.wiremock.client.WireMock.*
 import static io.restassured.RestAssured.given
 import static org.hamcrest.Matchers.startsWith
 
 @Scenario("implicit-flow-local-validation")
 class ImplicitLocalValidationIT extends ApplicationTestRunner {
-
-    String pubKeyE
-    String pubKeyN
-    String accessTokenJwt
-    String wrongScopeAccessTokenJwt
-    String invalidAccessTokenJwt
-    String wrongAudienceAccessToken
-    String idTokenjwt
-
-    ImplicitLocalValidationIT() {
-
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA")
-        keyPairGenerator.initialize(4096)
-        KeyPair invalidKeyPair = keyPairGenerator.generateKeyPair()
-
-        KeyPair keyPair = keyPairGenerator.generateKeyPair()
-
-        pubKeyE = Base64.encodeBase64URLSafeString(TestUtils.toIntegerBytes(keyPair.publicKey.getPublicExponent()))
-        pubKeyN = Base64.encodeBase64URLSafeString(TestUtils.toIntegerBytes(keyPair.publicKey.getModulus()))
-
-        Instant now = Instant.now()
-        accessTokenJwt =  Jwts.builder()
-                .setSubject("joe.coder@example.com")
-                .setAudience("api://default")
-                .claim("scp", ["profile", "openid", "email"])
-                .claim("groups", ["Everyone", "Test-Group"])
-                .setIssuedAt(Date.from(now))
-                .setNotBefore(Date.from(now))
-                .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
-                .setHeader(Jwts.jwsHeader()
-                    .setKeyId('TEST_PUB_KEY_ID'))
-                .signWith(SignatureAlgorithm.RS256, keyPair.privateKey)
-                .compact()
-
-        wrongScopeAccessTokenJwt =  Jwts.builder()
-                .setSubject("joe.coder@example.com")
-                .setAudience("api://default")
-                .claim("scp", ["profile", "openid"])
-                .claim("groups", ["Everyone", "Test-Group"])
-                .setIssuedAt(Date.from(now))
-                .setNotBefore(Date.from(now))
-                .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
-                .setHeader(Jwts.jwsHeader()
-                .setKeyId('TEST_PUB_KEY_ID'))
-                .signWith(SignatureAlgorithm.RS256, keyPair.privateKey)
-                .compact()
-
-        invalidAccessTokenJwt =  Jwts.builder()
-                .setSubject("joe.coder@example.com")
-                .setAudience("api://default")
-                .claim("scp", ["profile", "openid", "email"])
-                .claim("groups", ["Everyone", "Test-Group"])
-                .setIssuedAt(Date.from(now))
-                .setNotBefore(Date.from(now))
-                .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
-                .setHeader(Jwts.jwsHeader()
-                .setKeyId('TEST_PUB_KEY_ID'))
-                .signWith(SignatureAlgorithm.RS256, invalidKeyPair.private)
-                .compact()
-
-        wrongAudienceAccessToken =  Jwts.builder()
-                .setSubject("joe.coder@example.com")
-                .setAudience("api://something-else")
-                .claim("scp", ["profile", "openid", "email"])
-                .claim("groups", ["Everyone", "Test-Group"])
-                .setIssuedAt(Date.from(now))
-                .setNotBefore(Date.from(now))
-                .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
-                .setHeader(Jwts.jwsHeader()
-                .setKeyId('TEST_PUB_KEY_ID'))
-                .signWith(SignatureAlgorithm.RS256, invalidKeyPair.private)
-                .compact()
-
-        idTokenjwt =  Jwts.builder()
-                .setSubject("a_subject_id")
-                .claim("name", "Joe Coder")
-                .claim("email", "joe.coder@example.com")
-                .claim("preferred_username", "jod.coder@example.com")
-                .setAudience("api://default")
-                .setIssuer("http://localhost:9988/oauth2/default")
-                .setIssuedAt(Date.from(now))
-                .setNotBefore(Date.from(now))
-                .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
-                .setHeader(Jwts.jwsHeader()
-                    .setKeyId('TEST_PUB_KEY_ID'))
-                .signWith(SignatureAlgorithm.RS256, keyPair.privateKey)
-                .compact()
-    }
-
-    @Override
-    Map getBindingMap() {
-        return [
-                accessTokenJwt: accessTokenJwt,
-                baseUrl: getBaseUrl(),
-                pubKeyE: pubKeyE,
-                pubKeyN: pubKeyN,
-                idTokenjwt: idTokenjwt
-        ]
-    }
-
-    @Override
-    void configureHttpMock(WireMockServer wireMockServer) {
-        wireMockServer.stubFor(
-                get("/oauth2/default/.well-known/openid-configuration")
-                        .willReturn(aResponse()
-                            .withHeader("Content-Type", "application/json")
-                            .withBodyFile("discovery.json")
-                            .withTransformers("gstring-template")))
-
-        wireMockServer.stubFor(
-                get(urlPathEqualTo("/oauth2/default/v1/keys"))
-                    .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json;charset=UTF-8")
-                        .withBodyFile("keys.json")
-                        .withTransformers("gstring-template")))
-    }
-
     @Test
     void noToken401() {
         given()
@@ -170,7 +42,7 @@ class ImplicitLocalValidationIT extends ApplicationTestRunner {
     @Test
     void accessKeyNonTrustedKey() {
         given()
-            .header("Authorization", "Bearer ${invalidAccessTokenJwt}")
+            .header("Authorization", "Bearer ${invalidSignatureAccessTokenJwt}")
             .redirects()
                 .follow(false)
         .when()
@@ -196,13 +68,13 @@ class ImplicitLocalValidationIT extends ApplicationTestRunner {
     @Test
     void wrongAudienceAccessTokenTest() {
         given()
-            .header("Authorization", "Bearer ${wrongAudienceAccessToken}")
+            .header("Authorization", "Bearer ${wrongAudienceAccessTokenJwt}")
             .redirects()
                 .follow(false)
         .when()
             .get("http://localhost:${applicationPort}/")
         .then()
-            .statusCode(401)
+            .statusCode(403)
             .header("WWW-Authenticate", startsWith("Bearer realm="))
     }
 

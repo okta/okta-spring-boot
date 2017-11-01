@@ -15,45 +15,16 @@
  */
 package com.okta.test.mock.tests
 
-import com.github.tomakehurst.wiremock.WireMockServer
 import com.okta.test.mock.Scenario
 import com.okta.test.mock.application.ApplicationTestRunner
 import io.restassured.http.ContentType
-import org.hamcrest.Matchers
 import org.testng.annotations.Test
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*
 import static io.restassured.RestAssured.given
 import static org.hamcrest.Matchers.startsWith
 
 @Scenario("implicit-flow-remote-validation")
 class ImplicitRemoteValidationIT extends ApplicationTestRunner {
-
-
-    @Override
-    void configureHttpMock(WireMockServer wireMockServer) {
-        wireMockServer.stubFor(
-                get("/oauth2/default/.well-known/openid-configuration")
-                        .willReturn(aResponse()
-                            .withHeader("Content-Type", "application/json")
-                            .withBodyFile("discovery.json")
-                            .withTransformers("gstring-template")))
-
-        wireMockServer.stubFor(
-                get(urlPathEqualTo("/oauth2/default/v1/keys"))
-                    .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json;charset=UTF-8")
-                        .withBodyFile("keys.json")
-                        .withTransformers("gstring-template")))
-
-        wireMockServer.stubFor(
-                get(urlPathEqualTo("/oauth2/default/v1/userinfo"))
-                        .withHeader("Authorization", containing("Bearer some.random.jwt"))
-                        .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json;charset=UTF-8")
-                        .withBodyFile("userinfo-remote-access-token.json")))
-    }
-
     @Test
     void noToken401() {
         given()
@@ -69,7 +40,6 @@ class ImplicitRemoteValidationIT extends ApplicationTestRunner {
 
     @Test
     void scopeAccessTest() {
-
         given()
             .header("Authorization", "Bearer some.random.jwt")
             .redirects()
