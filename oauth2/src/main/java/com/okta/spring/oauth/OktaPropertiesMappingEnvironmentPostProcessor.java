@@ -137,8 +137,7 @@ public class OktaPropertiesMappingEnvironmentPostProcessor implements Environmen
                 OidcDiscoveryMetadata discoveryMetadata = new OidcDiscoveryClient(issuerUrl).discover();
                 Map<String, String> tmpValues = new HashMap<>();
 
-                String baseUrl = issuerUrl.substring(0, issuerUrl.lastIndexOf("/oauth2/"));
-                tmpValues.put("okta.client.orgUrl", baseUrl);
+                tmpValues.put("okta.client.orgUrl", issuerUrl);
                 tmpValues.put(OAUTH_CLIENT_PREFIX + "accessTokenUri", discoveryMetadata.getTokenEndpoint());
                 tmpValues.put(OAUTH_CLIENT_PREFIX + "userAuthorizationUri", discoveryMetadata.getAuthorizationEndpoint());
                 tmpValues.put(OAUTH_RESOURCE_PREFIX + "userInfoUri", discoveryMetadata.getUserinfoEndpoint());
