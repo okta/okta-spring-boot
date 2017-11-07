@@ -55,6 +55,7 @@ abstract class HttpMock {
     String wrongAudienceAccessTokenJwt
     String invalidSignatureAccessTokenJwt
     String idTokenjwt
+    String authHeader
     String scenario
     Logger logger = Logger.getLogger("")
 
@@ -183,12 +184,12 @@ abstract class HttpMock {
                 .compact()
 
         idTokenjwt =  Jwts.builder()
-                .setSubject("a_subject_id")
+                .setSubject("00uid4BxXw6I6TV4m0g3")
                 .claim("name", "Joe Coder")
                 .claim("email", "joe.coder@example.com")
                 .claim("preferred_username", "jod.coder@example.com")
-                .setAudience("api://default")
-                .setIssuer("http://localhost:9988/oauth2/default")
+                .setAudience("OOICU812")
+                .setIssuer("http://localhost:${getMockPort()}/oauth2/default")
                 .setIssuedAt(Date.from(now))
                 .setNotBefore(Date.from(now))
                 .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
@@ -196,33 +197,35 @@ abstract class HttpMock {
                     .setKeyId('TEST_PUB_KEY_ID'))
                 .signWith(SignatureAlgorithm.RS256, keyPair.privateKey)
                 .compact()
+
+        // client_secret_basic auth scheme is used by default (Basic client_id:client_secret) by the clients
+        authHeader = "Basic " + "OOICU812:VERY_SECRET".bytes.encodeBase64().toString()
     }
 
     void configureHttpMock(WireMockServer wireMockServer) {
         wireMockServer.stubFor(
                 get("/oauth2/default/.well-known/openid-configuration")
-                        .willReturn(aResponse()
-                            .withHeader("Content-Type", "application/json")
-                            .withBodyFile("discovery.json")
-                            .withTransformers("gstring-template")))
+                    .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBodyFile("discovery.json")
+                        .withTransformers("gstring-template")))
 
         wireMockServer.stubFor(
                 get(urlPathEqualTo("/oauth2/default/v1/authorize"))
                         .withQueryParam("client_id", matching("OOICU812"))
-                        .withQueryParam("redirect_uri", matching(Pattern.quote("http://localhost:")+ "\\d+/login"))
+                        .withQueryParam("redirect_uri", matching(Pattern.quote("http://localhost:")+ "\\d+/authorization-code/callback"))
                         .withQueryParam("response_type", matching("code"))
                         .withQueryParam("scope", matching("profile email openid"))
-                        .withQueryParam("state", matching(".{6}"))
+                        .withQueryParam("state", matching(".{6,}")) // express-js oidc client has more than 30 characters in state parameter
                         .willReturn(aResponse()
                             .withBody("<html>fake_login_page<html/>")))
 
         wireMockServer.stubFor(
                 post(urlPathEqualTo("/oauth2/default/v1/token"))
+                        .withHeader("Authorization", equalTo(authHeader))
                         .withRequestBody(containing("grant_type=authorization_code"))
                         .withRequestBody(containing("code=TEST_CODE_wrongKeyIdAccessTokenJwt&"))
-                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Flogin") +".*"))
-                        .withRequestBody(containing("client_id=OOICU812"))
-                        .withRequestBody(containing("client_secret=VERY_SECRET"))
+                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Fauthorization-code%2Fcallback") +".*"))
                         .willReturn(aResponse()
                             .withHeader("Content-Type", "application/json;charset=UTF-8")
                             .withBodyFile("token.json")
@@ -230,39 +233,36 @@ abstract class HttpMock {
 
         wireMockServer.stubFor(
                 post(urlPathEqualTo("/oauth2/default/v1/token"))
-                        .withRequestBody(containing("grant_type=authorization_code"))
-                        .withRequestBody(containing("code=TEST_CODE_wrongScopeAccessTokenJwt&"))
-                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Flogin") +".*"))
-                        .withRequestBody(containing("client_id=OOICU812"))
-                        .withRequestBody(containing("client_secret=VERY_SECRET"))
-                        .willReturn(aResponse()
-                            .withHeader("Content-Type", "application/json;charset=UTF-8")
-                            .withBodyFile("token.json")
-                            .withTransformer("gstring-template", "accessTokenJwt", wrongScopeAccessTokenJwt)))
+                    .withHeader("Authorization", equalTo(authHeader))
+                    .withRequestBody(containing("grant_type=authorization_code"))
+                    .withRequestBody(containing("code=TEST_CODE_wrongScopeAccessTokenJwt&"))
+                    .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Fauthorization-code%2Fcallback") +".*"))
+                    .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json;charset=UTF-8")
+                        .withBodyFile("token.json")
+                        .withTransformer("gstring-template", "accessTokenJwt", wrongScopeAccessTokenJwt)))
 
         wireMockServer.stubFor(
                 post(urlPathEqualTo("/oauth2/default/v1/token"))
-                        .withRequestBody(containing("grant_type=authorization_code"))
-                        .withRequestBody(containing("code=TEST_CODE_wrongAudienceAccessTokenJwt&"))
-                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Flogin") +".*"))
-                        .withRequestBody(containing("client_id=OOICU812"))
-                        .withRequestBody(containing("client_secret=VERY_SECRET"))
-                        .willReturn(aResponse()
-                            .withHeader("Content-Type", "application/json;charset=UTF-8")
-                            .withBodyFile("token.json")
-                            .withTransformer("gstring-template", "accessTokenJwt", wrongAudienceAccessTokenJwt)))
+                    .withHeader("Authorization", equalTo(authHeader))
+                    .withRequestBody(containing("grant_type=authorization_code"))
+                    .withRequestBody(containing("code=TEST_CODE_wrongAudienceAccessTokenJwt&"))
+                    .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Fauthorization-code%2Fcallback") +".*"))
+                    .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json;charset=UTF-8")
+                        .withBodyFile("token.json")
+                        .withTransformer("gstring-template", "accessTokenJwt", wrongAudienceAccessTokenJwt)))
 
         wireMockServer.stubFor(
                 post(urlPathEqualTo("/oauth2/default/v1/token"))
-                        .withRequestBody(containing("grant_type=authorization_code"))
-                        .withRequestBody(containing("code=TEST_CODE_invalidSignatureAccessTokenJwt&"))
-                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Flogin") +".*"))
-                        .withRequestBody(containing("client_id=OOICU812"))
-                        .withRequestBody(containing("client_secret=VERY_SECRET"))
-                        .willReturn(aResponse()
-                            .withHeader("Content-Type", "application/json;charset=UTF-8")
-                            .withBodyFile("token.json")
-                            .withTransformer("gstring-template", "accessTokenJwt", invalidSignatureAccessTokenJwt)))
+                    .withHeader("Authorization", equalTo(authHeader))
+                    .withRequestBody(containing("grant_type=authorization_code"))
+                    .withRequestBody(containing("code=TEST_CODE_invalidSignatureAccessTokenJwt&"))
+                    .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Fauthorization-code%2Fcallback") +".*"))
+                    .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json;charset=UTF-8")
+                        .withBodyFile("token.json")
+                        .withTransformer("gstring-template", "accessTokenJwt", invalidSignatureAccessTokenJwt)))
 
         wireMockServer.stubFor(
                 get(urlPathEqualTo("/oauth2/default/v1/keys"))
@@ -275,27 +275,34 @@ abstract class HttpMock {
             case "code-flow-local-validation":
                 wireMockServer.stubFor(
                     post(urlPathEqualTo("/oauth2/default/v1/token"))
+                        .withHeader("Authorization", equalTo(authHeader))
                         .withHeader("Content-Type", equalTo("application/x-www-form-urlencoded"))
                         .withRequestBody(containing("grant_type=authorization_code"))
                         .withRequestBody(containing("code=TEST_CODE&"))
-                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Flogin") +".*"))
-                        .withRequestBody(containing("client_id=OOICU812"))
-                        .withRequestBody(containing("client_secret=VERY_SECRET"))
+                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Fauthorization-code%2Fcallback") +".*"))
                         .willReturn(aResponse()
                             .withHeader("Content-Type", "application/json;charset=UTF-8")
                             .withBodyFile("token.json")
                             .withTransformers("gstring-template")))
+                
+                wireMockServer.stubFor(
+                    get(urlPathEqualTo("/oauth2/default/v1/userinfo"))
+                        .withHeader("Authorization", containing("Bearer ${accessTokenJwt}"))
+                        .willReturn(aResponse()
+                            .withHeader("Content-Type", "application/json;charset=UTF-8")
+                            .withBodyFile("userinfo.json")))
+
                 break
+
 
             case "code-flow-remote-validation":
                 wireMockServer.stubFor(
                     post(urlPathEqualTo("/oauth2/default/v1/token"))
+                        .withHeader("Authorization", equalTo(authHeader))
                         .withHeader("Content-Type", equalTo("application/x-www-form-urlencoded"))
                         .withRequestBody(containing("grant_type=authorization_code"))
                         .withRequestBody(containing("code=TEST_CODE"))
-                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Flogin") +".*"))
-                        .withRequestBody(containing("client_id=OOICU812"))
-                        .withRequestBody(containing("client_secret=VERY_SECRET"))
+                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Fauthorization-code%2Fcallback") +".*"))
                         .willReturn(aResponse()
                             .withHeader("Content-Type", "application/json;charset=UTF-8")
                             .withBodyFile("remote-validation-token.json")))

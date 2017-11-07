@@ -21,11 +21,11 @@ import io.restassured.http.ContentType
 import io.restassured.response.ExtractableResponse
 import org.hamcrest.Matchers
 import org.testng.annotations.Test
-
 import java.util.regex.Pattern
 
 import static io.restassured.RestAssured.given
 import static org.hamcrest.Matchers.is
+import static org.hamcrest.text.MatchesPattern.matchesPattern
 
 @Scenario("code-flow-remote-validation")
 class CodeFlowRemoteValidationIT extends ApplicationTestRunner {
@@ -39,16 +39,15 @@ class CodeFlowRemoteValidationIT extends ApplicationTestRunner {
             .get("http://localhost:${applicationPort}/")
         .then()
             .statusCode(302)
-            .header("Location", is("http://localhost:${applicationPort}/login".toString()))
+            .header("Location", is("http://localhost:${applicationPort}/authorization-code/callback".toString()))
     }
 
     @Test
     ExtractableResponse redirectToRemoteLogin() {
-
         String expectedRedirect = Pattern.quote(
                 "http://localhost:${doGetMockPort()}/oauth2/default/v1/authorize" +
                 "?client_id=OOICU812" +
-                "&redirect_uri=http://localhost:${applicationPort}/login" +
+                "&redirect_uri=http://localhost:${applicationPort}/authorization-code/callback" +
                 "&response_type=code" +
                 "&scope=profile%20email%20openid" +
                 "&state=")+".{6}"
@@ -58,10 +57,10 @@ class CodeFlowRemoteValidationIT extends ApplicationTestRunner {
                 .follow(false)
             .accept(ContentType.JSON)
         .when()
-            .get("http://localhost:${applicationPort}/login")
+            .get("http://localhost:${applicationPort}/authorization-code/callback")
         .then()
             .statusCode(302)
-            .header("Location", org.hamcrest.text.MatchesPattern.matchesPattern(expectedRedirect))
+            .header("Location", matchesPattern(expectedRedirect))
         .extract()
     }
 
@@ -82,7 +81,7 @@ class CodeFlowRemoteValidationIT extends ApplicationTestRunner {
         String redirectUrl = response.header("Location")
         String state = redirectUrl.substring(redirectUrl.lastIndexOf('=')+1)
         String code = "TEST_CODE"
-        String requestUrl = "http://localhost:${applicationPort}/login?code=${code}&state=${state}"
+        String requestUrl = "http://localhost:${applicationPort}/authorization-code/callback?code=${code}&state=${state}"
 
         ExtractableResponse response2 = given()
             .accept(ContentType.JSON)
