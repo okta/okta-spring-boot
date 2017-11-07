@@ -34,7 +34,7 @@ export ARTIFACT_VERSION="$(xmllint --xpath "//*[local-name()='project']/*[local-
 export IS_RELEASE="$([ ${ARTIFACT_VERSION/SNAPSHOT} == $ARTIFACT_VERSION ] && [ $TRAVIS_BRANCH == 'master' ] && echo 'true')"
 
 #Install newer Maven since Travis uses 3.2 by default
-wget http://mirror.cc.columbia.edu/pub/software/apache/maven/maven-3/${MVN_VERSION}/binaries/apache-maven-${MVN_VERSION}-bin.zip
+wget https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/${MVN_VERSION}/apache-maven-${MVN_VERSION}-bin.zip
 unzip -qq apache-maven-${MVN_VERSION}-bin.zip -d ..
 rm apache-maven-${MVN_VERSION}-bin.zip
 export M2_HOME=$PWD/../apache-maven-${MVN_VERSION}
