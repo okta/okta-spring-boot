@@ -58,6 +58,8 @@
 
 scenarios:
   code-flow-local-validation:
+    disabledTests:
+    - disabledTest
     command: mvn
     args:
     - spring-boot:run

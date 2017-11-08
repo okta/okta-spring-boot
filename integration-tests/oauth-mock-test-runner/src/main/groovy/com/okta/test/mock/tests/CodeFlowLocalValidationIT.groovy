@@ -232,4 +232,9 @@ class CodeFlowLocalValidationIT extends ApplicationTestRunner {
         .then()
             .statusCode(401)
     }
+
+    @Test
+    void disabledTest() {
+        logger.info("This test won't run")
+    }
 }

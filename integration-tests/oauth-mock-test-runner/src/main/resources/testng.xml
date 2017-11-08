@@ -15,8 +15,8 @@
   -->
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="Okta-OAuth-Mock" verbose="2" >
-    <test name="Regression1"   >
+<suite name="Okta-OAuth-Mock" verbose="2" parallel="tests" thread-count="1" configfailurepolicy="continue">
+    <test name="Regression1">
         <packages>
             <package name="com.okta.test.mock.tests" />
         </packages>

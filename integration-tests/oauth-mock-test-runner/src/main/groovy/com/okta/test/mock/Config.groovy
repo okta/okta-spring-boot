@@ -16,12 +16,12 @@
 package com.okta.test.mock
 
 class Config {
-
     String implementation = "com.okta.test.mock.application.CliApplicationUnderTest"
     Map<String, TestScenario> scenarios = new LinkedHashMap<>()
 }
 
 class TestScenario {
+    List<String> disabledTests = new ArrayList<>()
     String command
     List<String> args = new ArrayList<>()
     Map<String, Integer> ports = new HashMap<>()

@@ -23,9 +23,12 @@ import groovy.text.StreamingTemplateEngine
 import org.junit.Assert
 import org.testng.annotations.AfterClass
 import org.testng.annotations.BeforeClass
+import org.testng.annotations.BeforeMethod
+import org.testng.SkipException; 
 import org.testng.util.Strings
 import org.yaml.snakeyaml.Yaml
 
+import java.lang.reflect.Method;
 import java.util.stream.Collectors
 
 import static io.restassured.RestAssured.given
@@ -37,6 +40,7 @@ abstract class ApplicationTestRunner extends HttpMock {
 
     private int mockPort
     private int applicationPort
+    private TestScenario scenario
 
     String getScenarioName() {
         Scenario scenario = getClass().getAnnotation(Scenario)
@@ -53,6 +57,15 @@ abstract class ApplicationTestRunner extends HttpMock {
 
     int doGetMockPort() {
         return mockPort
+    }
+
+    @BeforeMethod
+    public void checkToRun(Method method) {
+        for (String disabledTest : scenario.disabledTests) {
+            if (method.getName().equals(disabledTest)) {
+                throw new SkipException("Skipping the disabled test - " + disabledTest);
+            }
+        }
     }
 
     @BeforeClass
@@ -93,7 +106,7 @@ abstract class ApplicationTestRunner extends HttpMock {
         Config config = new Yaml().loadAs(getClass().getResource( '/testRunner.yml' ).text, Config)
 
         Class impl = Class.forName(config.implementation)
-        TestScenario scenario = config.scenarios.get(scenarioName)
+        scenario = config.scenarios.get(scenarioName)
 
         // figure out which ports we need
         applicationPort = getPort("applicationPort", scenario)
