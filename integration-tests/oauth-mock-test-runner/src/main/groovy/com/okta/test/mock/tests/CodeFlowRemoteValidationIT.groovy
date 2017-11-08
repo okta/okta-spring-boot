@@ -26,8 +26,9 @@ import java.util.regex.Pattern
 import static io.restassured.RestAssured.given
 import static org.hamcrest.Matchers.is
 import static org.hamcrest.text.MatchesPattern.matchesPattern
+import static com.okta.test.mock.scenarios.Scenario.CODE_FLOW_REMOTE_VALIDATION
 
-@Scenario("code-flow-remote-validation")
+@Scenario(CODE_FLOW_REMOTE_VALIDATION)
 class CodeFlowRemoteValidationIT extends ApplicationTestRunner {
     @Test
     void redirectToLogin() {

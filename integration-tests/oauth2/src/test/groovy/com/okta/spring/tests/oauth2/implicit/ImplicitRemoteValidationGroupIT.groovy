@@ -15,49 +15,16 @@
  */
 package com.okta.spring.tests.oauth2.implicit
 
-import com.github.tomakehurst.wiremock.WireMockServer
 import com.okta.test.mock.Scenario
 import com.okta.test.mock.application.ApplicationTestRunner
 import org.hamcrest.Matchers
 import org.testng.annotations.Test
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse
-import static com.github.tomakehurst.wiremock.client.WireMock.containing
-import static com.github.tomakehurst.wiremock.client.WireMock.get
-import static com.github.tomakehurst.wiremock.client.WireMock.get
-import static com.github.tomakehurst.wiremock.client.WireMock.get
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import static io.restassured.RestAssured.given
+import static com.okta.test.mock.scenarios.Scenario.IMPLICIT_FLOW_REMOTE_VALIDATION
 
-@Scenario("implicit-flow-remote-validation")
+@Scenario(IMPLICIT_FLOW_REMOTE_VALIDATION)
 class ImplicitRemoteValidationGroupIT extends ApplicationTestRunner {
-
-    @Override
-    void configureHttpMock(WireMockServer wireMockServer) {
-        wireMockServer.stubFor(
-                get("/oauth2/default/.well-known/openid-configuration")
-                        .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
-                            .withBodyFile("discovery.json")
-                            .withTransformers("gstring-template")))
-
-        wireMockServer.stubFor(
-                get(urlPathEqualTo("/oauth2/default/v1/keys"))
-                        .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json;charset=UTF-8")
-                            .withBodyFile("keys.json")
-                            .withTransformers("gstring-template")))
-
-        wireMockServer.stubFor(
-                get(urlPathEqualTo("/oauth2/default/v1/userinfo"))
-                        .withHeader("Authorization", containing("Bearer some.random.jwt"))
-                        .willReturn(aResponse()
-                            .withHeader("Content-Type", "application/json;charset=UTF-8")
-                            .withBodyFile("userinfo-remote-access-token.json")))
-    }
 
     @Test
     void groupAccessTest() {

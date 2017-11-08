@@ -22,8 +22,9 @@ import org.testng.annotations.Test
 
 import static io.restassured.RestAssured.given
 import static org.hamcrest.Matchers.startsWith
+import static com.okta.test.mock.scenarios.Scenario.IMPLICIT_FLOW_REMOTE_VALIDATION
 
-@Scenario("implicit-flow-remote-validation")
+@Scenario(IMPLICIT_FLOW_REMOTE_VALIDATION)
 class ImplicitRemoteValidationIT extends ApplicationTestRunner {
     @Test
     void noToken401() {

@@ -22,68 +22,45 @@ import com.github.tomakehurst.wiremock.extension.Parameters
 import com.github.tomakehurst.wiremock.extension.ResponseTransformer
 import com.github.tomakehurst.wiremock.http.Request
 import com.github.tomakehurst.wiremock.http.Response
+import com.okta.test.mock.scenarios.Scenario
+import com.okta.test.mock.scenarios.ScenarioDefinition
 import groovy.text.StreamingTemplateEngine
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.testng.annotations.AfterClass
-import org.testng.annotations.BeforeClass
-import org.apache.commons.codec.binary.Base64
-import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
-
-import java.security.KeyPair
-import java.security.KeyPairGenerator
-import java.time.Instant
-import java.time.temporal.ChronoUnit
-import java.util.regex.Pattern
-import java.util.logging.Logger
-
-import static TestUtils.toIntegerBytes
-import static com.github.tomakehurst.wiremock.client.WireMock.*
-import static io.restassured.RestAssured.given
-import static org.hamcrest.Matchers.is
-import static org.hamcrest.text.MatchesPattern.matchesPattern
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 
 abstract class HttpMock {
 
+    final private Logger logger = LoggerFactory.getLogger(HttpMock)
+
     private WireMockServer wireMockServer
     private int port
-    String pubKeyE
-    String pubKeyN
-    String accessTokenJwt
-    String wrongKeyIdAccessTokenJwt
-    String wrongScopeAccessTokenJwt
-    String wrongAudienceAccessTokenJwt
-    String invalidSignatureAccessTokenJwt
-    String idTokenjwt
-    String authHeader
-    String scenario
-    Logger logger = Logger.getLogger("")
-
-    Map getBindingMap() {
-        return [
-                baseUrl: getBaseUrl(),
-                accessTokenJwt: accessTokenJwt,
-                baseUrl: getBaseUrl(),
-                pubKeyE: pubKeyE,
-                pubKeyN: pubKeyN,
-                idTokenjwt: idTokenjwt
-        ]
-    }
+    private String scenario
 
     void setScenario(String scenario) {
         this.scenario = scenario
     }
 
+    Map getBaseBindingMap() {
+        return Collections.unmodifiableMap([
+            baseUrl: getBaseUrl()
+        ])
+    }
+
     void startMockServer() {
         if (wireMockServer == null) {
-            setupJwts()
+
+            ScenarioDefinition definition =  Scenario.fromId(scenario).definition
+            Map bindingMap = baseBindingMap + definition.bindingMap
+
             wireMockServer = new WireMockServer(wireMockConfig()
                     .port(getMockPort())
                     .fileSource(new ClasspathFileSource("stubs"))
-                    .extensions(new GStringTransformer(getBindingMap()))
+                    .extensions(new GStringTransformer(bindingMap))
             )
-            
-            configureHttpMock(wireMockServer)
+
+            definition.configureHttpMock(wireMockServer)
             wireMockServer.start()
         }
     }
@@ -106,224 +83,6 @@ abstract class HttpMock {
 
     String getBaseUrl() {
         return "http://localhost:${getMockPort()}"
-    }
-
-    void setupJwts() {
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA")
-        keyPairGenerator.initialize(4096)
-        KeyPair invalidKeyPair = keyPairGenerator.generateKeyPair()
-        KeyPair keyPair = keyPairGenerator.generateKeyPair()
-
-        pubKeyE = Base64.encodeBase64URLSafeString(TestUtils.toIntegerBytes(keyPair.publicKey.getPublicExponent()))
-        pubKeyN = Base64.encodeBase64URLSafeString(TestUtils.toIntegerBytes(keyPair.publicKey.getModulus()))
-
-        Instant now = Instant.now()
-        accessTokenJwt =  Jwts.builder()
-                .setSubject("joe.coder@example.com")
-                .setAudience("api://default")
-                .claim("scp", ["profile", "openid", "email"])
-                .claim("groups", ["Everyone", "Test-Group"])
-                .setIssuedAt(Date.from(now))
-                .setNotBefore(Date.from(now))
-                .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
-                .setHeader(Jwts.jwsHeader()
-                    .setKeyId('TEST_PUB_KEY_ID'))
-                .signWith(SignatureAlgorithm.RS256, keyPair.privateKey)
-                .compact()
-
-        wrongKeyIdAccessTokenJwt =  Jwts.builder()
-                .setSubject("joe.coder@example.com")
-                .setAudience("api://default")
-                .claim("scp", ["profile", "openid", "email"])
-                .claim("groups", ["Everyone", "Test-Group"])
-                .setIssuedAt(Date.from(now))
-                .setNotBefore(Date.from(now))
-                .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
-                .setHeader(Jwts.jwsHeader()
-                    .setKeyId('WRONG_TEST_PUB_KEY_ID'))
-                .signWith(SignatureAlgorithm.RS256, keyPair.privateKey)
-                .compact()
-
-        wrongScopeAccessTokenJwt =  Jwts.builder()
-                .setSubject("joe.coder@example.com")
-                .setAudience("api://default")
-                .claim("scp", ["profile", "openid"])
-                .claim("groups", ["Everyone", "Test-Group"])
-                .setIssuedAt(Date.from(now))
-                .setNotBefore(Date.from(now))
-                .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
-                .setHeader(Jwts.jwsHeader()
-                    .setKeyId('TEST_PUB_KEY_ID'))
-                .signWith(SignatureAlgorithm.RS256, keyPair.privateKey)
-                .compact()
-
-        invalidSignatureAccessTokenJwt =  Jwts.builder()
-                .setSubject("joe.coder@example.com")
-                .setAudience("api://default")
-                .claim("scp", ["profile", "openid", "email"])
-                .claim("groups", ["Everyone", "Test-Group"])
-                .setIssuedAt(Date.from(now))
-                .setNotBefore(Date.from(now))
-                .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
-                .setHeader(Jwts.jwsHeader()
-                .setKeyId('TEST_PUB_KEY_ID'))
-                .signWith(SignatureAlgorithm.RS256, invalidKeyPair.private)
-                .compact()
-                
-        wrongAudienceAccessTokenJwt =  Jwts.builder()
-                .setSubject("joe.coder@example.com")
-                .setAudience("api://wrong-default")
-                .claim("scp", ["profile", "openid", "email"])
-                .claim("groups", ["Everyone", "Test-Group"])
-                .setIssuedAt(Date.from(now))
-                .setNotBefore(Date.from(now))
-                .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
-                .setHeader(Jwts.jwsHeader()
-                .setKeyId('TEST_PUB_KEY_ID'))
-                    .signWith(SignatureAlgorithm.RS256, keyPair.privateKey)
-                .compact()
-
-        idTokenjwt =  Jwts.builder()
-                .setSubject("00uid4BxXw6I6TV4m0g3")
-                .claim("name", "Joe Coder")
-                .claim("email", "joe.coder@example.com")
-                .claim("preferred_username", "jod.coder@example.com")
-                .setAudience("OOICU812")
-                .setIssuer("http://localhost:${getMockPort()}/oauth2/default")
-                .setIssuedAt(Date.from(now))
-                .setNotBefore(Date.from(now))
-                .setExpiration(Date.from(now.plus(1, ChronoUnit.HOURS)))
-                .setHeader(Jwts.jwsHeader()
-                    .setKeyId('TEST_PUB_KEY_ID'))
-                .signWith(SignatureAlgorithm.RS256, keyPair.privateKey)
-                .compact()
-
-        // client_secret_basic auth scheme is used by default (Basic client_id:client_secret) by the clients
-        authHeader = "Basic " + "OOICU812:VERY_SECRET".bytes.encodeBase64().toString()
-    }
-
-    void configureHttpMock(WireMockServer wireMockServer) {
-        wireMockServer.stubFor(
-                get("/oauth2/default/.well-known/openid-configuration")
-                    .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withBodyFile("discovery.json")
-                        .withTransformers("gstring-template")))
-
-        wireMockServer.stubFor(
-                get(urlPathEqualTo("/oauth2/default/v1/authorize"))
-                        .withQueryParam("client_id", matching("OOICU812"))
-                        .withQueryParam("redirect_uri", matching(Pattern.quote("http://localhost:")+ "\\d+/authorization-code/callback"))
-                        .withQueryParam("response_type", matching("code"))
-                        .withQueryParam("scope", matching("profile email openid"))
-                        .withQueryParam("state", matching(".{6,}")) // express-js oidc client has more than 30 characters in state parameter
-                        .willReturn(aResponse()
-                            .withBody("<html>fake_login_page<html/>")))
-
-        wireMockServer.stubFor(
-                post(urlPathEqualTo("/oauth2/default/v1/token"))
-                        .withHeader("Authorization", equalTo(authHeader))
-                        .withRequestBody(containing("grant_type=authorization_code"))
-                        .withRequestBody(containing("code=TEST_CODE_wrongKeyIdAccessTokenJwt&"))
-                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Fauthorization-code%2Fcallback") +".*"))
-                        .willReturn(aResponse()
-                            .withHeader("Content-Type", "application/json;charset=UTF-8")
-                            .withBodyFile("token.json")
-                            .withTransformer("gstring-template", "accessTokenJwt", wrongKeyIdAccessTokenJwt)))
-
-        wireMockServer.stubFor(
-                post(urlPathEqualTo("/oauth2/default/v1/token"))
-                    .withHeader("Authorization", equalTo(authHeader))
-                    .withRequestBody(containing("grant_type=authorization_code"))
-                    .withRequestBody(containing("code=TEST_CODE_wrongScopeAccessTokenJwt&"))
-                    .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Fauthorization-code%2Fcallback") +".*"))
-                    .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json;charset=UTF-8")
-                        .withBodyFile("token.json")
-                        .withTransformer("gstring-template", "accessTokenJwt", wrongScopeAccessTokenJwt)))
-
-        wireMockServer.stubFor(
-                post(urlPathEqualTo("/oauth2/default/v1/token"))
-                    .withHeader("Authorization", equalTo(authHeader))
-                    .withRequestBody(containing("grant_type=authorization_code"))
-                    .withRequestBody(containing("code=TEST_CODE_wrongAudienceAccessTokenJwt&"))
-                    .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Fauthorization-code%2Fcallback") +".*"))
-                    .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json;charset=UTF-8")
-                        .withBodyFile("token.json")
-                        .withTransformer("gstring-template", "accessTokenJwt", wrongAudienceAccessTokenJwt)))
-
-        wireMockServer.stubFor(
-                post(urlPathEqualTo("/oauth2/default/v1/token"))
-                    .withHeader("Authorization", equalTo(authHeader))
-                    .withRequestBody(containing("grant_type=authorization_code"))
-                    .withRequestBody(containing("code=TEST_CODE_invalidSignatureAccessTokenJwt&"))
-                    .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Fauthorization-code%2Fcallback") +".*"))
-                    .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json;charset=UTF-8")
-                        .withBodyFile("token.json")
-                        .withTransformer("gstring-template", "accessTokenJwt", invalidSignatureAccessTokenJwt)))
-
-        wireMockServer.stubFor(
-                get(urlPathEqualTo("/oauth2/default/v1/keys"))
-                    .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json;charset=UTF-8")
-                        .withBodyFile("keys.json")
-                        .withTransformers("gstring-template")))
-
-        switch (scenario) {
-            case "code-flow-local-validation":
-                wireMockServer.stubFor(
-                    post(urlPathEqualTo("/oauth2/default/v1/token"))
-                        .withHeader("Authorization", equalTo(authHeader))
-                        .withHeader("Content-Type", equalTo("application/x-www-form-urlencoded"))
-                        .withRequestBody(containing("grant_type=authorization_code"))
-                        .withRequestBody(containing("code=TEST_CODE&"))
-                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Fauthorization-code%2Fcallback") +".*"))
-                        .willReturn(aResponse()
-                            .withHeader("Content-Type", "application/json;charset=UTF-8")
-                            .withBodyFile("token.json")
-                            .withTransformers("gstring-template")))
-                
-                wireMockServer.stubFor(
-                    get(urlPathEqualTo("/oauth2/default/v1/userinfo"))
-                        .withHeader("Authorization", containing("Bearer ${accessTokenJwt}"))
-                        .willReturn(aResponse()
-                            .withHeader("Content-Type", "application/json;charset=UTF-8")
-                            .withBodyFile("userinfo.json")))
-
-                break
-
-
-            case "code-flow-remote-validation":
-                wireMockServer.stubFor(
-                    post(urlPathEqualTo("/oauth2/default/v1/token"))
-                        .withHeader("Authorization", equalTo(authHeader))
-                        .withHeader("Content-Type", equalTo("application/x-www-form-urlencoded"))
-                        .withRequestBody(containing("grant_type=authorization_code"))
-                        .withRequestBody(containing("code=TEST_CODE"))
-                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Fauthorization-code%2Fcallback") +".*"))
-                        .willReturn(aResponse()
-                            .withHeader("Content-Type", "application/json;charset=UTF-8")
-                            .withBodyFile("remote-validation-token.json")))
-
-                wireMockServer.stubFor(
-                    get(urlPathEqualTo("/oauth2/default/v1/userinfo"))
-                        .withHeader("Authorization", containing("Bearer accessTokenJwt"))
-                        .willReturn(aResponse()
-                            .withHeader("Content-Type", "application/json;charset=UTF-8")
-                            .withBodyFile("userinfo.json")))
-                break 
-
-            case "implicit-flow-remote-validation":
-                wireMockServer.stubFor(
-                    get(urlPathEqualTo("/oauth2/default/v1/userinfo"))
-                        .withHeader("Authorization", containing("Bearer some.random.jwt"))
-                        .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json;charset=UTF-8")
-                        .withBodyFile("userinfo-remote-access-token.json")))
-                break          
-        }      
     }
 }
 

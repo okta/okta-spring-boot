@@ -23,8 +23,9 @@ import org.testng.annotations.Test
 
 import static io.restassured.RestAssured.given
 import static org.hamcrest.Matchers.startsWith
+import static com.okta.test.mock.scenarios.Scenario.IMPLICIT_FLOW_LOCAL_VALIDATION
 
-@Scenario("implicit-flow-local-validation")
+@Scenario(IMPLICIT_FLOW_LOCAL_VALIDATION)
 class ImplicitLocalValidationIT extends ApplicationTestRunner {
     @Test
     void noToken401() {
@@ -42,7 +43,7 @@ class ImplicitLocalValidationIT extends ApplicationTestRunner {
     @Test
     void accessKeyNonTrustedKey() {
         given()
-            .header("Authorization", "Bearer ${invalidSignatureAccessTokenJwt}")
+            .header("Authorization", "Bearer ${IMPLICIT_FLOW_LOCAL_VALIDATION.definition.invalidAccessTokenJwt}")
             .redirects()
                 .follow(false)
         .when()
@@ -68,20 +69,20 @@ class ImplicitLocalValidationIT extends ApplicationTestRunner {
     @Test
     void wrongAudienceAccessTokenTest() {
         given()
-            .header("Authorization", "Bearer ${wrongAudienceAccessTokenJwt}")
+            .header("Authorization", "Bearer ${IMPLICIT_FLOW_LOCAL_VALIDATION.definition.wrongAudienceAccessToken}")
             .redirects()
                 .follow(false)
         .when()
             .get("http://localhost:${applicationPort}/")
         .then()
-            .statusCode(403)
+            .statusCode(401)
             .header("WWW-Authenticate", startsWith("Bearer realm="))
     }
 
     @Test
     void scopeAccessTest() {
         given()
-            .header("Authorization", "Bearer ${accessTokenJwt}")
+            .header("Authorization", "Bearer ${IMPLICIT_FLOW_LOCAL_VALIDATION.definition.accessTokenJwt}")
             .redirects()
                 .follow(false)
         .when()
@@ -93,7 +94,7 @@ class ImplicitLocalValidationIT extends ApplicationTestRunner {
     @Test
     void wrongScopeAccessToken() {
         given()
-            .header("Authorization", "Bearer ${wrongScopeAccessTokenJwt}")
+            .header("Authorization", "Bearer ${IMPLICIT_FLOW_LOCAL_VALIDATION.definition.wrongScopeAccessTokenJwt}")
             .redirects()
                 .follow(false)
         .when()

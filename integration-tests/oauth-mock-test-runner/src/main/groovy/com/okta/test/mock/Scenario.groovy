@@ -26,5 +26,5 @@ import java.lang.annotation.Target
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @interface Scenario {
-    String value()
+    com.okta.test.mock.scenarios.Scenario value()
 }

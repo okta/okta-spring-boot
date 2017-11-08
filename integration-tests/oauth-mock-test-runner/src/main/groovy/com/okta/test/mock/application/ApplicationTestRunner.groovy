@@ -42,13 +42,16 @@ abstract class ApplicationTestRunner extends HttpMock {
     private int applicationPort
     private TestScenario scenario
 
+    ApplicationTestRunner() {
+        setScenario(getScenarioName())
+    }
+
     String getScenarioName() {
         Scenario scenario = getClass().getAnnotation(Scenario)
-        if (scenario == null || Strings.isNullOrEmpty(scenario.value())) {
+        if (scenario == null) {
             Assert.fail("@Scenario was not found on class '${getClass()}', you must annotate this class or override the 'getScenarioName()' method.")
         }
-        setScenario(scenario.value())
-        return scenario.value()
+        return scenario.value().id
     }
 
     int getApplicationPort() {
@@ -60,10 +63,10 @@ abstract class ApplicationTestRunner extends HttpMock {
     }
 
     @BeforeMethod
-    public void checkToRun(Method method) {
+    void checkToRun(Method method) {
         for (String disabledTest : scenario.disabledTests) {
             if (method.getName().equals(disabledTest)) {
-                throw new SkipException("Skipping the disabled test - " + disabledTest);
+                throw new SkipException("Skipping the disabled test - " + disabledTest)
             }
         }
     }
