@@ -33,6 +33,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.get
 import static com.github.tomakehurst.wiremock.client.WireMock.matching
 import static com.github.tomakehurst.wiremock.client.WireMock.post
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 
 class CodeLocalValidationScenarioDefinition implements ScenarioDefinition {
 
@@ -43,6 +44,9 @@ class CodeLocalValidationScenarioDefinition implements ScenarioDefinition {
     String wrongScopeAccessTokenJwt
     String wrongAudienceAccessTokenJwt
     String idTokenjwt
+    String clientId = "OOICU812"
+    String clientSecret = "VERY_SECRET"
+    String authHeader = "Basic " + "${clientId}:${clientSecret}".bytes.encodeBase64().toString()
 
     CodeLocalValidationScenarioDefinition() {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA")
@@ -136,7 +140,7 @@ class CodeLocalValidationScenarioDefinition implements ScenarioDefinition {
 
         wireMockServer.stubFor(
                 get(urlPathEqualTo("/oauth2/default/v1/authorize"))
-                        .withQueryParam("client_id", matching("OOICU812"))
+                        .withQueryParam("client_id", matching(clientId))
                         .withQueryParam("redirect_uri", matching(Pattern.quote("http://localhost:")+ "\\d+/authorization-code/callback"))
                         .withQueryParam("response_type", matching("code"))
                         .withQueryParam("scope", matching("profile email openid"))
@@ -146,11 +150,10 @@ class CodeLocalValidationScenarioDefinition implements ScenarioDefinition {
 
         wireMockServer.stubFor(
                 post(urlPathEqualTo("/oauth2/default/v1/token"))
+                        .withHeader("Authorization", equalTo(authHeader))
                         .withRequestBody(containing("grant_type=authorization_code"))
                         .withRequestBody(containing("code=TEST_CODE&"))
-                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Flogin") +".*"))
-                        .withRequestBody(containing("client_id=OOICU812"))
-                        .withRequestBody(containing("client_secret=VERY_SECRET"))
+                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Fauthorization-code%2Fcallback") +".*"))
                         .willReturn(aResponse()
                         .withHeader("Content-Type", "application/json;charset=UTF-8")
                         .withBodyFile("token.json")
@@ -158,11 +161,10 @@ class CodeLocalValidationScenarioDefinition implements ScenarioDefinition {
 
         wireMockServer.stubFor(
                 post(urlPathEqualTo("/oauth2/default/v1/token"))
+                        .withHeader("Authorization", equalTo(authHeader))
                         .withRequestBody(containing("grant_type=authorization_code"))
                         .withRequestBody(containing("code=TEST_CODE_wrongKeyIdAccessTokenJwt&"))
-                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Flogin") +".*"))
-                        .withRequestBody(containing("client_id=OOICU812"))
-                        .withRequestBody(containing("client_secret=VERY_SECRET"))
+                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Fauthorization-code%2Fcallback")  +".*"))
                         .willReturn(aResponse()
                         .withHeader("Content-Type", "application/json;charset=UTF-8")
                         .withBodyFile("token.json")
@@ -170,11 +172,10 @@ class CodeLocalValidationScenarioDefinition implements ScenarioDefinition {
 
         wireMockServer.stubFor(
                 post(urlPathEqualTo("/oauth2/default/v1/token"))
+                        .withHeader("Authorization", equalTo(authHeader))
                         .withRequestBody(containing("grant_type=authorization_code"))
                         .withRequestBody(containing("code=TEST_CODE_wrongScopeAccessTokenJwt&"))
-                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Flogin") +".*"))
-                        .withRequestBody(containing("client_id=OOICU812"))
-                        .withRequestBody(containing("client_secret=VERY_SECRET"))
+                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Fauthorization-code%2Fcallback")  +".*"))
                         .willReturn(aResponse()
                         .withHeader("Content-Type", "application/json;charset=UTF-8")
                         .withBodyFile("token.json")
@@ -182,11 +183,10 @@ class CodeLocalValidationScenarioDefinition implements ScenarioDefinition {
 
         wireMockServer.stubFor(
                 post(urlPathEqualTo("/oauth2/default/v1/token"))
+                        .withHeader("Authorization", equalTo(authHeader))
                         .withRequestBody(containing("grant_type=authorization_code"))
                         .withRequestBody(containing("code=TEST_CODE_wrongAudienceAccessTokenJwt&"))
-                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Flogin") +".*"))
-                        .withRequestBody(containing("client_id=OOICU812"))
-                        .withRequestBody(containing("client_secret=VERY_SECRET"))
+                        .withRequestBody(matching(".*"+Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" +Pattern.quote("%2Fauthorization-code%2Fcallback")  +".*"))
                         .willReturn(aResponse()
                         .withHeader("Content-Type", "application/json;charset=UTF-8")
                         .withBodyFile("token.json")

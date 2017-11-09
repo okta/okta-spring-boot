@@ -46,8 +46,6 @@ class CodeRemoteValidationScenarioDefinition implements ScenarioDefinition {
                         .withRequestBody(containing("grant_type=authorization_code"))
                         .withRequestBody(containing("code=TEST_CODE"))
                         .withRequestBody(matching(".*" + Pattern.quote("redirect_uri=http%3A%2F%2Flocalhost%3A") + "\\d+" + Pattern.quote("%2Fauthorization-code%2Fcallback") + ".*"))
-//                        .withRequestBody(containing("client_id=OOICU812"))
-//                        .withRequestBody(containing("client_secret=VERY_SECRET"))
                         .withBasicAuth("OOICU812", "VERY_SECRET")
                         .willReturn(aResponse()
                         .withHeader("Content-Type", "application/json;charset=UTF-8")
