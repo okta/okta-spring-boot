@@ -106,3 +106,6 @@ scenarios:
     - -Dserver.session.trackingModes=cookie
     - -Dokta.oauth2.localTokenValidation=false
     - --batch-mode
+
+  oidc-code-flow-local-validation:
+    enabled: false
