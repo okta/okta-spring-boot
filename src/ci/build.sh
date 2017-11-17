@@ -37,10 +37,11 @@ else
         git clone -b gh-pages https://github.com/${REPO_SLUG}.git target/gh-pages/
         $MVN_CMD javadoc:aggregate -Ppub-docs -Pci
     else
-        # else try to run the ITs if possible (for someone who has push access to the repo
+        # else try to run the ITs if possible (for someone who has push access to the repo)
         if [ "$RUN_ITS" = true ] ; then
             echo "Running mvn install"
-            $MVN_CMD install -Pci
+            $MVN_CMD install -Pci || \
+            (find . -type f | grep target/mvn- | xargs -I{} sh -c 'echo "file: {}"; cat {}' && exit 1)
         else
             # fall back to running an install and skip the ITs
             echo "Skipping ITs, likely this build is a pull request from a fork"
@@ -48,3 +49,8 @@ else
         fi
     fi
 fi
+
+# Run the integration tests in any case
+cd integration-tests/oauth2
+java -cp src/test/resources/:./okta-oidc-tck-0.2.0-SNAPSHOT-shaded.jar org.testng.TestNG -d target/cli-test-output src/test/testng.xml 
+cd ../..

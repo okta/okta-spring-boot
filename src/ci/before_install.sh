@@ -34,7 +34,7 @@ export ARTIFACT_VERSION="$(xmllint --xpath "//*[local-name()='project']/*[local-
 export IS_RELEASE="$([ ${ARTIFACT_VERSION/SNAPSHOT} == $ARTIFACT_VERSION ] && [ $TRAVIS_BRANCH == 'master' ] && echo 'true')"
 
 #Install newer Maven since Travis uses 3.2 by default
-wget http://mirror.cc.columbia.edu/pub/software/apache/maven/maven-3/${MVN_VERSION}/binaries/apache-maven-${MVN_VERSION}-bin.zip
+wget https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/${MVN_VERSION}/apache-maven-${MVN_VERSION}-bin.zip
 unzip -qq apache-maven-${MVN_VERSION}-bin.zip -d ..
 rm apache-maven-${MVN_VERSION}-bin.zip
 export M2_HOME=$PWD/../apache-maven-${MVN_VERSION}
@@ -43,3 +43,9 @@ export PATH=$M2_HOME/bin:${JAVA_HOME}/bin:$PATH
 echo "Build configuration:"
 echo "Version:             $ARTIFACT_VERSION"
 echo "Is release:          ${IS_RELEASE:-false}"
+
+#Download the oidc-tck jar for integration tests
+TCK_JAR="https://oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=com.okta.tests&a=okta-oidc-tck&v=0.2.0-SNAPSHOT&e=jar&c=shaded"
+cd integration-tests/oauth2
+curl ${TCK_JAR} -L -o okta-oidc-tck-0.2.0-SNAPSHOT-shaded.jar
+cd ../..
