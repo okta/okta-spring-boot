@@ -43,3 +43,9 @@ export PATH=$M2_HOME/bin:${JAVA_HOME}/bin:$PATH
 echo "Build configuration:"
 echo "Version:             $ARTIFACT_VERSION"
 echo "Is release:          ${IS_RELEASE:-false}"
+
+#Download the oidc-tck jar for integration tests
+TCK_JAR="https://oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=com.okta.tests&a=okta-oidc-tck&v=0.2.0-SNAPSHOT&e=jar&c=shaded"
+cd integration-tests/oauth2
+curl ${TCK_JAR} -L -o okta-oidc-tck-0.2.0-SNAPSHOT-shaded.jar
+cd ../..
