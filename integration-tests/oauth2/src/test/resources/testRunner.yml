@@ -14,98 +14,43 @@
 # limitations under the License.
 #
 
-#implementation: com.okta.spring.tests.oauth2.SpringApplicationUnderTest
-#scenarios:
-#  code-flow-local-validation:
-#    command: com.okta.spring.tests.oauth2.code.BasicRedirectCodeFlowApplication
-#    args:
-#    - --debug
-#    - --server.port=${applicationPort}
-#    - --okta.oauth2.issuer=http://localhost:${mockPort}/oauth2/default
-#    - --okta.oauth2.clientId=OOICU812
-#    - --okta.oauth2.clientSecret=VERY_SECRET
-#    - --server.session.trackingModes=cookie
-#
-#  code-flow-remote-validation:
-#    command: com.okta.spring.tests.oauth2.code.BasicRedirectCodeFlowApplication
-#    args:
-#    - --debug
-#    - --server.port=${applicationPort}
-#    - --okta.oauth2.issuer=http://localhost:${mockPort}/oauth2/default
-#    - --okta.oauth2.clientId=OOICU812
-#    - --okta.oauth2.clientSecret=VERY_SECRET
-#    - --server.session.trackingModes=cookie
-#    - --okta.oauth2.localTokenValidation=false
-#
-#  implicit-flow-local-validation:
-#    command: com.okta.spring.tests.oauth2.implicit.BasicImplicitFlowApplication
-#    args:
-#    - --debug
-#    - --server.port=${applicationPort}
-#    - --okta.oauth2.issuer=http://localhost:${mockPort}/oauth2/default
-#    - --okta.oauth2.clientId=OOICU812
-#    - --server.session.trackingModes=cookie
-#
-#  implicit-flow-remote-validation:
-#    command: com.okta.spring.tests.oauth2.implicit.BasicImplicitFlowApplication
-#    args:
-#    - --debug
-#    - --server.port=${applicationPort}
-#    - --okta.oauth2.issuer=http://localhost:${mockPort}/oauth2/default
-#    - --okta.oauth2.clientId=OOICU812
-#    - --server.session.trackingModes=cookie
-#    - --okta.oauth2.localTokenValidation=false
-
+implementation: com.okta.spring.tests.oauth2.SpringApplicationUnderTest
 scenarios:
   code-flow-local-validation:
-    disabledTests:
-    - disabledTest
-    command: mvn
+    command: com.okta.spring.tests.oauth2.code.BasicRedirectCodeFlowApplication
     args:
-    - spring-boot:run
-    - -Dtest.mainClass=com.okta.spring.tests.oauth2.code.BasicRedirectCodeFlowApplication
-    - -Dserver.port=${applicationPort}
-    - -Dokta.oauth2.issuer=http://localhost:${mockPort}/oauth2/default
-    - -Dokta.oauth2.clientId=OOICU812
-    - -Dokta.oauth2.clientSecret=VERY_SECRET
-    - -Dserver.session.trackingModes=cookie
-    - --batch-mode
+    - --server.port=${applicationPort}
+    - --okta.oauth2.issuer=http://localhost:${mockPort}/oauth2/default
+    - --okta.oauth2.clientId=OOICU812
+    - --okta.oauth2.clientSecret=VERY_SECRET
+    - --server.session.trackingModes=cookie
 
   code-flow-remote-validation:
-    command: mvn
+    command: com.okta.spring.tests.oauth2.code.BasicRedirectCodeFlowApplication
     args:
-    - spring-boot:run
-    - -Dtest.mainClass=com.okta.spring.tests.oauth2.code.BasicRedirectCodeFlowApplication
-    - -Dserver.port=${applicationPort}
-    - -Dokta.oauth2.issuer=http://localhost:${mockPort}/oauth2/default
-    - -Dokta.oauth2.clientId=OOICU812
-    - -Dokta.oauth2.clientSecret=VERY_SECRET
-    - -Dserver.session.trackingModes=cookie
-    - -Dokta.oauth2.localTokenValidation=false
-    - --batch-mode
+    - --server.port=${applicationPort}
+    - --okta.oauth2.issuer=http://localhost:${mockPort}/oauth2/default
+    - --okta.oauth2.clientId=OOICU812
+    - --okta.oauth2.clientSecret=VERY_SECRET
+    - --server.session.trackingModes=cookie
+    - --okta.oauth2.localTokenValidation=false
 
   implicit-flow-local-validation:
-    command: mvn
+    command: com.okta.spring.tests.oauth2.implicit.BasicImplicitFlowApplication
     args:
-    - spring-boot:run
-    - -Dtest.mainClass=com.okta.spring.tests.oauth2.implicit.BasicImplicitFlowApplication
-    - -Dserver.port=${applicationPort}
-    - -Dokta.oauth2.issuer=http://localhost:${mockPort}/oauth2/default
-    - -Dokta.oauth2.clientId=OOICU812
-    - -Dserver.session.trackingModes=cookie
-    - --batch-mode
+    - --server.port=${applicationPort}
+    - --okta.oauth2.issuer=http://localhost:${mockPort}/oauth2/default
+    - --okta.oauth2.clientId=OOICU812
+    - --server.session.trackingModes=cookie
 
   implicit-flow-remote-validation:
-    command: mvn
+    command: com.okta.spring.tests.oauth2.implicit.BasicImplicitFlowApplication
     args:
-    - spring-boot:run
-    - -Dtest.mainClass=com.okta.spring.tests.oauth2.implicit.BasicImplicitFlowApplication
-    - -Dserver.port=${applicationPort}
-    - -Dokta.oauth2.issuer=http://localhost:${mockPort}/oauth2/default
-    - -Dokta.oauth2.clientId=OOICU812
-    - -Dserver.session.trackingModes=cookie
-    - -Dokta.oauth2.localTokenValidation=false
-    - --batch-mode
+    - --server.port=${applicationPort}
+    - --okta.oauth2.issuer=http://localhost:${mockPort}/oauth2/default
+    - --okta.oauth2.clientId=OOICU812
+    - --server.session.trackingModes=cookie
+    - --okta.oauth2.localTokenValidation=false
 
   oidc-code-flow-local-validation:
     enabled: false

@@ -27,6 +27,10 @@
     <artifactId>okta-spring-boot-integration-tests-oauth2</artifactId>
     <name>Okta Spring Boot :: ITs :: OAuth2</name>
 
+    <properties>
+        <test.mainClass>com.okta.spring.tests.oauth2.code.BasicRedirectCodeFlowApplication</test.mainClass>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.okta.spring</groupId>
@@ -91,6 +95,11 @@
 
         <!-- Test deps -->
         <dependency>
+            <groupId>com.okta.tests</groupId>
+            <artifactId>okta-oidc-tck</artifactId>
+            <version>0.2.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-test</artifactId>
             <scope>test</scope>
@@ -110,13 +119,21 @@
                     <artifactId>spring-boot-maven-plugin</artifactId>
                     <configuration>
                         <mainClass>${test.mainClass}</mainClass>
-                        <arguments>--debug</arguments>
                     </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
                     <version>2.20.1</version>
+                    <configuration>
+                        <dependenciesToScan>
+                            <dependency>com.okta.tests:okta-oidc-tck</dependency>
+                        </dependenciesToScan>
+                        <reuseForks>false</reuseForks>
+                        <excludes>
+                            <exclude>**/OIDCCodeFlowLocalValidationIT.*</exclude>
+                        </excludes>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
