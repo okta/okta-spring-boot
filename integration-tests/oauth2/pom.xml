@@ -95,9 +95,10 @@
 
         <!-- Test deps -->
         <dependency>
-            <groupId>com.okta.tests</groupId>
+            <groupId>com.okta.oidc.tck</groupId>
             <artifactId>okta-oidc-tck</artifactId>
-            <version>0.2.0-SNAPSHOT</version>
+            <version>0.2.0</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -127,7 +128,7 @@
                     <version>2.20.1</version>
                     <configuration>
                         <dependenciesToScan>
-                            <dependency>com.okta.tests:okta-oidc-tck</dependency>
+                            <dependency>com.okta.oidc.tck:okta-oidc-tck</dependency>
                         </dependenciesToScan>
                         <reuseForks>false</reuseForks>
                         <excludes>
