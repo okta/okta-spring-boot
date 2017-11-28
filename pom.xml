@@ -31,8 +31,9 @@
     <packaging>pom</packaging>
 
     <properties>
-        <spring-boot.version>1.5.8.RELEASE</spring-boot.version>
+        <spring-boot.version>1.5.7.RELEASE</spring-boot.version>
         <github.slug>okta/okta-spring-boot</github.slug>
+        <okta.sdk.version>0.8.2-SNAPSHOT</okta.sdk.version>
     </properties>
 
     <modules>
