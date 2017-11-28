@@ -16,35 +16,26 @@
 package com.okta.spring.sdk
 
 import com.okta.sdk.client.Client
-import com.okta.sdk.impl.cache.DefaultCacheManager
+import com.okta.spring.sdk.cache.SpringCacheManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests
 import org.testng.annotations.Test
 
 import static org.hamcrest.MatcherAssert.assertThat
-import static org.hamcrest.Matchers.equalTo
-import static org.hamcrest.Matchers.instanceOf
-import static org.hamcrest.Matchers.notNullValue
+import static org.hamcrest.Matchers.*
 
-@SpringBootTest(classes    = [MockSdkApp],
+@SpringBootTest(classes    = [MockSdkAppWithCache],
                 properties = ["okta.client.orgUrl=https://okta.example.com",
                               "okta.client.token=my-secret-api-token",
                               "okta.oauth2.discoveryDisabled=true"])
-class OktaSdkConfigTest extends AbstractTestNGSpringContextTests {
+class OktaSdkConfigWithCacheTest extends AbstractTestNGSpringContextTests {
 
     @Autowired
     Client client
 
     @Test
-    void basicConfigTest() {
-        assertThat client, notNullValue()
-
-        // check if client properties were set correctly
-        assertThat client.dataStore.baseUrlResolver.getBaseUrl(), equalTo("https://okta.example.com")
-        assertThat client.dataStore.clientCredentialsResolver.getClientCredentials().getCredentials(), equalTo("my-secret-api-token")
-
-        // no spring cache manager enabled the default is expected
-        assertThat client.dataStore.cacheManager, instanceOf(DefaultCacheManager)
+    void correctCacheImpl() {
+        assertThat client.dataStore.cacheManager, instanceOf(SpringCacheManager)
     }
 }

@@ -23,4 +23,10 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 @EnableAutoConfiguration
-class MockSdkApp {}
+class MockSdkAppWithCache {
+
+    @Bean
+    CacheManager springCacheManager() {
+        return new ConcurrentMapCacheManager("test")
+    }
+}
