@@ -37,6 +37,7 @@ import org.springframework.security.oauth2.provider.token.store.IssuerClaimVerif
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtClaimsSetVerifier;
 import org.springframework.security.oauth2.provider.token.store.jwk.JwkTokenStore;
+import org.springframework.util.StringUtils;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -114,6 +115,11 @@ public class OktaTokenServicesConfig {
         @Bean
         @ConditionalOnMissingBean
         public JwtClaimsSetVerifier jwtClaimsSetVerifier() {
+
+            if (!StringUtils.hasText(oktaOAuth2Properties.getIssuer())) {
+                throw new InvalidPropertyException(JwtClaimsSetVerifier.class, "okta.oauth2.issuer", "Property 'okta.oauth2.issuer' is required.");
+            }
+
             try {
                 return new IssuerClaimVerifier(new URL(oktaOAuth2Properties.getIssuer()));
             } catch (MalformedURLException e) {

@@ -1,2 +1,4 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration = com.okta.spring.oauth.implicit.ResourceServerConfig,com.okta.spring.oauth.code.OktaOAuthCodeFlowConfiguration
+org.springframework.boot.autoconfigure.EnableAutoConfiguration = \
+  com.okta.spring.oauth.implicit.ResourceServerConfig,\
+  com.okta.spring.oauth.code.OktaOAuthCodeFlowConfiguration
 org.springframework.boot.env.EnvironmentPostProcessor=com.okta.spring.oauth.OktaPropertiesMappingEnvironmentPostProcessor

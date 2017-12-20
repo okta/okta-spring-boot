@@ -34,7 +34,8 @@ import static org.hamcrest.Matchers.notNullValue
                 properties = ["okta.oauth2.issuer=https://okta.example.com/oauth2/my_issuer",
                               "okta.oauth2.audience=custom_audience",
                               "okta.oauth2.scopeClaim=custom_scope_claim",
-                              "okta.oauth2.rolesClaim=custom_roles_claim"])
+                              "okta.oauth2.rolesClaim=custom_roles_claim",
+                              "okta.oauth2.discoveryDisabled=true"])
 class ResourceServerConfigTest extends AbstractTestNGSpringContextTests {
 
     @Autowired
