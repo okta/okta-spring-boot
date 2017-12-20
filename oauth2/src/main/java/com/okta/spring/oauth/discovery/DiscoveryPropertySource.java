@@ -70,7 +70,6 @@ public class DiscoveryPropertySource extends EnumerablePropertySource<String> {
 
     @Override
     public Object getProperty(String name) {
-
         // there are some cases where 'containsProperty' is not called before calling this method, so we need to guard
         // against it because we are using the 'environment' direction, otherwise we would end up recursively
         // calling this method.
