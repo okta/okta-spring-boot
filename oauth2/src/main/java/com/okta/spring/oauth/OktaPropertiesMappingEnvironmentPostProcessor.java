@@ -90,7 +90,8 @@ public class OktaPropertiesMappingEnvironmentPostProcessor implements Environmen
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
         environment.getPropertySources().addLast(remappedOktaToStandardOAuthPropertySource(environment));
-        environment.getPropertySources().addLast(loadYaml(new FileSystemResource(new File(System.getProperty("user.home"), "okta/okta.yml")), false));
+        environment.getPropertySources().addLast(loadYaml(new FileSystemResource(new File(System.getProperty("user.home"), ".okta/okta.yml")), false));
+        environment.getPropertySources().addLast(loadYaml(new FileSystemResource(new File(System.getProperty("user.home"), ".okta/okta.yaml")), false));
         environment.getPropertySources().addLast(new DiscoveryPropertySource(environment));
         environment.getPropertySources().addLast(oauthToClientPropertiesSource(environment));
         environment.getPropertySources().addLast(loadYaml(new ClassPathResource("com/okta/spring/okta.yml"), true));
@@ -109,7 +110,7 @@ public class OktaPropertiesMappingEnvironmentPostProcessor implements Environmen
                 throw new IllegalStateException("Failed to load yaml configuration from " + resource, ex);
             }
         } else {
-            return new MapPropertySource("missing "+ resource.getFilename(), Collections.emptyMap());
+            return new MapPropertySource("Missing "+ resource.getFilename(), Collections.emptyMap());
         }
     }
 
@@ -154,7 +155,7 @@ public class OktaPropertiesMappingEnvironmentPostProcessor implements Environmen
             String orgUrlKey = "okta.client.orgUrl";
             if (orgUrlKey.equals(name)) {
                 // first lookup the issuer
-                String issuerUrl = environment.getProperty(OKTA_OAUTH_PREFIX +"issuer");
+                String issuerUrl = environment.getProperty(OKTA_OAUTH_PREFIX + "issuer");
                 // if we don't have one just return null
                 if (StringUtils.hasText(issuerUrl)) {
                     return issuerUrl.substring(0, issuerUrl.lastIndexOf("/oauth2/"));
