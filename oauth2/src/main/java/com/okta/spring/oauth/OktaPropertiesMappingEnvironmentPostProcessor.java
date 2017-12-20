@@ -15,21 +15,21 @@
  */
 package com.okta.spring.oauth;
 
-import com.okta.spring.oauth.discovery.OidcDiscoveryClient;
-import com.okta.spring.oauth.discovery.OidcDiscoveryMetadata;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.okta.spring.oauth.discovery.DiscoveryPropertySource;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.boot.env.YamlPropertySourceLoader;
+import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.web.client.ResourceAccessException;
+import org.springframework.util.StringUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -81,31 +81,35 @@ import java.util.Map;
  *
  * @since 0.2.0
  */
-public class OktaPropertiesMappingEnvironmentPostProcessor implements EnvironmentPostProcessor {
+public class OktaPropertiesMappingEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
     private static final String OAUTH_CLIENT_PREFIX = "security.oauth2.client.";
     private static final String OAUTH_RESOURCE_PREFIX = "security.oauth2.resource.";
     private static final String OKTA_OAUTH_PREFIX = "okta.oauth2.";
 
-    private final Logger logger = LoggerFactory.getLogger(OktaPropertiesMappingEnvironmentPostProcessor.class);
-
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
         environment.getPropertySources().addLast(remappedOktaToStandardOAuthPropertySource(environment));
-        environment.getPropertySources().addLast(discoveryPropertiesSource(environment));
-        environment.getPropertySources().addLast(loadYaml(new ClassPathResource("com/okta/spring/okta.yml")));
+        environment.getPropertySources().addLast(loadYaml(new FileSystemResource(new File(System.getProperty("user.home"), "okta/okta.yml")), false));
+        environment.getPropertySources().addLast(new DiscoveryPropertySource(environment));
+        environment.getPropertySources().addLast(oauthToClientPropertiesSource(environment));
+        environment.getPropertySources().addLast(loadYaml(new ClassPathResource("com/okta/spring/okta.yml"), true));
     }
 
-    private PropertySource<?> loadYaml(Resource resource) {
+    private PropertySource<?> loadYaml(Resource resource, boolean required) {
         YamlPropertySourceLoader loader = new YamlPropertySourceLoader();
-        if (!resource.exists()) {
+        if (!resource.exists() && required) {
             throw new IllegalArgumentException("Resource " + resource + " does not exist");
         }
-        try {
-            return loader.load("okta-defaults", resource, null);
-        }
-        catch (IOException ex) {
-            throw new IllegalStateException("Failed to load yaml configuration from " + resource, ex);
+
+        if (resource.exists()) {
+            try {
+                return loader.load(resource.getFilename(), resource, null);
+            } catch (IOException ex) {
+                throw new IllegalStateException("Failed to load yaml configuration from " + resource, ex);
+            }
+        } else {
+            return new MapPropertySource("missing "+ resource.getFilename(), Collections.emptyMap());
         }
     }
 
@@ -115,57 +119,53 @@ public class OktaPropertiesMappingEnvironmentPostProcessor implements Environmen
      * @return A PropertySource containing the newly mapped values.
      */
     private PropertySource remappedOktaToStandardOAuthPropertySource(Environment environment) {
-        Map<String, String> tmpValues = new HashMap<>();
-        tmpValues.put(OAUTH_CLIENT_PREFIX + "clientId", environment.getProperty(OKTA_OAUTH_PREFIX + "clientId"));
-        tmpValues.put(OAUTH_CLIENT_PREFIX + "clientSecret", environment.getProperty(OKTA_OAUTH_PREFIX + "clientSecret"));
-        tmpValues.put(OAUTH_RESOURCE_PREFIX + "serviceId", environment.getProperty(OKTA_OAUTH_PREFIX + "audience"));
-        return new MapBasedPropertySource("okta-to-oauth2", Collections.unmodifiableMap(tmpValues));
+        Map<String, String> aliasMap = new HashMap<>();
+        aliasMap.put(OAUTH_CLIENT_PREFIX + "clientId", OKTA_OAUTH_PREFIX + "clientId");
+        aliasMap.put(OAUTH_CLIENT_PREFIX + "clientSecret", OKTA_OAUTH_PREFIX + "clientSecret");
+        aliasMap.put(OAUTH_RESOURCE_PREFIX + "serviceId", OKTA_OAUTH_PREFIX + "audience");
+        return new RemappedPropertySource(aliasMap, environment);
     }
 
     /**
-     * Maps OIDC discovery metadata properties to {code}security.oauth2.*{code}.
-     * @param environment Environment used to read the {code}okta.oauth2.issuer{code} property from.
+     * Maps the baseUrl of {code}okta.oauth2.issuer{code} to {code}okta.client.orgUrl{code}.
+     * @param environment Environment used to read the {code}okta.oauth2.*{code} properties from.
      * @return A PropertySource containing the newly mapped values.
      */
-    private PropertySource discoveryPropertiesSource(Environment environment) {
-
-        boolean discoveryDisabled = Boolean.parseBoolean(environment.getProperty(OKTA_OAUTH_PREFIX +"discoveryDisabled"));
-
-        if (!discoveryDisabled) {
-            String issuerUrl = environment.getProperty(OKTA_OAUTH_PREFIX +"issuer");
-            try {
-                OidcDiscoveryMetadata discoveryMetadata = new OidcDiscoveryClient(issuerUrl).discover();
-                Map<String, String> tmpValues = new HashMap<>();
-
-                String baseUrl = issuerUrl.substring(0, issuerUrl.lastIndexOf("/oauth2/"));
-                tmpValues.put("okta.client.orgUrl", baseUrl);
-                tmpValues.put(OAUTH_CLIENT_PREFIX + "accessTokenUri", discoveryMetadata.getTokenEndpoint());
-                tmpValues.put(OAUTH_CLIENT_PREFIX + "userAuthorizationUri", discoveryMetadata.getAuthorizationEndpoint());
-                tmpValues.put(OAUTH_RESOURCE_PREFIX + "userInfoUri", discoveryMetadata.getUserinfoEndpoint());
-                tmpValues.put(OAUTH_RESOURCE_PREFIX + "jwk.keySetUri", discoveryMetadata.getJwksUri());
-                tmpValues.put(OAUTH_RESOURCE_PREFIX + "tokenInfoUri", discoveryMetadata.getIntrospectionEndpoint());
-                return new MapBasedPropertySource("discovery-to-oauth2", Collections.unmodifiableMap(tmpValues));
-            } catch (ResourceAccessException e) {
-                logger.warn("Failed to discover oauth metadata from url: {}", issuerUrl, e);
-            }
-        }
-        return new MapBasedPropertySource("no-discovery", Collections.emptyMap());
+    private PropertySource oauthToClientPropertiesSource(final Environment environment) {
+        return new IssuerToOrgUrlPropertySource(environment);
     }
 
-    private static class MapBasedPropertySource extends EnumerablePropertySource<Map<String, String>> {
+    @Override
+    public int getOrder() {
+        return LOWEST_PRECEDENCE;
+    }
 
-        MapBasedPropertySource(String name, Map<String, String> source) {
-            super(name, source);
+    private static class IssuerToOrgUrlPropertySource extends PropertySource {
+
+        private final Environment environment;
+
+        private IssuerToOrgUrlPropertySource(Environment environment) {
+            super("okta-oauth-to-client");
+            this.environment = environment;
         }
 
         @Override
         public Object getProperty(String name) {
-            return getSource().get(name);
+            String orgUrlKey = "okta.client.orgUrl";
+            if (orgUrlKey.equals(name)) {
+                // first lookup the issuer
+                String issuerUrl = environment.getProperty(OKTA_OAUTH_PREFIX +"issuer");
+                // if we don't have one just return null
+                if (StringUtils.hasText(issuerUrl)) {
+                    return issuerUrl.substring(0, issuerUrl.lastIndexOf("/oauth2/"));
+                }
+            }
+            return null;
         }
 
         @Override
-        public String[] getPropertyNames() {
-            return getSource().keySet().toArray(new String[getSource().size()]);
+        public boolean containsProperty(String name) {
+            return "okta.client.orgUrl".equals(name);
         }
     }
 }
