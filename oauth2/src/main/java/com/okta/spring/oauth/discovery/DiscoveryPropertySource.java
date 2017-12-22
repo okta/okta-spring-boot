@@ -102,15 +102,17 @@ public class DiscoveryPropertySource extends EnumerablePropertySource<String> {
         if (metadataProperties == null) {
             synchronized (this) {
                 String issuerUrl = environment.getRequiredProperty(OKTA_OAUTH_ISSUER);
-                OidcDiscoveryMetadata discoveryMetadata = new OidcDiscoveryClient(issuerUrl).discover();
-
+                OidcDiscoveryMetadata discoveryMetadata = createDiscoveryClient(issuerUrl).discover();
                 Map<String, Object> tmpValues = new HashMap<>();
-                putIfNotNull(tmpValues, OAUTH_ACCESS_TOKEN_URI_KEY, discoveryMetadata.getTokenEndpoint());
-                putIfNotNull(tmpValues, OAUTH_ACCESS_USER_AUTH_URI_KEY, discoveryMetadata.getAuthorizationEndpoint());
-                putIfNotNull(tmpValues, OAUTH_ACCESS_USER_INFO_URI_KEY, discoveryMetadata.getUserinfoEndpoint());
-                putIfNotNull(tmpValues, OAUTH_RESOURCE_JWT_KEY_SET_URI_KEY, discoveryMetadata.getJwksUri());
-                putIfNotNull(tmpValues, OAUTH_RESOURCE_JWT_KEY_SET_URI_DASH_KEY, discoveryMetadata.getJwksUri());
-                putIfNotNull(tmpValues, OAUTH_RESOURCE_TOKEN_INFO_URI, discoveryMetadata.getIntrospectionEndpoint());
+
+                if (discoveryMetadata != null) {
+                    putIfNotNull(tmpValues, OAUTH_ACCESS_TOKEN_URI_KEY, discoveryMetadata.getTokenEndpoint());
+                    putIfNotNull(tmpValues, OAUTH_ACCESS_USER_AUTH_URI_KEY, discoveryMetadata.getAuthorizationEndpoint());
+                    putIfNotNull(tmpValues, OAUTH_ACCESS_USER_INFO_URI_KEY, discoveryMetadata.getUserinfoEndpoint());
+                    putIfNotNull(tmpValues, OAUTH_RESOURCE_JWT_KEY_SET_URI_KEY, discoveryMetadata.getJwksUri());
+                    putIfNotNull(tmpValues, OAUTH_RESOURCE_JWT_KEY_SET_URI_DASH_KEY, discoveryMetadata.getJwksUri());
+                    putIfNotNull(tmpValues, OAUTH_RESOURCE_TOKEN_INFO_URI, discoveryMetadata.getIntrospectionEndpoint());
+                }
                 metadataProperties = tmpValues;
             }
         }
@@ -121,5 +123,9 @@ public class DiscoveryPropertySource extends EnumerablePropertySource<String> {
         if (value != null) {
             map.put(key, value);
         }
+    }
+
+    OidcDiscoveryClient createDiscoveryClient(String issuerUrl) {
+        return  new OidcDiscoveryClient(issuerUrl);
     }
 }
