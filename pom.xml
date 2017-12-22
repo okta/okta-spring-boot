@@ -33,7 +33,7 @@
     <properties>
         <spring-boot.version>1.5.7.RELEASE</spring-boot.version>
         <github.slug>okta/okta-spring-boot</github.slug>
-        <okta.sdk.version>0.8.2-SNAPSHOT</okta.sdk.version>
+        <okta.sdk.version>0.10.0</okta.sdk.version>
     </properties>
 
     <modules>
@@ -112,6 +112,16 @@
             <dependency>
                 <groupId>com.okta.sdk</groupId>
                 <artifactId>okta-sdk-api</artifactId>
+                <version>${okta.sdk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.okta.sdk</groupId>
+                <artifactId>okta-sdk-impl</artifactId>
+                <version>${okta.sdk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.okta.sdk</groupId>
+                <artifactId>okta-sdk-httpclient</artifactId>
                 <version>${okta.sdk.version}</version>
             </dependency>
             <dependency>
