@@ -129,6 +129,21 @@ You will be redirected automatically to an Okta login page. Once you successfull
 
 This module integrates with Spring Security's OAuth support, all you need is the mark your application with the standard `@EnableOAuth2Client` annotation. 
 
+# Inject the Okta Java SDK
+
+To integrate the [Okta Java SDK](https://github.com/okta/okta-sdk-java) into your Spring Boot application you just need to add a dependency:
+
+```xml
+<dependency>
+    <groupId>com.okta.spring</groupId>
+    <artifactId>okta-spring-sdk</artifactId>
+</dependency>
+```
+
+Then define the `okta.client.token` property. See [creating an API token](https://developer.okta.com/docs/api/getting_started/getting_a_token) for more info.
+
+All that is left is to inject the client (`com.okta.sdk.client.Client`)!
+
 # Extra Credit
 
 Want to build this project? 
@@ -143,11 +158,13 @@ $ mvn install
 
 ## Change Log
 
+### 0.3.0
+
+* Add support to inject the Okta Java SDK (if on classpath)
+* Fixed issue stopping configuration from being loaded from Spring Cloud Config
+
 ### 0.2.0
 
 * Add support for authorization code flow
 * Standardized Okta OAuth 2.0 properties as `okta.oauth2.*`
 * Added integration test suite
-
-
-
