@@ -17,6 +17,7 @@ package com.okta.spring.tests.oauth2.code;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,6 +32,8 @@ import java.security.Principal;
 @SpringBootApplication
 @RestController
 @EnableOAuth2Sso
+// fail loading this config if the SDK 'Client' is found. It should NOT exist on the classpath by default
+@ConditionalOnMissingClass("com.okta.sdk.client.Client")
 public class BasicRedirectCodeFlowApplication {
 
     @EnableGlobalMethodSecurity(prePostEnabled = true)

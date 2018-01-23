@@ -38,23 +38,21 @@
         <dependency>
             <groupId>com.okta.spring</groupId>
             <artifactId>okta-spring-sdk</artifactId>
-        </dependency>
-
-        <!-- force the SDK to be optional from the starter -->
-        <dependency>
-            <groupId>com.okta.sdk</groupId>
-            <artifactId>okta-sdk-api</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>com.okta.sdk</groupId>
-            <artifactId>okta-sdk-impl</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>com.okta.sdk</groupId>
-            <artifactId>okta-sdk-httpclient</artifactId>
-            <optional>true</optional>
+            <exclusions>
+                <!-- force the SDK to be optional from the starter -->
+                <exclusion>
+                    <groupId>com.okta.sdk</groupId>
+                    <artifactId>okta-sdk-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.okta.sdk</groupId>
+                    <artifactId>okta-sdk-impl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.okta.sdk</groupId>
+                    <artifactId>okta-sdk-httpclient</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
