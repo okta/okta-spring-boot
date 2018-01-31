@@ -4,7 +4,7 @@ Okta Spring Security OAuth2 Code Flow Example
 Clone the project and build it!
 
 ```bash
-$ git clone https://github.com/okta/okta-spring-security.git
+$ git clone https://github.com/okta/okta-spring-boot.git
 $ cd okta-spring-security
 $ mvn install
 ```
