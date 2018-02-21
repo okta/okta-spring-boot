@@ -66,7 +66,7 @@ public class ExampleApplication {
 }
 ```
 
-Make sure to mark the application with Spring Security's `@EnableResourceServer` annotation, to enable handing of access tokens.
+Make sure to mark the application with Spring Security's `@EnableResourceServer` annotation, to enable handling of access tokens.
 
 ### That's it!
 
