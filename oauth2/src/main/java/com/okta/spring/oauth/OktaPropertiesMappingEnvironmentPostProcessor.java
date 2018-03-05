@@ -105,7 +105,7 @@ public class OktaPropertiesMappingEnvironmentPostProcessor implements Environmen
 
         if (resource.exists()) {
             try {
-                return loader.load(resource.getFilename(), resource, null);
+                return loader.load(resource.getFilename(), resource).get(0);
             } catch (IOException ex) {
                 throw new IllegalStateException("Failed to load yaml configuration from " + resource, ex);
             }
