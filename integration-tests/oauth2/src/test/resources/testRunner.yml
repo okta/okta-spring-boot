@@ -35,7 +35,11 @@ scenarios:
     - --server.session.trackingModes=cookie
     - --okta.oauth2.localTokenValidation=false
 
+
   implicit-flow-local-validation:
+    disabledTests:
+    # Spring JWT parsing does NOT check the 'not-before' claim, (the 'exp' claim is validated)
+    - inactiveAccessTokenTest
     command: com.okta.spring.tests.oauth2.implicit.BasicImplicitFlowApplication
     args:
     - --server.port=${applicationPort}
