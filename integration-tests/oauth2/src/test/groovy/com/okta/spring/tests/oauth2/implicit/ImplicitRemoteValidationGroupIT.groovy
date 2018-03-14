@@ -15,11 +15,15 @@
  */
 package com.okta.spring.tests.oauth2.implicit
 
+import com.github.tomakehurst.wiremock.http.RequestMethod
 import com.okta.test.mock.Scenario
 import com.okta.test.mock.application.ApplicationTestRunner
 import org.hamcrest.Matchers
 import org.testng.annotations.Test
 
+import static com.github.tomakehurst.wiremock.client.WireMock.containing
+import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching
+import static com.github.tomakehurst.wiremock.matching.RequestPatternBuilder.newRequestPattern
 import static io.restassured.RestAssured.given
 import static com.okta.test.mock.scenarios.Scenario.IMPLICIT_FLOW_REMOTE_VALIDATION
 
@@ -37,5 +41,20 @@ class ImplicitRemoteValidationGroupIT extends ApplicationTestRunner {
             .get("http://localhost:${applicationPort}/everyone")
         .then()
             .body(Matchers.equalTo("Everyone has Access: joe.coder@example.com"))
+    }
+
+    @Test
+    void validateUserAgent() {
+
+        ResourceBundle versions = ResourceBundle.getBundle("versions")
+        def springIntegrationVersion = versions.getString("project.version")
+        def sdkVersion = versions.getString("okta.sdk.version")
+
+        // discovery
+        wireMockServer.verify(
+                newRequestPattern(RequestMethod.GET, urlMatching("/oauth2/default/.well-known/openid-configuration"))
+                    .withHeader("User-Agent", containing("okta-spring-security/${springIntegrationVersion}"))
+                    .withHeader("User-Agent", containing("okta-sdk-java/${sdkVersion}"))
+        )
     }
 }

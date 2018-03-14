@@ -15,10 +15,17 @@
  */
 package com.okta.spring.oauth.discovery;
 
+import com.okta.spring.oauth.http.UserAgent;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRequest;
+import org.springframework.http.client.ClientHttpRequestExecution;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.IOException;
 import java.net.URI;
 
 /**
@@ -29,7 +36,7 @@ import java.net.URI;
 public class OidcDiscoveryClient {
 
     private final URI issuerUri;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate = restTemplate();
 
     public OidcDiscoveryClient(String issuer) {
 
@@ -47,5 +54,19 @@ public class OidcDiscoveryClient {
 
     public OidcDiscoveryMetadata discover() {
         return this.restTemplate.getForObject(issuerUri, OidcDiscoveryMetadata.class);
+    }
+
+    private static RestTemplate restTemplate() {
+        RestTemplate template = new RestTemplate();
+        template.getInterceptors().add(new UserAgentInterceptor());
+        return template;
+    }
+
+    private static class UserAgentInterceptor implements ClientHttpRequestInterceptor {
+        @Override
+        public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
+            request.getHeaders().add(HttpHeaders.USER_AGENT, UserAgent.getUserAgentString());
+            return execution.execute(request, body);
+        }
     }
 }
