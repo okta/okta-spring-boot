@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright 2017 Okta, Inc.
+# Copyright 2017 Okta
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ COMMON_SCRIPT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/common.sh"
 source "${COMMON_SCRIPT}"
 
 # all the prep is done, lets run the build!
-MVN_CMD="mvn -s src/ci/settings.xml"
+MVN_CMD="mvn -s src/ci/settings.xml -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn"
 
 # if this build was triggered via a cron job, just scan the dependencies
 if [ "$TRAVIS_EVENT_TYPE" = "cron" ] ; then

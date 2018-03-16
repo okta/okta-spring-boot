@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright 2017 Okta, Inc.
+# Copyright 2017 Okta
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,8 @@ JAVA_PACKAGE=jdk-8u131-linux-x64
 MVN_VERSION=3.5.0
 
 # Travis uses an older version of Java8 by default
-wget --no-cookies \
+wget --quiet \
+     --no-cookies \
      --header "Cookie: oraclelicense=accept-securebackup-cookie" \
      http://download.oracle.com/otn-pub/java/jdk/8u131-b11/d54c1d3a095b4ff2b6607d096fa80163/${JAVA_PACKAGE}.tar.gz
 mkdir ../java
@@ -34,12 +35,15 @@ export ARTIFACT_VERSION="$(xmllint --xpath "//*[local-name()='project']/*[local-
 export IS_RELEASE="$([ ${ARTIFACT_VERSION/SNAPSHOT} == $ARTIFACT_VERSION ] && [ $TRAVIS_BRANCH == 'master' ] && echo 'true')"
 
 #Install newer Maven since Travis uses 3.2 by default
-wget https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/${MVN_VERSION}/apache-maven-${MVN_VERSION}-bin.zip
+wget --quiet https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/${MVN_VERSION}/apache-maven-${MVN_VERSION}-bin.zip
 unzip -qq apache-maven-${MVN_VERSION}-bin.zip -d ..
 rm apache-maven-${MVN_VERSION}-bin.zip
 export M2_HOME=$PWD/../apache-maven-${MVN_VERSION}
 export PATH=$M2_HOME/bin:${JAVA_HOME}/bin:$PATH
 
 echo "Build configuration:"
-echo "Version:             $ARTIFACT_VERSION"
+echo "Version:             ${ARTIFACT_VERSION}"
 echo "Is release:          ${IS_RELEASE:-false}"
+echo
+echo "Replaced Java and Maven versions:"
+mvn --version

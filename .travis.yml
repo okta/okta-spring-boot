@@ -7,6 +7,8 @@ addons:
     - libxml2-utils
 before_install:
 - source ./src/ci/before_install.sh
+install:
+- "true"
 script:
 - "./src/ci/build.sh"
 after_success:
