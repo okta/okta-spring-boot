@@ -29,7 +29,6 @@ class UserAgentTest {
 
     private static final String VERSION_SEPARATOR = "/"
     private static final String ENTRY_SEPARATOR = " "
-    private static final String SDK_KEY = "okta-sdk-java"
     private static final String OKTA_SPRING_KEY = "okta-spring-security"
 
     private static ResourceBundle versionBundle = ResourceBundle.getBundle("versions")
@@ -40,17 +39,12 @@ class UserAgentTest {
         assertThat userAgent, allOf(
                 not(emptyString()),
                 containsString(OKTA_SPRING_KEY + VERSION_SEPARATOR + getSpringIntegrationVersion() + ENTRY_SEPARATOR),
-                containsString(SDK_KEY + VERSION_SEPARATOR + getSDKVersion() + ENTRY_SEPARATOR),
                 containsString("java" + VERSION_SEPARATOR + System.getProperty("java.version") + ENTRY_SEPARATOR)
         )
-        assertThat "Expected '${SDK_KEY}' to appear in userAgent once once.", StringUtils.countOccurrencesOf(userAgent, OKTA_SPRING_KEY), equalTo(1)
+        assertThat "Expected '${OKTA_SPRING_KEY}' to appear in userAgent once once.", StringUtils.countOccurrencesOf(userAgent, OKTA_SPRING_KEY), equalTo(1)
     }
 
     // cheat a little we are filtering a file to load the known versions
-    private String getSDKVersion() {
-        return versionBundle.getString("okta.sdk.version")
-    }
-
     private String getSpringIntegrationVersion() {
         return versionBundle.getString("project.version")
     }
