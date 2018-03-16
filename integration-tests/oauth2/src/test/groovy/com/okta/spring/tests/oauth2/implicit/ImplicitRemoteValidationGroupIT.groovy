@@ -48,13 +48,11 @@ class ImplicitRemoteValidationGroupIT extends ApplicationTestRunner {
 
         ResourceBundle versions = ResourceBundle.getBundle("versions")
         def springIntegrationVersion = versions.getString("project.version")
-        def sdkVersion = versions.getString("okta.sdk.version")
 
         // discovery
         wireMockServer.verify(
                 newRequestPattern(RequestMethod.GET, urlMatching("/oauth2/default/.well-known/openid-configuration"))
                     .withHeader("User-Agent", containing("okta-spring-security/${springIntegrationVersion}"))
-                    .withHeader("User-Agent", containing("okta-sdk-java/${sdkVersion}"))
         )
     }
 }
