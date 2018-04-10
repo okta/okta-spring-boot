@@ -45,18 +45,4 @@ echo "IS_RELEASE: ${IS_RELEASE}"
 echo "RUN_ITS: ${RUN_ITS}"
 
 # all the prep is done, lets run the build!
-MVN_CMD="mvn -s src/ci/settings.xml"
-
-function send_tag_notification()
-{
-    GIT_TAG="$1"
-    MAILGUN_DOMAIN="sandbox178e6a568a554fc7b4ddfb998d7a3ac4.mailgun.org"
-    MAIL_TO="Brian Demers <brian.demers@okta.com>"
-
-    curl -s --user "${MAILGUN_API_KEY}" \
-         https:/api.mailgun.net/v3/${MAILGUN_DOMAIN}/messages\
-         -F from="Okta Notifications <postmaster@${MAILGUN_DOMAIN}>"\
-         -F to="${MAIL_TO}"\
-         -F subject="New Tag for ${REPO_SLUG}" \
-         -F text="A new tag was created for ${REPO_SLUG} - ${GIT_TAG}"
-}
+MVN_CMD="./mvnw -s src/ci/settings.xml -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -V"

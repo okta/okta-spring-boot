@@ -5,6 +5,8 @@ addons:
   apt:
     packages:
     - libxml2-utils
+    - oracle-java8-installer
+    - oracle-java8-set-default
 before_install:
 - source ./src/ci/before_install.sh
 install:

@@ -20,9 +20,6 @@ set -e
 COMMON_SCRIPT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/common.sh"
 source "${COMMON_SCRIPT}"
 
-# all the prep is done, lets run the build!
-MVN_CMD="mvn -s src/ci/settings.xml -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn"
-
 # if this build was triggered via a cron job, just scan the dependencies
 if [ "$TRAVIS_EVENT_TYPE" = "cron" ] ; then
     echo "Running TRAVIS CRON task"
