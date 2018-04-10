@@ -26,7 +26,7 @@ TAG_NAME="okta-spring-boot-parent-${NEW_VERSION}" # default release plugin tag f
 
 # TODO: we must use our local maven settings file as this script is NOT ready for triggered by travis
 # GPG agent configuration needed to sign artifacts
-MVN_CMD="mvn"
+MVN_CMD="./mvnw"
 
 # Update pom versions, tag, update to new dev version
 ${MVN_CMD} release:prepare --batch-mode
