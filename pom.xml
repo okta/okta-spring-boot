@@ -20,7 +20,7 @@
     <parent>
         <groupId>com.okta</groupId>
         <artifactId>okta-parent</artifactId>
-        <version>2</version>
+        <version>3</version>
         <relativePath>../okta-java-parent</relativePath>
     </parent>
 
@@ -31,9 +31,9 @@
     <packaging>pom</packaging>
 
     <properties>
-        <spring-boot.version>1.5.7.RELEASE</spring-boot.version>
+        <spring-boot.version>1.5.11.RELEASE</spring-boot.version>
         <github.slug>okta/okta-spring-boot</github.slug>
-        <okta.sdk.version>1.0.0</okta.sdk.version>
+        <okta.sdk.version>1.0.1</okta.sdk.version>
     </properties>
 
     <modules>
