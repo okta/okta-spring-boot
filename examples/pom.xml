@@ -21,7 +21,7 @@
     <parent>
         <groupId>com.okta.spring</groupId>
         <artifactId>okta-spring-boot-parent</artifactId>
-        <version>0.4.1</version>
+        <version>0.4.2-SNAPSHOT</version>
     </parent>
 
     <groupId>com.okta.spring.examples</groupId>
