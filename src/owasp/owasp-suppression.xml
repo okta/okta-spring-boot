@@ -19,4 +19,35 @@
   -->
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
 
+    <!-- this comes from this repo, and it is java not ruby, so... false positive -->
+    <suppress>
+       <notes><![CDATA[ file name: okta-sdk-httpclient-*.jar ]]></notes>
+       <gav regex="true">^com\.okta\.sdk:okta-sdk-httpclient:.*$</gav>
+       <cpe>cpe:/a:rest-client_project:rest-client</cpe>
+    </suppress>
+
+    <!-- wrong GAV, this CVE was against Apache Directory, not groovy  -->
+    <suppress>
+       <notes><![CDATA[file name: groovy-xml-*.jar]]></notes>
+       <gav regex="true">^org\.codehaus\.groovy:groovy-xml:.*$</gav>
+       <cve>CVE-2016-6497</cve>
+    </suppress>
+
+    <!-- tomcat linux dist issue, NOT this GAV, and not the annotations lib -->
+    <suppress>
+       <notes><![CDATA[file name: tomcat-annotations-api-8.5.29.jar]]></notes>
+       <gav regex="true">^org\.apache\.tomcat:tomcat-annotations-api:.*$</gav>
+       <cve>CVE-2016-5425</cve>
+    </suppress>
+    <suppress>
+       <notes><![CDATA[file name: tomcat-annotations-api-8.5.29.jar]]></notes>
+       <gav regex="true">^org\.apache\.tomcat:tomcat-annotations-api:.*$</gav>
+       <cve>CVE-2016-6325</cve>
+    </suppress>
+    <suppress>
+       <notes><![CDATA[file name: tomcat-annotations-api-8.5.29.jar]]></notes>
+       <gav regex="true">^org\.apache\.tomcat:tomcat-annotations-api:.*$</gav>
+       <cve>CVE-2017-6056</cve>
+    </suppress>
+
 </suppressions>
