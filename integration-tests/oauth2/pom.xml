@@ -86,7 +86,7 @@
         <dependency>
             <groupId>com.okta.oidc.tck</groupId>
             <artifactId>okta-oidc-tck</artifactId>
-            <version>0.3.0</version>
+            <version>0.3.1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
