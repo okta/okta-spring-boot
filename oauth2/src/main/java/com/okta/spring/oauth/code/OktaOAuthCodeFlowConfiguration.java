@@ -26,6 +26,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
+import org.springframework.security.jwt.crypto.sign.InvalidSignatureException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
@@ -72,14 +73,19 @@ public class OktaOAuthCodeFlowConfiguration {
         @Override
         public OAuth2Authentication loadAuthentication(String accessTokenValue) {
 
-            OAuth2Authentication originalOAuth = super.loadAuthentication(accessTokenValue);
+            try {
+                OAuth2Authentication originalOAuth = super.loadAuthentication(accessTokenValue);
 
-            // validate audience
-            if (!originalOAuth.getOAuth2Request().getResourceIds().contains(audience)) {
-                throw new OAuth2AccessTokenValidationException("Invalid token, 'aud' claim does not contain the expected audience of: " + audience);
+                // validate audience
+                if (!originalOAuth.getOAuth2Request().getResourceIds().contains(audience)) {
+                    throw new OAuth2AccessTokenValidationException("Invalid token, 'aud' claim does not contain the expected audience of: " + audience);
+                }
+
+                return originalOAuth;
+
+            } catch (InvalidSignatureException e) {
+                throw new OAuth2AccessTokenValidationException("Invalid token, invalid signature", e);
             }
-
-            return originalOAuth;
         }
     }
 }
