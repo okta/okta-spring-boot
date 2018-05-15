@@ -31,7 +31,8 @@
     <packaging>pom</packaging>
 
     <properties>
-        <spring-boot.version>1.5.11.RELEASE</spring-boot.version>
+        <spring-boot.version>1.5.13.RELEASE</spring-boot.version>
+        <spring-boot2.version>2.0.2.RELEASE</spring-boot2.version>
         <github.slug>okta/okta-spring-boot</github.slug>
         <okta.sdk.version>1.0.1</okta.sdk.version>
     </properties>
@@ -42,6 +43,7 @@
         <module>sdk</module>
         <module>okta-spring-boot-starter</module>
         <module>integration-tests/oauth2</module>
+        <module>integration-tests/oauth2-boot2</module>
         <module>examples</module>
         <module>coverage</module>
     </modules>
@@ -69,7 +71,7 @@
             <dependency>
                 <groupId>org.springframework.security.oauth</groupId>
                 <artifactId>spring-security-oauth2</artifactId>
-                <version>2.2.0.RELEASE</version>
+                <version>2.3.3.RELEASE</version>
                 <exclusions>
                     <!-- don't let these transitive dependencies mess with the bom above -->
                     <exclusion>

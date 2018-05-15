@@ -27,12 +27,16 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -105,8 +109,17 @@ public class OktaPropertiesMappingEnvironmentPostProcessor implements Environmen
 
         if (resource.exists()) {
             try {
-                return loader.load(resource.getFilename(), resource, null);
-            } catch (IOException ex) {
+
+                // Spring Boot 2
+                Method method = ClassUtils.getMethodIfAvailable(YamlPropertySourceLoader.class,"load", String.class, Resource.class);
+                if (method != null) {
+                    List<PropertySource<?>> list = (List<PropertySource<?>>) method.invoke(loader, resource.getFilename(), resource);
+                    return list.get(0); // TODO: hack
+                } else {
+                    // Spring Boot 1.x
+                    return loader.load(resource.getFilename(), resource, null);
+                }
+            } catch (IllegalAccessException | InvocationTargetException | IOException ex) {
                 throw new IllegalStateException("Failed to load yaml configuration from " + resource, ex);
             }
         } else {

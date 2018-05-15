@@ -32,7 +32,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionOutcome;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.SpringBootCondition;
-import org.springframework.boot.bind.RelaxedPropertyResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.context.annotation.Conditional;
@@ -119,8 +118,7 @@ public class OktaSdkConfig {
         public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
 
             ConditionMessage.Builder message = ConditionMessage.forCondition("Okta Api Token Condition");
-            RelaxedPropertyResolver resolver = new RelaxedPropertyResolver(context.getEnvironment(), "okta.client.");
-            String tokenValue = resolver.getProperty("token");
+            String tokenValue = context.getEnvironment().getProperty("okta.client.token");
             if (StringUtils.hasText(tokenValue)) {
                 return ConditionOutcome.match(message.foundExactly("provided API token"));
             }
