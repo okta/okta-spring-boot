@@ -138,6 +138,11 @@
                 <artifactId>mockito-core</artifactId>
                 <version>2.10.0</version>
             </dependency>
+            <dependency>
+                <groupId>com.okta.oidc.tck</groupId>
+                <artifactId>okta-oidc-tck</artifactId>
+                <version>0.3.1</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>
