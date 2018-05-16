@@ -155,16 +155,3 @@ $ git clone https://github.com/okta/okta-spring-boot.git
 $ cd okta-spring-boot
 $ mvn install
 ```
-
-## Change Log
-
-### 0.3.0
-
-* Add support to inject the Okta Java SDK (if on classpath)
-* Fixed issue stopping configuration from being loaded from Spring Cloud Config
-
-### 0.2.0
-
-* Add support for authorization code flow
-* Standardized Okta OAuth 2.0 properties as `okta.oauth2.*`
-* Added integration test suite
