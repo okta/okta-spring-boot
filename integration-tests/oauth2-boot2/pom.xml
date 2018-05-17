@@ -29,7 +29,7 @@
     <properties>
         <test.mainClass>com.okta.spring.tests.oauth2.code.BasicRedirectCodeFlowApplication</test.mainClass>
 
-        <spring-boot.version>2.0.1.RELEASE</spring-boot.version>
+        <spring-boot.version>${spring-boot2.version}</spring-boot.version>
     </properties>
 
     <dependencies>
@@ -38,9 +38,9 @@
         <dependency>
             <groupId>org.springframework.security.oauth.boot</groupId>
             <artifactId>spring-security-oauth2-autoconfigure</artifactId>
-            <version>${spring-boot.version}</version>
+            <!-- This version differs from spring boot release version -->
+            <version>2.0.1.RELEASE</version>
         </dependency>
-
         <dependency>
             <groupId>com.okta.spring</groupId>
             <artifactId>okta-spring-boot-starter</artifactId>

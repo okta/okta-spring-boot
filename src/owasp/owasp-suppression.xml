@@ -50,4 +50,11 @@
        <cve>CVE-2017-6056</cve>
     </suppress>
 
+    <!-- wrong GAV for this CVE, it should be spring-security-oauth2 -->
+    <suppress>
+        <notes><![CDATA[file name: spring-security-oauth2-autoconfigure-2.0.1.RELEASE.jar]]></notes>
+        <gav regex="true">^org\.springframework\.security\.oauth\.boot:spring-security-oauth2-autoconfigure:.*$</gav>
+       <cve>CVE-2016-4977</cve>
+    </suppress>
+
 </suppressions>

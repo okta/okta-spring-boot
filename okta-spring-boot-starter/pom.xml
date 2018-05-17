@@ -26,10 +26,6 @@
     <artifactId>okta-spring-boot-starter</artifactId>
     <name>Okta Spring Boot :: Starter</name>
 
-    <properties>
-        <spring-boot.version>1.5.4.RELEASE</spring-boot.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.okta.spring</groupId>
