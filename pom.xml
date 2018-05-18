@@ -34,7 +34,7 @@
         <spring-boot.version>1.5.13.RELEASE</spring-boot.version>
         <spring-boot2.version>2.0.2.RELEASE</spring-boot2.version>
         <github.slug>okta/okta-spring-boot</github.slug>
-        <okta.sdk.version>1.0.1</okta.sdk.version>
+        <okta.sdk.version>1.1.0</okta.sdk.version>
     </properties>
 
     <modules>
