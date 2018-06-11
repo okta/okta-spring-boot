@@ -35,8 +35,8 @@ public class RemappedPropertySource extends EnumerablePropertySource<String> {
     private final Map<String, String> aliasMap = new HashMap<>();
     private final Environment environment;
 
-    public RemappedPropertySource(Map<String, String> aliasMap, Environment environment) {
-        super("okta-to-oauth2");
+    public RemappedPropertySource(String name, Map<String, String> aliasMap, Environment environment) {
+        super(name);
         this.aliasMap.putAll(aliasMap);
         this.environment = environment;
     }
