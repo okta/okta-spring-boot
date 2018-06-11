@@ -25,7 +25,7 @@ PULL_REQUEST=${PULL_REQUEST:-${TRAVIS_PULL_REQUEST:-true}} # default to true
 BRANCH=${TRAVIS_BRANCH:-"$(git rev-parse --abbrev-ref HEAD)"}
 
 # run the ITs if we have an ENV_VARS are set
-if [ ! -z $TRAVIS_SECURE_ENV_VARS ] ; then
+if [ $TRAVIS_SECURE_ENV_VARS = true ] ; then
     RUN_ITS=true
 fi
 RUN_ITS=${RUN_ITS:-false}
