@@ -50,12 +50,12 @@ import java.util.Map;
  *             <th>Spring Boot Property</th>
  *         </tr>
  *         <tr>
- *             <td>okta.oauth2.clientId</td>
- *             <td>security.oauth2.client.clientId</td>
+ *             <td>okta.oauth2.client-id</td>
+ *             <td>security.oauth2.client.client-id</td>
  *         </tr>
  *         <tr>
- *             <td>okta.oauth2.clientSecret</td>
- *             <td>security.oauth2.client.clientSecret</td>
+ *             <td>okta.oauth2.client-secret</td>
+ *             <td>security.oauth2.client.client-secret</td>
  *         </tr>
  *     </table>
  * Discovery properties:
@@ -67,18 +67,18 @@ import java.util.Map;
  *         </tr>
  *         <tr>
  *             <td>OidcDiscoveryMetadata.getTokenEndpoint()</td>
- *             <td>security.oauth2.client.accessTokenUri</td>
+ *             <td>security.oauth2.client.access-token-uri</td>
  *         </tr>
  *         <tr>
  *             <td>OidcDiscoveryMetadata.getAuthorizationEndpoint()</td>
- *             <td>security.oauth2.client.userAuthorizationUri</td>
+ *             <td>security.oauth2.client.user-authorization-uri</td>
  *         </tr>
  *         <tr>
  *             <td>OidcDiscoveryMetadata.getUserinfoEndpoint()</td>
- *             <td>security.oauth2.resource.userInfoUri</td>
+ *             <td>security.oauth2.resource.user-info-uri</td>
  *         </tr>
  *     </table>
- * As well as updating default properties values from 'com.okta.spring.okta.yml'. And setting 'okta.client.orgUrl' based
+ * As well as updating default properties values from 'com.okta.spring.okta.yml'. And setting 'okta.client.org-url' based
  * on 'okta.oauth2.issuer'
  *
  * NOTE: for discovery can be disabled by setting the property {code}okta.oauth2.discoveryDisabled=true{code}.
@@ -134,14 +134,16 @@ public class OktaPropertiesMappingEnvironmentPostProcessor implements Environmen
      */
     private PropertySource remappedOktaToStandardOAuthPropertySource(Environment environment) {
         Map<String, String> aliasMap = new HashMap<>();
+
+        // when we drop Spring Boot 1.x support these properties should be changed to kabab format
         aliasMap.put(OAUTH_CLIENT_PREFIX + "clientId", OKTA_OAUTH_PREFIX + "clientId");
         aliasMap.put(OAUTH_CLIENT_PREFIX + "clientSecret", OKTA_OAUTH_PREFIX + "clientSecret");
         aliasMap.put(OAUTH_RESOURCE_PREFIX + "serviceId", OKTA_OAUTH_PREFIX + "audience");
-        return new RemappedPropertySource(aliasMap, environment);
+        return new RemappedPropertySource("okta-to-oauth2", aliasMap, environment);
     }
 
     /**
-     * Maps the baseUrl of {code}okta.oauth2.issuer{code} to {code}okta.client.orgUrl{code}.
+     * Maps the baseUrl of {code}okta.oauth2.issuer{code} to {code}okta.client.org-url{code}.
      * @param environment Environment used to read the {code}okta.oauth2.*{code} properties from.
      * @return A PropertySource containing the newly mapped values.
      */
@@ -165,8 +167,7 @@ public class OktaPropertiesMappingEnvironmentPostProcessor implements Environmen
 
         @Override
         public Object getProperty(String name) {
-            String orgUrlKey = "okta.client.orgUrl";
-            if (orgUrlKey.equals(name)) {
+            if (containsProperty(name)) {
                 // first lookup the issuer
                 String issuerUrl = environment.getProperty(OKTA_OAUTH_PREFIX + "issuer");
                 // if we don't have one just return null
@@ -179,7 +180,7 @@ public class OktaPropertiesMappingEnvironmentPostProcessor implements Environmen
 
         @Override
         public boolean containsProperty(String name) {
-            return "okta.client.orgUrl".equals(name);
+            return "okta.client.org-url".equals(name) || "okta.client.orgUrl".equals(name);
         }
     }
 }
