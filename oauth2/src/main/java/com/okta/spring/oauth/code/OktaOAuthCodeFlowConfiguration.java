@@ -17,14 +17,9 @@ package com.okta.spring.oauth.code;
 
 import com.okta.spring.config.OktaOAuth2Properties;
 import com.okta.spring.oauth.OAuth2AccessTokenValidationException;
-import com.okta.spring.oauth.OktaTokenServicesConfig;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2SsoDefaultConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.jwt.crypto.sign.InvalidSignatureException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -45,10 +40,7 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
  * @since 0.2.0
  */
 @Configuration
-@AutoConfigureBefore(OAuth2SsoDefaultConfiguration.class)
-@ConditionalOnBean(OAuth2SsoDefaultConfiguration.class)
-@Import(OktaTokenServicesConfig.class)
-public class OktaOAuthCodeFlowConfiguration {
+class OktaOAuthCodeFlowConfiguration {
 
     @Configuration
     @ConditionalOnProperty(name = "okta.oauth2.localTokenValidation", matchIfMissing = true)
