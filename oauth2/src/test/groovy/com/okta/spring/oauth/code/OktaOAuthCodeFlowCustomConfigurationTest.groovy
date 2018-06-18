@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Okta, Inc.
+ * Copyright 2018-present Okta, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  */
 package com.okta.spring.oauth.code
 
-import com.okta.spring.oauth.OktaTokenServicesConfig
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2SsoCustomConfiguration
 import org.springframework.boot.autoconfigure.security.oauth2.resource.AuthoritiesExtractor
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.security.oauth2.provider.token.TokenStore
@@ -29,18 +29,21 @@ import static org.hamcrest.Matchers.isA
 import static org.hamcrest.Matchers.notNullValue
 
 /**
- * @since 0.2.0
+ * Ensures a Spring Security {@link OAuth2SsoCustomConfiguration} when OktaOAuthCodeFlowCustomConfiguration is used and
+ * a {@link org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter WebSecurityConfigurerAdapter} is found with a @{@link org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso EnableOAuth2Sso}.
+ *
+ * @since 0.6.0
  */
-class OktaOAuthCodeFlowConfigurationTest extends AbstractTestNGSpringContextTests {
+class OktaOAuthCodeFlowCustomConfigurationTest extends AbstractTestNGSpringContextTests {
 
-    @SpringBootTest(classes    = [MockCodeFlowApp, OktaOAuthCodeFlowConfiguration],
+    @SpringBootTest(classes    = [MockCustomSsoCodeFlowApp, OktaOAuthCodeFlowCustomConfiguration],
                     properties = ["okta.oauth2.issuer=https://okta.example.com/oauth2/my_issuer",
                                   "okta.oauth2.discoveryDisabled=true",
                                   "okta.oauth2.localTokenValidation=false"])
     static class RemoteValidationConfigTest extends AbstractTestNGSpringContextTests {
 
         @Autowired
-        OktaTokenServicesConfig oktaTokenServicesConfig
+        OAuth2SsoCustomConfiguration oAuth2SsoCustomConfiguration
 
         @Autowired
         AuthoritiesExtractor authoritiesExtractor
@@ -48,17 +51,17 @@ class OktaOAuthCodeFlowConfigurationTest extends AbstractTestNGSpringContextTest
         @Test
         void theBasics() {
             assertThat authoritiesExtractor, notNullValue()
-            assertThat oktaTokenServicesConfig, notNullValue()
+            assertThat oAuth2SsoCustomConfiguration, notNullValue()
         }
     }
 
-    @SpringBootTest(classes    = [MockCodeFlowApp, OktaOAuthCodeFlowConfiguration],
+    @SpringBootTest(classes    = [MockCustomSsoCodeFlowApp, OktaOAuthCodeFlowCustomConfiguration],
                     properties = ["okta.oauth2.issuer=https://okta.example.com/oauth2/my_issuer",
                                   "okta.oauth2.discoveryDisabled=true"])
     static class LocalValidationConfigTest extends AbstractTestNGSpringContextTests {
 
         @Autowired
-        OktaTokenServicesConfig oktaTokenServicesConfig
+        OAuth2SsoCustomConfiguration oAuth2SsoCustomConfiguration
 
         @Autowired
         TokenStore tokenStore
@@ -66,7 +69,7 @@ class OktaOAuthCodeFlowConfigurationTest extends AbstractTestNGSpringContextTest
         @Test
         void theBasics() {
             assertThat tokenStore, isA(JwkTokenStore)
-            assertThat oktaTokenServicesConfig, notNullValue()
+            assertThat oAuth2SsoCustomConfiguration, notNullValue()
         }
     }
 }
