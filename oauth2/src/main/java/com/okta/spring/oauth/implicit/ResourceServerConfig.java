@@ -15,10 +15,10 @@
  */
 package com.okta.spring.oauth.implicit;
 
-import com.okta.spring.config.OktaOAuth2Properties;
 import com.okta.spring.oauth.OktaTokenServicesConfig;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -39,20 +39,15 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 @Import(OktaTokenServicesConfig.class)
 public class ResourceServerConfig {
 
-    private final OktaOAuth2Properties oktaOAuth2Properties;
-
-    public ResourceServerConfig(OktaOAuth2Properties oktaOAuth2Properties) {
-        this.oktaOAuth2Properties = oktaOAuth2Properties;
-    }
-
     @Bean
     @Primary
     @ConditionalOnBean(ResourceServerTokenServices.class)
-    public ResourceServerConfigurerAdapter oktaResourceServerConfigurerAdapter(ResourceServerTokenServices tokenServices) {
+    public ResourceServerConfigurerAdapter oktaResourceServerConfigurerAdapter(ResourceServerTokenServices tokenServices,
+                                                                               ResourceServerProperties resourceServerProperties) {
         return new ResourceServerConfigurerAdapter() {
             @Override
             public void configure(final ResourceServerSecurityConfigurer config) {
-                config.resourceId(oktaOAuth2Properties.getAudience()); // set resourceId to the audience
+                config.resourceId(resourceServerProperties.getServiceId()); // set resourceId to the audience
                 config.tokenServices(tokenServices);
             }
         };

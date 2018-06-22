@@ -91,7 +91,7 @@ class DiscoveryPropertySourceTest {
         when(env.getRequiredProperty("okta.oauth2.issuer")).thenReturn("https://okta.example.com/issuer")
 
         OidcDiscoveryMetadata metadata = mock(OidcDiscoveryMetadata)
-        when(metadata.getTokenEndpoint()).thenReturn("tokenEnpoint")
+        when(metadata.getTokenEndpoint()).thenReturn("tokenEndpoint")
         when(metadata.getAuthorizationEndpoint()).thenReturn("authorizationEndpoint")
         when(metadata.getUserinfoEndpoint()).thenReturn("userinfoEndpoint")
         when(metadata.getJwksUri()).thenReturn("jwksUri")
@@ -106,11 +106,10 @@ class DiscoveryPropertySourceTest {
                 return discoveryClient
             }
         }
-        assertThat propertySource.getProperty("security.oauth2.client.accessTokenUri"), equalTo("tokenEnpoint")
-        assertThat propertySource.getProperty("security.oauth2.client.userAuthorizationUri"), equalTo("authorizationEndpoint")
-        assertThat propertySource.getProperty("security.oauth2.resource.userInfoUri"), equalTo("userinfoEndpoint")
-        assertThat propertySource.getProperty("security.oauth2.resource.jwk.keySetUri"), equalTo("jwksUri")
-        assertThat propertySource.getProperty("security.oauth2.resource.jwk.key-set-uri"), equalTo("jwksUri")
-        assertThat propertySource.getProperty("security.oauth2.resource.tokenInfoUri"), equalTo("introspectionEndpoint")
+        assertThat propertySource.getProperty("discovery.token-endpoint"), equalTo("tokenEndpoint")
+        assertThat propertySource.getProperty("discovery.authorization-endpoint"), equalTo("authorizationEndpoint")
+        assertThat propertySource.getProperty("discovery.userinfo-endpoint"), equalTo("userinfoEndpoint")
+        assertThat propertySource.getProperty("discovery.jwks-uri"), equalTo("jwksUri")
+        assertThat propertySource.getProperty("discovery.introspection-endpoint"), equalTo("introspectionEndpoint")
     }
 }

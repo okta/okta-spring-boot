@@ -21,7 +21,6 @@ import org.springframework.core.env.Environment;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,29 +33,22 @@ import java.util.Map;
  */
 public class DiscoveryPropertySource extends EnumerablePropertySource<String> {
 
-    private static final String OAUTH_CLIENT_PREFIX = "security.oauth2.client.";
-    private static final String OAUTH_RESOURCE_PREFIX = "security.oauth2.resource.";
     private static final String OKTA_OAUTH_ISSUER = "okta.oauth2.issuer";
     private static final String OKTA_OAUTH_DISCOVERY_DISABLED = "okta.oauth2.discoveryDisabled";
 
-    private static final String OAUTH_RESOURCE_JWK_SUB_KEY = OAUTH_RESOURCE_PREFIX + "jwk";
+    private static final String PREFIX = "discovery.";
+    private static final String TOKEN_ENDPOINT_KEY = "token-endpoint";
+    private static final String AUTHORIZATION_ENDPOINT_KEY = "authorization-endpoint";
+    private static final String USERINFO_ENDPOINT_KEY = "userinfo-endpoint";
+    private static final String JWKS_URI_KEY = "jwks-uri";
+    private static final String INTROSPECTION_ENDPOINT_KEY = "introspection-endpoint";
 
-    private static final String OAUTH_ACCESS_TOKEN_URI_KEY = OAUTH_CLIENT_PREFIX + "accessTokenUri";
-    private static final String OAUTH_ACCESS_USER_AUTH_URI_KEY = OAUTH_CLIENT_PREFIX + "userAuthorizationUri";
-    private static final String OAUTH_ACCESS_USER_INFO_URI_KEY = OAUTH_RESOURCE_PREFIX + "userInfoUri";
-    private static final String OAUTH_RESOURCE_JWT_KEY_SET_URI_KEY = OAUTH_RESOURCE_JWK_SUB_KEY + ".keySetUri";
-    private static final String OAUTH_RESOURCE_JWT_KEY_SET_URI_DASH_KEY = OAUTH_RESOURCE_JWK_SUB_KEY + ".key-set-uri";
-    private static final String OAUTH_RESOURCE_TOKEN_INFO_URI = OAUTH_RESOURCE_PREFIX + "tokenInfoUri";
-
-    private static final String[] supportedKeys = {OAUTH_ACCESS_TOKEN_URI_KEY,
-                                                   OAUTH_ACCESS_USER_AUTH_URI_KEY,
-                                                   OAUTH_ACCESS_USER_INFO_URI_KEY,
-                                                   OAUTH_RESOURCE_JWK_SUB_KEY,
-                                                   OAUTH_RESOURCE_JWT_KEY_SET_URI_KEY,
-                                                   OAUTH_RESOURCE_JWT_KEY_SET_URI_DASH_KEY,
-                                                   OAUTH_RESOURCE_TOKEN_INFO_URI};
-    private static final List<String> supportedKeysList = Collections.unmodifiableList(Arrays.asList(supportedKeys));
-
+    private static final String[] SUPPORTED_KEYS = {
+                                            PREFIX + TOKEN_ENDPOINT_KEY,
+                                            PREFIX + AUTHORIZATION_ENDPOINT_KEY,
+                                            PREFIX + USERINFO_ENDPOINT_KEY,
+                                            PREFIX + JWKS_URI_KEY,
+                                            PREFIX + INTROSPECTION_ENDPOINT_KEY};
 
     private final boolean isEnabled;
     private final Environment environment;
@@ -73,19 +65,19 @@ public class DiscoveryPropertySource extends EnumerablePropertySource<String> {
         // there are some cases where 'containsProperty' is not called before calling this method, so we need to guard
         // against it because we are using the 'environment' direction, otherwise we would end up recursively
         // calling this method.
-        return containsProperty(name) && isReady()
+        return isReady()
             ? getDiscoveryMetadata().get(name)
             : null;
     }
 
     @Override
     public boolean containsProperty(String name) {
-        return isEnabled && supportedKeysList.contains(name);
+        return isEnabled && metadataProperties != null && metadataProperties.containsKey(name);
     }
 
     @Override
     public String[] getPropertyNames() {
-        return Arrays.copyOf(supportedKeys, supportedKeys.length);
+        return Arrays.copyOf(SUPPORTED_KEYS, SUPPORTED_KEYS.length);
     }
 
     private boolean isReady() {
@@ -106,12 +98,11 @@ public class DiscoveryPropertySource extends EnumerablePropertySource<String> {
                 Map<String, Object> tmpValues = new HashMap<>();
 
                 if (discoveryMetadata != null) {
-                    putIfNotNull(tmpValues, OAUTH_ACCESS_TOKEN_URI_KEY, discoveryMetadata.getTokenEndpoint());
-                    putIfNotNull(tmpValues, OAUTH_ACCESS_USER_AUTH_URI_KEY, discoveryMetadata.getAuthorizationEndpoint());
-                    putIfNotNull(tmpValues, OAUTH_ACCESS_USER_INFO_URI_KEY, discoveryMetadata.getUserinfoEndpoint());
-                    putIfNotNull(tmpValues, OAUTH_RESOURCE_JWT_KEY_SET_URI_KEY, discoveryMetadata.getJwksUri());
-                    putIfNotNull(tmpValues, OAUTH_RESOURCE_JWT_KEY_SET_URI_DASH_KEY, discoveryMetadata.getJwksUri());
-                    putIfNotNull(tmpValues, OAUTH_RESOURCE_TOKEN_INFO_URI, discoveryMetadata.getIntrospectionEndpoint());
+                    putIfNotNull(tmpValues, TOKEN_ENDPOINT_KEY, discoveryMetadata.getTokenEndpoint());
+                    putIfNotNull(tmpValues, AUTHORIZATION_ENDPOINT_KEY, discoveryMetadata.getAuthorizationEndpoint());
+                    putIfNotNull(tmpValues, USERINFO_ENDPOINT_KEY, discoveryMetadata.getUserinfoEndpoint());
+                    putIfNotNull(tmpValues, JWKS_URI_KEY, discoveryMetadata.getJwksUri());
+                    putIfNotNull(tmpValues, INTROSPECTION_ENDPOINT_KEY, discoveryMetadata.getIntrospectionEndpoint());
                 }
                 metadataProperties = tmpValues;
             }
@@ -121,10 +112,11 @@ public class DiscoveryPropertySource extends EnumerablePropertySource<String> {
 
     private static void putIfNotNull(Map<String, Object> map, String key, Object value) {
         if (value != null) {
-            map.put(key, value);
+            map.put(PREFIX + key, value);
         }
     }
 
+    // exposed for testing
     OidcDiscoveryClient createDiscoveryClient(String issuerUrl) {
         return  new OidcDiscoveryClient(issuerUrl);
     }

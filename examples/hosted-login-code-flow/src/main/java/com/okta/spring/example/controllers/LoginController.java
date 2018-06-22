@@ -18,6 +18,8 @@ package com.okta.spring.example.controllers;
 import com.okta.spring.config.OktaClientProperties;
 import com.okta.spring.config.OktaOAuth2Properties;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.oauth2.OAuth2ClientProperties;
+import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -40,13 +42,19 @@ public class LoginController {
     @Autowired
     private OktaClientProperties oktaClientProperties;
 
+    @Autowired
+    private OAuth2ClientProperties clientProperties;
+
+    @Autowired
+    private OAuth2ProtectedResourceDetails oAuth2ProtectedResourceDetails;
+
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public ModelAndView login(@RequestParam("state") String state) {
         ModelAndView mav = new ModelAndView("okta/login");
         mav.addObject(STATE, state);
-        mav.addObject(SCOPES, oktaOAuth2Properties.getScopes());
+        mav.addObject(SCOPES, oAuth2ProtectedResourceDetails.getScope());
         mav.addObject(OKTA_BASE_URL, oktaClientProperties.getOrgUrl());
-        mav.addObject(OKTA_CLIENT_ID, oktaOAuth2Properties.getClientId());
+        mav.addObject(OKTA_CLIENT_ID, clientProperties.getClientId());
         mav.addObject(REDIRECT_URI, oktaOAuth2Properties.getRedirectUri());
         mav.addObject(ISSUER_URI, oktaOAuth2Properties.getIssuer());
         return mav;

@@ -15,9 +15,9 @@
  */
 package com.okta.spring.oauth.code;
 
-import com.okta.spring.config.OktaOAuth2Properties;
 import com.okta.spring.oauth.OAuth2AccessTokenValidationException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -47,18 +47,19 @@ class OktaOAuthCodeFlowConfiguration {
     public static class LocalTokenValidationConfig {
         @Bean
         @Primary
-        protected ResourceServerTokenServices resourceServerTokenServices(TokenStore tokenStore, OktaOAuth2Properties properties) {
-            DefaultTokenServices services = new Non500ErrorDefaultTokenServices(properties.getAudience());
+        protected ResourceServerTokenServices resourceServerTokenServices(TokenStore tokenStore,
+                                                                          ResourceServerProperties resourceServerProperties) {
+            DefaultTokenServices services = new AudienceValidatingTokenServices(resourceServerProperties.getServiceId());
             services.setTokenStore(tokenStore);
             return services;
         }
     }
 
-    static class Non500ErrorDefaultTokenServices extends DefaultTokenServices {
+    static class AudienceValidatingTokenServices extends DefaultTokenServices {
 
         private final String audience;
 
-        Non500ErrorDefaultTokenServices(String audience) {
+        AudienceValidatingTokenServices(String audience) {
             this.audience = audience;
         }
 
