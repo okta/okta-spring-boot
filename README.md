@@ -39,7 +39,7 @@ You can configure your applications properties with environment variables, syste
 
 | Property | Default | Details |
 |----------|---------|---------|
-| okta.oauth2.issuer     | N/A | [Authorization Server](/docs/how-to/set-up-auth-server.html) issuer URL, i.e.: https://{yourOktaDomain}.com/oauth2/default |
+| okta.oauth2.issuer     | N/A | [Authorization Server](/docs/how-to/set-up-auth-server.html) issuer URL, i.e.: https://{yourOktaDomain}/oauth2/default |
 | okta.oauth2.clientId   | N/A | The Client Id of your Okta OIDC application |
 | okta.oauth2.audience   | api://default | The audience of your [Authorization Server](/docs/how-to/set-up-auth-server.html) |
 | okta.oauth2.scopeClaim | scp | The scope claim key in the Access Token's JWT |
@@ -96,7 +96,7 @@ You can configure your applications properties with environment variables, syste
 
 | Property | Required | Details |
 |----------|---------|---------|
-| okta.oauth2.issuer     | true | [Authorization Server](/docs/how-to/set-up-auth-server.html) issuer URL, i.e.: https://{yourOktaDomain}.com/oauth2/default |
+| okta.oauth2.issuer     | true | [Authorization Server](/docs/how-to/set-up-auth-server.html) issuer URL, i.e.: https://{yourOktaDomain}/oauth2/default |
 | okta.oauth2.clientId   | true | The Client Id of your Okta OIDC application |
 | okta.oauth2.clientSecret   | true | The Client Secret of your Okta OIDC application |
 

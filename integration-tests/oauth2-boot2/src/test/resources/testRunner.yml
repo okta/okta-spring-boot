@@ -30,10 +30,10 @@ scenarios:
     args:
     - --server.port=${applicationPort}
     - --okta.oauth2.issuer=http://localhost:${mockPort}/oauth2/default
-    - --okta.oauth2.clientId=OOICU812
-    - --okta.oauth2.clientSecret=VERY_SECRET
-    - --server.session.trackingModes=cookie
-    - --okta.oauth2.localTokenValidation=false
+    - --okta.oauth2.client-d=OOICU812
+    - --okta.oauth2.client-ecret=VERY_SECRET
+    - --server.session.tracking-modes=cookie
+    - --okta.oauth2.local-token-validation=false
 
 
   implicit-flow-local-validation:
