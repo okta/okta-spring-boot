@@ -1,0 +1,14 @@
+{
+  "properties": [
+    {
+      "name": "okta.oauth2.client-id",
+      "type": "java.lang.String",
+      "description": "Alias for 'security.oauth2.client.client-id'."
+    },
+    {
+      "name": "okta.oauth2.client-secret",
+      "type": "java.lang.String",
+      "description": "Alias for 'security.oauth2.client.client-secret'."
+    }
+  ]
+}

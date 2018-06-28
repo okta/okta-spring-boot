@@ -30,8 +30,8 @@ scenarios:
     args:
     - --server.port=${applicationPort}
     - --okta.oauth2.issuer=http://localhost:${mockPort}/oauth2/default
-    - --okta.oauth2.client-d=OOICU812
-    - --okta.oauth2.client-ecret=VERY_SECRET
+    - --okta.oauth2.client-id=OOICU812
+    - --okta.oauth2.client-secret=VERY_SECRET
     - --server.session.tracking-modes=cookie
     - --okta.oauth2.local-token-validation=false
 

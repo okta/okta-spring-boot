@@ -41,6 +41,9 @@ class ImplicitRemoteValidationGroupIT extends ApplicationTestRunner {
             .get("http://localhost:${applicationPort}/everyone")
         .then()
             .body(Matchers.equalTo("Everyone has Access: joe.coder@example.com"))
+
+        wireMockServer.verify(
+                newRequestPattern(RequestMethod.GET, urlMatching("/oauth2/default/v1/userinfo")))
     }
 
     @Test

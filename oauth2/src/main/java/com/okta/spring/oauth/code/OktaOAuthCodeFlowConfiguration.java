@@ -43,7 +43,9 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 class OktaOAuthCodeFlowConfiguration {
 
     @Configuration
-    @ConditionalOnProperty(name = "okta.oauth2.localTokenValidation", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "okta.oauth2",
+                           name = "local-token-validation",
+                           matchIfMissing = true)
     public static class LocalTokenValidationConfig {
         @Bean
         @Primary

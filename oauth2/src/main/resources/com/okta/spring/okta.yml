@@ -20,8 +20,8 @@ security:
     client:
       client-authentication-scheme: form
       scope: ${okta.oauth2.scopes:profile email openid}
-      client-id: ${okta.oauth2.clientId:}
-      client-secret: ${okta.oauth2.clientSecret:}
+      client-id: ${okta.oauth2.clientId:${okta.oauth2.client-id:}}
+      client-secret: ${okta.oauth2.clientSecret:${okta.oauth2.client-secret:}}
       access-token-uri: ${discovery.token-endpoint:${okta.oauth2.issuer}/v1/token}
       user-authorization-uri: ${discovery.authorization-endpoint:${okta.oauth2.issuer}/v1/authorize}
     resource:

@@ -48,7 +48,9 @@ import java.net.URL;
 public class OktaTokenServicesConfig {
 
     @Configuration
-    @ConditionalOnProperty(name = "okta.oauth2.localTokenValidation", havingValue = "false")
+    @ConditionalOnProperty(prefix = "okta.oauth2",
+                           name = "local-token-validation",
+                           havingValue = "false")
     public static class RemoteTokenValidationConfig {
 
         private final OktaOAuth2Properties oktaOAuth2Properties;
@@ -86,7 +88,9 @@ public class OktaTokenServicesConfig {
     }
 
     @Configuration
-    @ConditionalOnProperty(name = "okta.oauth2.localTokenValidation", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "okta.oauth2",
+                           name = "local-token-validation",
+                           matchIfMissing = true)
     public static class LocalTokenValidationConfig {
 
         private final OktaOAuth2Properties oktaOAuth2Properties;
