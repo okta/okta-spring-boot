@@ -55,9 +55,13 @@ public class OktaPropertiesMappingEnvironmentPostProcessor implements Environmen
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
         environment.getPropertySources().addLast(loadYaml(new FileSystemResource(new File(System.getProperty("user.home"), ".okta/okta.yml")), false));
         environment.getPropertySources().addLast(loadYaml(new FileSystemResource(new File(System.getProperty("user.home"), ".okta/okta.yaml")), false));
-        environment.getPropertySources().addLast(new DiscoveryPropertySource(environment));
-        environment.getPropertySources().addLast(new IssuerToOrgUrlPropertySource(environment));
         environment.getPropertySources().addLast(loadYaml(new ClassPathResource("com/okta/spring/okta.yml"), true));
+
+        if (environment.containsProperty("okta.oauth2.issuer")) {
+            environment.getPropertySources().addLast(new DiscoveryPropertySource(environment));
+            environment.getPropertySources().addLast(new IssuerToOrgUrlPropertySource(environment));
+            environment.getPropertySources().addLast(loadYaml(new ClassPathResource("com/okta/spring/okta-discovery.yml"), true));
+        }
     }
 
     private PropertySource<?> loadYaml(Resource resource, boolean required) {

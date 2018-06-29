@@ -33,6 +33,7 @@ class OktaPropertiesMappingEnvironmentPostProcessorTest {
         def env = mock(ConfigurableEnvironment)
         def propertySources = new MutablePropertySources()
         when(env.getPropertySources()).thenReturn(propertySources)
+        when(env.containsProperty("okta.oauth2.issuer")).thenReturn(true)
         when(env.getProperty("okta.oauth2.issuer")).thenReturn("http://example.com/foo/oauth2/bar")
                                                    .thenReturn("http://example.com/bar/oauth2/foo")
         def underTest = new OktaPropertiesMappingEnvironmentPostProcessor()

@@ -14,16 +14,13 @@
 # limitations under the License.
 #
 
-
 security:
   oauth2:
     client:
-      client-authentication-scheme: form
-      scope: ${okta.oauth2.scopes:profile email openid}
-      client-id: ${okta.oauth2.clientId:${okta.oauth2.client-id:}}
-      client-secret: ${okta.oauth2.clientSecret:${okta.oauth2.client-secret:}}
+      access-token-uri: ${discovery.token-endpoint:${okta.oauth2.issuer}/v1/token}
+      user-authorization-uri: ${discovery.authorization-endpoint:${okta.oauth2.issuer}/v1/authorize}
     resource:
-      prefer-token-info: false
-      service-id: ${okta.oauth2.audience:api://default}
-    sso:
-      login-path: ${okta.client.redirect-uri:/login}
+      user-info-uri: ${discovery.userinfo-endpoint:${okta.oauth2.issuer}/v1/userinfo}
+      token-info-uri: ${discovery.introspection-endpoint:${okta.oauth2.issuer}/v1/introspect}
+      jwk:
+        key-set-uri: ${discovery.jwks-uri:${okta.oauth2.issuer}/v1/keys}

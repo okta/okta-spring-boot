@@ -21,6 +21,7 @@ import org.springframework.core.env.Environment;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -43,12 +44,12 @@ public class DiscoveryPropertySource extends EnumerablePropertySource<String> {
     private static final String JWKS_URI_KEY = "jwks-uri";
     private static final String INTROSPECTION_ENDPOINT_KEY = "introspection-endpoint";
 
-    private static final String[] SUPPORTED_KEYS = {
+    private static final List<String> SUPPORTED_KEYS = Arrays.asList(
                                             PREFIX + TOKEN_ENDPOINT_KEY,
                                             PREFIX + AUTHORIZATION_ENDPOINT_KEY,
                                             PREFIX + USERINFO_ENDPOINT_KEY,
                                             PREFIX + JWKS_URI_KEY,
-                                            PREFIX + INTROSPECTION_ENDPOINT_KEY};
+                                            PREFIX + INTROSPECTION_ENDPOINT_KEY);
 
     private final boolean isEnabled;
     private final Environment environment;
@@ -63,9 +64,9 @@ public class DiscoveryPropertySource extends EnumerablePropertySource<String> {
     @Override
     public Object getProperty(String name) {
         // there are some cases where 'containsProperty' is not called before calling this method, so we need to guard
-        // against it because we are using the 'environment' direction, otherwise we would end up recursively
+        // against it because we are using the 'environment' directly, otherwise we would end up recursively
         // calling this method.
-        return isReady()
+        return SUPPORTED_KEYS.contains(name) && isReady()
             ? getDiscoveryMetadata().get(name)
             : null;
     }
@@ -77,7 +78,7 @@ public class DiscoveryPropertySource extends EnumerablePropertySource<String> {
 
     @Override
     public String[] getPropertyNames() {
-        return Arrays.copyOf(SUPPORTED_KEYS, SUPPORTED_KEYS.length);
+        return SUPPORTED_KEYS.toArray(new String[SUPPORTED_KEYS.size()]);
     }
 
     private boolean isReady() {

@@ -16,10 +16,12 @@
 package com.okta.spring.oauth.code;
 
 
+import com.okta.spring.oauth.IssuerCondition;
 import com.okta.spring.oauth.OktaTokenServicesConfig;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2SsoCustomConfiguration;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -30,4 +32,5 @@ import org.springframework.context.annotation.Import;
 @AutoConfigureBefore(OAuth2SsoCustomConfiguration.class)
 @ConditionalOnBean(OAuth2SsoCustomConfiguration.class)
 @Import({OktaOAuthCodeFlowConfiguration.class, OktaTokenServicesConfig.class})
+@Conditional(IssuerCondition.class)
 public class OktaOAuthCodeFlowCustomConfiguration {}
