@@ -56,5 +56,17 @@
         <gav regex="true">^org\.springframework\.security\.oauth\.boot:spring-security-oauth2-autoconfigure:.*$</gav>
        <cve>CVE-2016-4977</cve>
     </suppress>
+    <suppress>
+       <notes><![CDATA[file name: spring-security-oauth2-autoconfigure-2.0.1.RELEASE.jar]]></notes>
+       <gav regex="true">^org\.springframework\.security\.oauth\.boot:spring-security-oauth2-autoconfigure:.*$</gav>
+       <cve>CVE-2018-1260</cve>
+    </suppress>
+
+    <!-- wrong GAV for this CVE, it should be spring-data-commons-->
+    <suppress>
+       <notes><![CDATA[file name: spring-boot-starter-data-rest-1.5.14.RELEASE.jar]]></notes>
+       <gav regex="true">^org\.springframework\.boot:spring-boot-starter-data-rest:.*$</gav>
+       <cve>CVE-2018-1273</cve>
+    </suppress>
 
 </suppressions>
