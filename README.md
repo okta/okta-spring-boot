@@ -142,7 +142,7 @@ To integrate the [Okta Java SDK](https://github.com/okta/okta-sdk-java) into you
 
 Then define the `okta.client.token` property. See [creating an API token](https://developer.okta.com/docs/api/getting_started/getting_a_token) for more info.
 
-All that is left is to inject the client (`com.okta.sdk.client.Client`)!
+All that is left is to inject the client (`com.okta.sdk.client.Client`)! Take a look at [this post](https://spring.io/blog/2007/07/11/setter-injection-versus-constructor-injection-and-the-use-of-required/) for more info on the best way to inject your beans.
 
 # Extra Credit
 
