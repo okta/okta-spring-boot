@@ -15,23 +15,39 @@
  */
 package com.okta.spring.oauth.implicit;
 
+import com.okta.spring.oauth.OAuth2AccessTokenValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.jwt.crypto.sign.InvalidSignatureException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 
-class Non500ErrorDefaultTokenServices extends DefaultTokenServices {
+public class ImplicitAudienceValidatingTokenServices extends DefaultTokenServices {
 
-    private final Logger logger = LoggerFactory.getLogger(Non500ErrorDefaultTokenServices.class);
+    private final Logger logger = LoggerFactory.getLogger(ImplicitAudienceValidatingTokenServices.class);
+
+    private final String audience;
+
+    public ImplicitAudienceValidatingTokenServices(String audience) {
+        this.audience = audience;
+    }
 
     @Override
     public OAuth2Authentication loadAuthentication(String accessTokenValue) {
         try {
-            return super.loadAuthentication(accessTokenValue);
+            OAuth2Authentication originalOAuth = super.loadAuthentication(accessTokenValue);
+
+            // validate audience
+            if (!originalOAuth.getOAuth2Request().getResourceIds().contains(audience)) {
+                throw new OAuth2AccessTokenValidationException("Invalid token, 'aud' claim does not contain the expected audience of: " + audience);
+            }
+
+            return originalOAuth;
+
         } catch(InvalidSignatureException e) {
             logger.debug("Invalid Token Signature: {}", e.getMessage(), e);
             return null;
+
         }
     }
 }

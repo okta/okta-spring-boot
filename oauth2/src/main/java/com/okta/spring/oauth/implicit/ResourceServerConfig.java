@@ -63,8 +63,8 @@ public class ResourceServerConfig {
     public static class LocalTokenValidationConfig {
         @Bean
         @Primary
-        protected ResourceServerTokenServices resourceServerTokenServices(TokenStore tokenStore) {
-            DefaultTokenServices services = new Non500ErrorDefaultTokenServices();
+        protected ResourceServerTokenServices resourceServerTokenServices(TokenStore tokenStore, OktaOAuth2Properties properties) {
+            DefaultTokenServices services = new ImplicitAudienceValidatingTokenServices(properties.getAudience());
             services.setTokenStore(tokenStore);
             return services;
         }
