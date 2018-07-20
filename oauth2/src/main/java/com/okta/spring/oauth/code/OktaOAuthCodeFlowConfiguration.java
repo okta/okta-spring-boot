@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Okta, Inc.
+ * Copyright 2017-Present Okta, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,10 @@
 package com.okta.spring.oauth.code;
 
 import com.okta.spring.config.OktaOAuth2Properties;
-import com.okta.spring.oauth.OAuth2AccessTokenValidationException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.security.jwt.crypto.sign.InvalidSignatureException;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -48,36 +45,9 @@ class OktaOAuthCodeFlowConfiguration {
         @Bean
         @Primary
         protected ResourceServerTokenServices resourceServerTokenServices(TokenStore tokenStore, OktaOAuth2Properties properties) {
-            DefaultTokenServices services = new Non500ErrorDefaultTokenServices(properties.getAudience());
+            DefaultTokenServices services = new CodeFlowAudienceValidatingTokenServices(properties.getAudience());
             services.setTokenStore(tokenStore);
             return services;
-        }
-    }
-
-    static class Non500ErrorDefaultTokenServices extends DefaultTokenServices {
-
-        private final String audience;
-
-        Non500ErrorDefaultTokenServices(String audience) {
-            this.audience = audience;
-        }
-
-        @Override
-        public OAuth2Authentication loadAuthentication(String accessTokenValue) {
-
-            try {
-                OAuth2Authentication originalOAuth = super.loadAuthentication(accessTokenValue);
-
-                // validate audience
-                if (!originalOAuth.getOAuth2Request().getResourceIds().contains(audience)) {
-                    throw new OAuth2AccessTokenValidationException("Invalid token, 'aud' claim does not contain the expected audience of: " + audience);
-                }
-
-                return originalOAuth;
-
-            } catch (InvalidSignatureException e) {
-                throw new OAuth2AccessTokenValidationException("Invalid token, invalid signature", e);
-            }
         }
     }
 }
