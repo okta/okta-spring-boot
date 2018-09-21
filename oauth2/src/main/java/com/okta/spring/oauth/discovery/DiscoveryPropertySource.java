@@ -15,6 +15,7 @@
  */
 package com.okta.spring.oauth.discovery;
 
+import com.okta.commons.configcheck.ConfigurationValidator;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.Environment;
 
@@ -102,6 +103,7 @@ public class DiscoveryPropertySource extends EnumerablePropertySource<String> {
         if (metadataProperties == null) {
             synchronized (this) {
                 String issuerUrl = environment.getRequiredProperty(OKTA_OAUTH_ISSUER);
+                ConfigurationValidator.validateOrgUrl(issuerUrl);
                 OidcDiscoveryMetadata discoveryMetadata = createDiscoveryClient(issuerUrl).discover();
                 Map<String, Object> tmpValues = new HashMap<>();
 

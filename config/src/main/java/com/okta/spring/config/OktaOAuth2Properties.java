@@ -15,13 +15,16 @@
  */
 package com.okta.spring.config;
 
+import com.okta.commons.configcheck.ConfigurationValidator;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
 
 import java.util.Arrays;
 import java.util.List;
 
 @ConfigurationProperties("okta.oauth2")
-public class OktaOAuth2Properties {
+public class OktaOAuth2Properties implements Validator {
 
     /**
      * Login route path.
@@ -161,5 +164,31 @@ public class OktaOAuth2Properties {
 
     public void setScopes(List<String> scopes) {
         this.scopes = scopes;
+    }
+
+    @Override
+    public boolean supports(Class<?> clazz) {
+        return OktaOAuth2Properties.class.isAssignableFrom(clazz);
+    }
+
+    @Override
+    public void validate(Object target, Errors errors) {
+
+        OktaOAuth2Properties properties = (OktaOAuth2Properties) target;
+
+        if (properties.getIssuer() != null) {
+            ConfigurationValidator.validateIssuer(properties.getIssuer()).ifInvalid(res ->
+                    errors.rejectValue("issuer", res.getMessage()));
+        }
+
+        if (properties.getClientId() != null) {
+            ConfigurationValidator.validateClientId(properties.getClientId()).ifInvalid(res ->
+                    errors.rejectValue("clientId", res.getMessage()));
+        }
+
+        if (properties.getClientSecret() != null) {
+            ConfigurationValidator.validateClientSecret(properties.getClientSecret()).ifInvalid(res ->
+                    errors.rejectValue("clientSecret", res.getMessage()));
+        }
     }
 }

@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.oauth;
+package com.okta.spring.oauth.env;
 
+import com.okta.commons.configcheck.ConfigurationValidator;
 import com.okta.spring.oauth.discovery.DiscoveryPropertySource;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
@@ -38,6 +39,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * This {@link EnvironmentPostProcessor} configures additional {@link PropertySource}s that map OIDC discovery metadata
@@ -81,7 +83,7 @@ import java.util.Map;
  * As well as updating default properties values from 'com.okta.spring.okta.yml'. And setting 'okta.client.org-url' based
  * on 'okta.oauth2.issuer'
  *
- * NOTE: for discovery can be disabled by setting the property {code}okta.oauth2.discoveryDisabled=true{code}.
+ * NOTE: for discovery can be disabled by setting the property {@code okta.oauth2.discoveryDisabled=true}.
  *
  * @since 0.2.0
  */
@@ -90,9 +92,24 @@ public class OktaPropertiesMappingEnvironmentPostProcessor implements Environmen
     private static final String OAUTH_CLIENT_PREFIX = "security.oauth2.client.";
     private static final String OAUTH_RESOURCE_PREFIX = "security.oauth2.resource.";
     private static final String OKTA_OAUTH_PREFIX = "okta.oauth2.";
+    private static final String OKTA_OAUTH_ISSUER = OKTA_OAUTH_PREFIX + "issuer";
+    private static final String OKTA_OAUTH_CLIENT_ID = OKTA_OAUTH_PREFIX + "clientId";
+    private static final String OKTA_OAUTH_CLIENT_SECRET = OKTA_OAUTH_PREFIX + "clientSecret";
+    private static final String OKTA_OAUTH_AUDIENCE = OKTA_OAUTH_PREFIX + "audience";
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
+
+        // Validate only Okta properties
+        String issuer = environment.getProperty(OKTA_OAUTH_ISSUER);
+        Optional.ofNullable(issuer).ifPresent(ConfigurationValidator::validateOrgUrl);
+
+        String clientId = environment.getProperty(OKTA_OAUTH_CLIENT_ID);
+        Optional.ofNullable(clientId).ifPresent(ConfigurationValidator::validateClientId);
+
+        String clientSecret = environment.getProperty(OKTA_OAUTH_CLIENT_SECRET);
+        Optional.ofNullable(clientSecret).ifPresent(ConfigurationValidator::validateClientSecret);
+
         environment.getPropertySources().addLast(remappedOktaToStandardOAuthPropertySource(environment));
         environment.getPropertySources().addLast(loadYaml(new FileSystemResource(new File(System.getProperty("user.home"), ".okta/okta.yml")), false));
         environment.getPropertySources().addLast(loadYaml(new FileSystemResource(new File(System.getProperty("user.home"), ".okta/okta.yaml")), false));
@@ -128,7 +145,7 @@ public class OktaPropertiesMappingEnvironmentPostProcessor implements Environmen
     }
 
     /**
-     * Map {code}okta.oauth2.*{code} properties to {code}security.oauth2.*{code}.
+     * Map {@code okta.oauth2.*} properties to {@code security.oauth2.*}.
      * @param environment Environment used to read the known 'okta' properties from.
      * @return A PropertySource containing the newly mapped values.
      */
@@ -136,15 +153,15 @@ public class OktaPropertiesMappingEnvironmentPostProcessor implements Environmen
         Map<String, String> aliasMap = new HashMap<>();
 
         // when we drop Spring Boot 1.x support these properties should be changed to kabab format
-        aliasMap.put(OAUTH_CLIENT_PREFIX + "clientId", OKTA_OAUTH_PREFIX + "clientId");
-        aliasMap.put(OAUTH_CLIENT_PREFIX + "clientSecret", OKTA_OAUTH_PREFIX + "clientSecret");
-        aliasMap.put(OAUTH_RESOURCE_PREFIX + "serviceId", OKTA_OAUTH_PREFIX + "audience");
+        aliasMap.put(OAUTH_CLIENT_PREFIX + "clientId", OKTA_OAUTH_CLIENT_ID);
+        aliasMap.put(OAUTH_CLIENT_PREFIX + "clientSecret", OKTA_OAUTH_CLIENT_SECRET);
+        aliasMap.put(OAUTH_RESOURCE_PREFIX + "serviceId", OKTA_OAUTH_AUDIENCE);
         return new RemappedPropertySource("okta-to-oauth2", aliasMap, environment);
     }
 
     /**
-     * Maps the baseUrl of {code}okta.oauth2.issuer{code} to {code}okta.client.org-url{code}.
-     * @param environment Environment used to read the {code}okta.oauth2.*{code} properties from.
+     * Maps the baseUrl of {@code okta.oauth2.issuer} to {@code okta.client.org-url}.
+     * @param environment Environment used to read the {@code okta.oauth2.*} properties from.
      * @return A PropertySource containing the newly mapped values.
      */
     private PropertySource oauthToClientPropertiesSource(final Environment environment) {
