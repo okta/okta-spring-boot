@@ -15,6 +15,7 @@
  */
 package com.okta.spring.oauth
 
+import com.okta.spring.oauth.env.OktaPropertiesMappingEnvironmentPostProcessor
 import org.springframework.boot.SpringApplication
 import org.springframework.core.env.ConfigurableEnvironment
 import org.springframework.core.env.MutablePropertySources
@@ -33,7 +34,8 @@ class OktaPropertiesMappingEnvironmentPostProcessorTest {
         def env = mock(ConfigurableEnvironment)
         def propertySources = new MutablePropertySources()
         when(env.getPropertySources()).thenReturn(propertySources)
-        when(env.getProperty("okta.oauth2.issuer")).thenReturn("http://example.com/foo/oauth2/bar")
+        when(env.getProperty("okta.oauth2.issuer")).thenReturn("http://example.com/foo/oauth2/bar") // called for validation
+                                                   .thenReturn("http://example.com/foo/oauth2/bar")
                                                    .thenReturn("http://example.com/bar/oauth2/foo")
         def underTest = new OktaPropertiesMappingEnvironmentPostProcessor()
         underTest.postProcessEnvironment(env, app)

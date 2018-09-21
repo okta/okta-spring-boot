@@ -20,7 +20,7 @@
     <parent>
         <groupId>com.okta</groupId>
         <artifactId>okta-parent</artifactId>
-        <version>5</version>
+        <version>7</version>
         <relativePath>../okta-java-parent</relativePath>
     </parent>
 
@@ -34,7 +34,7 @@
         <spring-boot.version>1.5.14.RELEASE</spring-boot.version>
         <spring-boot2.version>2.0.3.RELEASE</spring-boot2.version>
         <github.slug>okta/okta-spring-boot</github.slug>
-        <okta.sdk.version>1.2.0</okta.sdk.version>
+        <okta.sdk.version>1.2.1-SNAPSHOT</okta.sdk.version>
     </properties>
 
     <modules>
@@ -139,9 +139,20 @@
                 <version>2.10.0</version>
             </dependency>
             <dependency>
+                <groupId>com.okta.commons</groupId>
+                <artifactId>okta-config-check</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
                 <groupId>com.okta.oidc.tck</groupId>
                 <artifactId>okta-oidc-tck</artifactId>
-                <version>0.3.1</version>
+                <version>0.4.0-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.github.tomakehurst</groupId>
+                <artifactId>wiremock-standalone</artifactId>
+                <version>2.18.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

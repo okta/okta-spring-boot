@@ -20,7 +20,7 @@ scenarios:
     command: com.okta.spring.tests.oauth2.code.BasicRedirectCodeFlowApplication
     args:
     - --server.port=${applicationPort}
-    - --okta.oauth2.issuer=http://localhost:${mockPort}/oauth2/default
+    - --okta.oauth2.issuer=https://localhost:${mockHttpsPort}/oauth2/default
     - --okta.oauth2.clientId=OOICU812
     - --okta.oauth2.clientSecret=VERY_SECRET
     - --server.session.trackingModes=cookie
@@ -29,7 +29,7 @@ scenarios:
     command: com.okta.spring.tests.oauth2.code.BasicRedirectCodeFlowApplication
     args:
     - --server.port=${applicationPort}
-    - --okta.oauth2.issuer=http://localhost:${mockPort}/oauth2/default
+    - --okta.oauth2.issuer=https://localhost:${mockHttpsPort}/oauth2/default
     - --okta.oauth2.clientId=OOICU812
     - --okta.oauth2.clientSecret=VERY_SECRET
     - --server.session.trackingModes=cookie
@@ -43,7 +43,7 @@ scenarios:
     command: com.okta.spring.tests.oauth2.implicit.BasicImplicitFlowApplication
     args:
     - --server.port=${applicationPort}
-    - --okta.oauth2.issuer=http://localhost:${mockPort}/oauth2/default
+    - --okta.oauth2.issuer=https://localhost:${mockHttpsPort}/oauth2/default
     - --okta.oauth2.clientId=OOICU812
     - --server.session.trackingModes=cookie
 
@@ -51,7 +51,7 @@ scenarios:
     command: com.okta.spring.tests.oauth2.implicit.BasicImplicitFlowApplication
     args:
     - --server.port=${applicationPort}
-    - --okta.oauth2.issuer=http://localhost:${mockPort}/oauth2/default
+    - --okta.oauth2.issuer=https://localhost:${mockHttpsPort}/oauth2/default
     - --okta.oauth2.clientId=OOICU812
     - --server.session.trackingModes=cookie
     - --okta.oauth2.localTokenValidation=false
