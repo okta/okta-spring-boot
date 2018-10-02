@@ -31,10 +31,10 @@
     <packaging>pom</packaging>
 
     <properties>
-        <spring-boot.version>1.5.14.RELEASE</spring-boot.version>
-        <spring-boot2.version>2.0.3.RELEASE</spring-boot2.version>
+        <spring-boot.version>1.5.16.RELEASE</spring-boot.version>
+        <spring-boot2.version>2.0.5.RELEASE</spring-boot2.version>
         <github.slug>okta/okta-spring-boot</github.slug>
-        <okta.sdk.version>1.2.1-SNAPSHOT</okta.sdk.version>
+        <okta.sdk.version>1.3.0</okta.sdk.version>
     </properties>
 
     <modules>
@@ -141,18 +141,24 @@
             <dependency>
                 <groupId>com.okta.commons</groupId>
                 <artifactId>okta-config-check</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>1.0.0</version>
             </dependency>
             <dependency>
                 <groupId>com.okta.oidc.tck</groupId>
                 <artifactId>okta-oidc-tck</artifactId>
-                <version>0.4.0-SNAPSHOT</version>
+                <version>0.4.0</version>
             </dependency>
 
             <dependency>
                 <groupId>com.github.tomakehurst</groupId>
                 <artifactId>wiremock-standalone</artifactId>
                 <version>2.18.0</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.rest-assured</groupId>
+                <artifactId>rest-assured</artifactId>
+                <version>3.0.7</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
