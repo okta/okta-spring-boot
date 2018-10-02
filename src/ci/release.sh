@@ -76,4 +76,4 @@ fi
 
 echo
 echo "Tag '${TAG_NAME}' has been created"
-echo "Manually update the release notes at https://github.com/okta/${REPO_SLUG}/releases/edit/${TAG_NAME}"
+echo "Manually update the release notes at https://github.com/${REPO_SLUG}/releases/new?tag=${TAG_NAME}"
