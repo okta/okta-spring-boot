@@ -6,7 +6,9 @@
 Okta Spring Boot Starter
 ========================
 
-Okta's Spring Boot Starter will enable your Spring Boot application to work with Okta via OAuth 2.0.  Jump to our [quickstart](https://developer.okta.com/quickstart/#/angular/java/spring) to see how to configure various clients or follow along below to use curl.
+Okta's Spring Boot Starter will enable your Spring Boot application to work with Okta via OAuth 2.0/OIDC.  Jump to our [quickstart](https://developer.okta.com/quickstart/#/angular/java/spring) to see how to configure various clients or follow along below to use curl.
+
+**NOTE:** If you need support for Spring Boot 1.5.x, use version version 0.6.
 
 **NOTE:** This library works with Spring Boot 1.5 and 2.0.0+.  Support for Spring Boot 2.1 is currently under development.
 
@@ -44,17 +46,15 @@ You can configure your applications properties with environment variables, syste
 | okta.oauth2.issuer     | N/A | [Authorization Server](/docs/how-to/set-up-auth-server.html) issuer URL, i.e.: https://{yourOktaDomain}/oauth2/default |
 | okta.oauth2.clientId   | N/A | The Client Id of your Okta OIDC application |
 | okta.oauth2.audience   | api://default | The audience of your [Authorization Server](/docs/how-to/set-up-auth-server.html) |
-| okta.oauth2.scopeClaim | scp | The scope claim key in the Access Token's JWT |
-| okta.oauth2.rolesClaim | groups | The claim key in the Access Token's JWT that corresponds to an array of the users groups. |
+| okta.oauth2.groupsClaim | groups | The claim key in the Access Token's JWT that corresponds to an array of the users groups. |
 
 ### Create a Controller
 
 The above client makes a request to `/hello-oauth`, you simply need to create a Spring Boot application and `Controller` to handle the response: 
 
 ```java
-@EnableResourceServer
-@SpringBootApplication
 @RestController
+@SpringBootApplication
 public class ExampleApplication {
 
     public static void main(String[] args) {
@@ -65,10 +65,19 @@ public class ExampleApplication {
     public String sayHello(Principal principal) {
         return "Hello, " + principal.getName();
     }
+    
+    @Configuration
+    static class OktaOAuth2WebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
+
+        @Override
+        protected void configure(HttpSecurity http) throws Exception {
+            http.oauth2ResourceServer().jwt();
+        }
+    }
 }
 ```
 
-Make sure to mark the application with Spring Security's `@EnableResourceServer` annotation, to enable handling of access tokens.
+Make sure to configure the `WebSecurityConfigurerAdaptor` with `http.oauth2ResourceServer().jwt()` to enable handling of access tokens.
 
 ### That's it!
 
@@ -107,9 +116,8 @@ You can configure your applications properties with environment variables, syste
 Create a minimal Spring Boot application:
 
 ```java
-@EnableOAuth2Sso
-@SpringBootApplication
 @RestController
+@SpringBootApplication
 public class ExampleApplication {
 
     public static void main(String[] args) {
@@ -119,6 +127,22 @@ public class ExampleApplication {
     @GetMapping("/")
     public String getMessageOfTheDay(Principal principal) {
         return principal.getName() + ", this message of the day is boring";
+    }
+}
+```
+
+If you want to allow anonymous access to specific routes you can add a `WebSecurityConfigurerAdapter`:
+
+```java
+@Configuration
+static class WebConfig extends WebSecurityConfigurerAdapter {
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.authorizeRequests()
+                .antMatchers("/my-anon-page").permitAll()
+                .anyRequest().authenticated()
+            .and().oauth2Client()
+            .and().oauth2Login();
     }
 }
 ```

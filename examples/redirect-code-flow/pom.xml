@@ -35,6 +35,11 @@
     <dependencies>
 
         <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.okta.spring</groupId>
             <artifactId>okta-spring-boot-starter</artifactId>
         </dependency>
@@ -62,13 +67,13 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Logging -->
         <dependency>
-            <!-- Required for any libraries that expect to call the commons logging APIs -->
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
-            <scope>runtime</scope>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-config</artifactId>
+            <version>${spring-cloud.version}</version>
         </dependency>
+
+        <!-- Logging -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>

@@ -14,18 +14,16 @@
 # limitations under the License.
 #
 
-logging:
-  level:
-    root: INFO
-    org.springframework.web: DEBUG
-    org.springframework.security: DEBUG
-
 okta:
   oauth2:
-    redirectUri: /login/okta
+    issuer: "https://{yourOktaDomain}/oauth2/default"
+    client-id: "{clientId}"
+    client-secret: "{clientSecret}"
 
-security:
-  oauth2:
-    client:
-      # Redirect to your local page and render the widget
-      userAuthorizationUri: http://localhost:8080/login
+spring:
+  security:
+    oauth2:
+      client:
+        provider:
+          okta:
+            authorization-uri: http://localhost:8080/okta-custom-login

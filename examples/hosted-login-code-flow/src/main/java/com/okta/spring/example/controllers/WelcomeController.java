@@ -30,7 +30,7 @@ public class WelcomeController {
      * @return a static welcome message
      */
     @GetMapping("/")
-    @PreAuthorize("#oauth2.clientHasRole('Everyone') || #oauth2.hasScope('email')")
+    @PreAuthorize("hasAuthority('Everyone')")
     public Welcome getMessageOfTheDay(Principal principal) {
         return new Welcome("The message of the day is boring.", principal.getName());
     }

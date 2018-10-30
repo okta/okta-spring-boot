@@ -15,8 +15,7 @@
  */
 package com.okta.spring.example.controllers;
 
-import com.okta.spring.config.OktaOAuth2Properties;
-import org.springframework.util.Assert;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,20 +25,19 @@ import java.util.Map;
 @RestController
 public class SignInWidgetConfigController {
 
-    private final String issuerUrl;
+    private final String issuer;
 
     private final  String clientId;
 
-    public SignInWidgetConfigController(OktaOAuth2Properties oktaOAuth2Properties) {
-
-        Assert.notNull(oktaOAuth2Properties.getClientId(), "Property 'okta.oauth.clientId' is required.");
-        this.issuerUrl = oktaOAuth2Properties.getIssuer();
-        this.clientId = oktaOAuth2Properties.getClientId();
+    public SignInWidgetConfigController(@Value("okta.oauth2.issuer") String issuer,
+                                        @Value("okta.oauth2.client-id") String clientId) {
+        this.issuer = issuer;
+        this.clientId = clientId;
     }
 
     @GetMapping("/sign-in-widget-config")
     public WidgetConfig getWidgetConfig() {
-        return new WidgetConfig(issuerUrl, clientId);
+        return new WidgetConfig(issuer, clientId);
     }
 
     public static class WidgetConfig {

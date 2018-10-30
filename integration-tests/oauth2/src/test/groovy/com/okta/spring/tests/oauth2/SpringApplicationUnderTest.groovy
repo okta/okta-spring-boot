@@ -29,6 +29,15 @@ class SpringApplicationUnderTest implements ApplicationUnderTest {
 
     @Override
     void start() {
+
+        testScenario.args.stream()
+                .filter {it.startsWith("-D")}
+                .map {it.substring(2)}
+                .map {it.split("=")}
+                .forEach {
+            System.setProperty(it[0], it[1])
+        }
+
         applicationContext = SpringApplication.run(
                 Class.forName(testScenario.command),
                 testScenario.args.toArray(new String[testScenario.args.size()]))

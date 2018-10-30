@@ -18,12 +18,11 @@ package com.okta.spring.tests.oauth2.code;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
-import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
-import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
-import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecurityExpressionHandler;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,23 +30,26 @@ import java.security.Principal;
 
 @SpringBootApplication
 @RestController
-@EnableOAuth2Sso
 // fail loading this config if the SDK 'Client' is found. It should NOT exist on the classpath by default
 @ConditionalOnMissingClass("com.okta.sdk.client.Client")
+@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class BasicRedirectCodeFlowApplication {
 
-    @EnableGlobalMethodSecurity(prePostEnabled = true)
-    protected static class GlobalSecurityConfiguration extends GlobalMethodSecurityConfiguration {
-        @Override
-        protected MethodSecurityExpressionHandler createExpressionHandler() {
-            return new OAuth2MethodSecurityExpressionHandler();
-        }
+    @GetMapping("/")
+    @PreAuthorize("hasAuthority('SCOPE_email')")
+    public String getMessageOfTheDay(Principal principal) {
+        return "Welcome home, The message of the day is boring: " + principal.getName();
     }
 
-    @GetMapping("/")
-    @PreAuthorize("#oauth2.hasScope('email')")
-    public String getMessageOfTheDay(Principal principal) {
-        return "The message of the day is boring: " + principal.getName();
+// The following isn't needed as the equivalent is provided by Spring Boot Security by default
+    @Configuration
+    static class WebConfig extends WebSecurityConfigurerAdapter {
+        @Override
+        protected void configure(HttpSecurity http) throws Exception {
+            http.authorizeRequests().anyRequest().authenticated()
+                .and().oauth2Client()
+                .and().oauth2Login();
+        }
     }
 
     public static void main(String[] args) {

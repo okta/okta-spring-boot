@@ -43,13 +43,6 @@
                 <scope>import</scope>
             </dependency>
 
-            <!-- User newer oauth2 module, this will be removed when this version is include in the above BOM  -->
-            <dependency>
-                <groupId>org.springframework.security.oauth</groupId>
-                <artifactId>spring-security-oauth2</artifactId>
-                <version>2.2.0.RELEASE</version>
-            </dependency>
-
         </dependencies>
     </dependencyManagement>
 

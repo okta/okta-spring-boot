@@ -16,14 +16,6 @@
 
 implementation: com.okta.spring.tests.oauth2.SpringApplicationUnderTest
 scenarios:
-  code-flow-local-validation:
-    command: com.okta.spring.tests.oauth2.code.BasicRedirectCodeFlowApplication
-    args:
-    - --server.port=${applicationPort}
-    - --okta.oauth2.issuer=https://localhost:${mockHttpsPort}/oauth2/default
-    - --okta.oauth2.clientId=OOICU812
-    - --okta.oauth2.clientSecret=VERY_SECRET
-    - --server.session.trackingModes=cookie
 
   code-flow-remote-validation:
     command: com.okta.spring.tests.oauth2.code.BasicRedirectCodeFlowApplication
@@ -32,29 +24,30 @@ scenarios:
     - --okta.oauth2.issuer=https://localhost:${mockHttpsPort}/oauth2/default
     - --okta.oauth2.clientId=OOICU812
     - --okta.oauth2.clientSecret=VERY_SECRET
-    - --server.session.trackingModes=cookie
-    - --okta.oauth2.localTokenValidation=false
-
+    - --okta.oauth2.scopes=offline_access
+    - --okta.oauth2.redirectUri=/authorization-code/callback
+    - --server.servlet.session.tracking-modes=cookie
+    protectedPath: /oauth2/authorization/okta
 
   implicit-flow-local-validation:
-    disabledTests:
-    # Spring JWT parsing does NOT check the 'not-before' claim, (the 'exp' claim is validated)
-    - inactiveAccessTokenTest
     command: com.okta.spring.tests.oauth2.implicit.BasicImplicitFlowApplication
     args:
     - --server.port=${applicationPort}
     - --okta.oauth2.issuer=https://localhost:${mockHttpsPort}/oauth2/default
     - --okta.oauth2.clientId=OOICU812
     - --server.session.trackingModes=cookie
-
-  implicit-flow-remote-validation:
-    command: com.okta.spring.tests.oauth2.implicit.BasicImplicitFlowApplication
-    args:
-    - --server.port=${applicationPort}
-    - --okta.oauth2.issuer=https://localhost:${mockHttpsPort}/oauth2/default
-    - --okta.oauth2.clientId=OOICU812
-    - --server.session.trackingModes=cookie
-    - --okta.oauth2.localTokenValidation=false
 
   oidc-code-flow-local-validation:
-    enabled: false
+    disabledTests:
+    # Spring does remote validation of the token
+    - invalidIssuerIdTokenJwtTest
+    command: com.okta.spring.tests.oauth2.code.BasicRedirectCodeFlowApplication
+    args:
+    - --server.port=${applicationPort}
+    - --okta.oauth2.issuer=https://localhost:${mockHttpsPort}/oauth2/default
+    - --okta.oauth2.clientId=OOICU812
+    - --okta.oauth2.clientSecret=VERY_SECRET
+    - --okta.oauth2.scopes=profile,email,openid
+    - --okta.oauth2.redirectUri=/authorization-code/callback
+    - --server.servlet.session.tracking-modes=cookie
+    protectedPath: /oauth2/authorization/okta
