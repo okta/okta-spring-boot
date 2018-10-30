@@ -30,10 +30,6 @@
     <dependencies>
         <dependency>
             <groupId>com.okta.spring</groupId>
-            <artifactId>okta-spring-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.okta.spring</groupId>
             <artifactId>okta-spring-security-oauth2</artifactId>
         </dependency>
         <dependency>

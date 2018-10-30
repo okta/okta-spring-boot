@@ -14,8 +14,8 @@
 # limitations under the License.
 #
 
-logging:
-  level:
-    root: INFO
-    org.springframework.web: INFO
-    org.springframework.security: INFO
+okta:
+  oauth2:
+    issuer: "{yourOktaDomain}/oauth2/default"
+    client-id: "{clientId}"
+

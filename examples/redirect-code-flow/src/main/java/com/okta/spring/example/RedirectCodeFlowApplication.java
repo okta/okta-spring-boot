@@ -17,29 +17,25 @@ package com.okta.spring.example;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
-import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
-import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecurityExpressionHandler;
 
 @SpringBootApplication
-@EnableOAuth2Sso
+@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class RedirectCodeFlowApplication {
-
-    /**
-     * Enable OAuth claim checking from @PreAuthorize annotation.
-     * @see com.okta.spring.example.controllers.WelcomeController
-     */
-    @EnableGlobalMethodSecurity(prePostEnabled = true)
-    protected static class GlobalSecurityConfiguration extends GlobalMethodSecurityConfiguration {
-        @Override
-        protected MethodSecurityExpressionHandler createExpressionHandler() {
-            return new OAuth2MethodSecurityExpressionHandler();
-        }
-    }
 
     public static void main(String[] args) {
         SpringApplication.run(RedirectCodeFlowApplication.class, args);
     }
+
+// By default Spring configures the equivalent for you. Secure by default.
+
+//    @Configuration
+//    static class WebConfig extends WebSecurityConfigurerAdapter {
+//        @Override
+//        protected void configure(HttpSecurity http) throws Exception {
+//            http.authorizeRequests().anyRequest().authenticated()
+//                .and().oauth2Client()
+//                .and().oauth2Login();
+//        }
+//    }
 }

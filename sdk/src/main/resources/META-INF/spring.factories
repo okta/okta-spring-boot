@@ -1,1 +1,3 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration = com.okta.spring.sdk.OktaSdkConfig
+org.springframework.boot.autoconfigure.EnableAutoConfiguration = com.okta.spring.boot.sdk.OktaSdkConfig
+
+org.springframework.boot.env.EnvironmentPostProcessor = com.okta.spring.boot.sdk.env.OktaSdkPropertiesEnvironmentPostProcessor
