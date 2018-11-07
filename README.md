@@ -8,6 +8,8 @@ Okta Spring Boot Starter
 
 Okta's Spring Boot Starter will enable your Spring Boot application to work with Okta via OAuth 2.0.  Jump to our [quickstart](https://developer.okta.com/quickstart/#/angular/java/spring) to see how to configure various clients or follow along below to use curl.
 
+**NOTE:** This library works with Spring Boot 1.5 and 2.0.0+.  Support for Spring Boot 2.1 is currently under development.
+
 ## What you need
 
 * An Okta account (sign up for a [forever-free developer account](https://developer.okta.com/signup/))
