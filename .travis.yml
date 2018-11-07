@@ -16,6 +16,9 @@ script:
 after_success:
   - bash <(curl -s https://codecov.io/bash) -f okta-spring-security-starter/target/site/jacoco/jacoco.xml
 
+after_failure:
+  - find integration-tests/oauth2/target/failsafe-reports/ -type f | xargs -I{} sh -c 'echo {}; cat {}'
+
 deploy:
   - provider: pages
     skip_cleanup: true
