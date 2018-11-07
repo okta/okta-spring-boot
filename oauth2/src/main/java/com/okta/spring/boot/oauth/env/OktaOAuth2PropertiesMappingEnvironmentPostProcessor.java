@@ -94,7 +94,6 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
         // okta's endpoints can be resolved from an issuer
         environment.getPropertySources().addLast(oktaStaticDiscoveryPropertySource(environment));
         environment.getPropertySources().addLast(oktaRedirectUriPropertySource(environment));
-
     }
 
     private PropertySource remappedOktaToStandardOAuthPropertySource(Environment environment) {
@@ -117,7 +116,6 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
                 if (containsProperty(name)) {
                     return Binder.get(environment).bind(OKTA_OAUTH_SCOPES, Bindable.setOf(String.class)).orElse(null);
                 }
-
                 return null;
             }
         };
@@ -156,7 +154,7 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
         @Override
         public Object getProperty(String name) {
 
-            return (containsProperty(name) && environment.containsProperty(conditionalProperty))
+            return containsProperty(name) && environment.containsProperty(conditionalProperty)
                 ? super.getProperty(name)
                 : null;
         }
