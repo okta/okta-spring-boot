@@ -42,6 +42,9 @@
     <Match>
         <Package name="~com\.okta\.test\.mock.*" />
     </Match>
-
+    <Match>
+        <Class name="com.okta.spring.boot.oauth.env.OktaOAuth2PropertiesMappingEnvironmentPostProcessor$1" />
+        <Bug pattern="SIC_INNER_SHOULD_BE_STATIC_ANON" />
+    </Match>
 
 </FindBugsFilter>
