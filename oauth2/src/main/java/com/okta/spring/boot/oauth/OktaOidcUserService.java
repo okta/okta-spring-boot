@@ -32,6 +32,7 @@ final class OktaOidcUserService extends OidcUserService {
 
     OktaOidcUserService(String groupClaim) {
         this.groupClaim = groupClaim;
+        this.setOauth2UserService(new OktaOAuth2UserService(groupClaim));
     }
 
     @Override

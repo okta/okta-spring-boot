@@ -16,11 +16,21 @@
 package com.okta.spring.boot.oauth;
 
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
+import com.okta.spring.boot.oauth.http.UserAgentRequestInterceptor;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
+import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
+import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.Arrays;
 
 final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Configurer, HttpSecurity> {
 
@@ -47,10 +57,14 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
     }
 
     private void configureLogin(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {
+
         http.oauth2Login()
-                    .userInfoEndpoint()
-                    .userService(new OktaOAuth2UserService(oktaOAuth2Properties.getGroupsClaim()))
-                    .oidcUserService(new OktaOidcUserService(oktaOAuth2Properties.getGroupsClaim()));
+                .userInfoEndpoint()
+                .userService(new OktaOAuth2UserService(oktaOAuth2Properties.getGroupsClaim()))
+                .oidcUserService(new OktaOidcUserService(oktaOAuth2Properties.getGroupsClaim()))
+            .and()
+                .tokenEndpoint()
+                    .accessTokenResponseClient(accessTokenResponseClient());
 
         if (oktaOAuth2Properties.getRedirectUri() != null) {
             http.oauth2Login().redirectionEndpoint().baseUri(oktaOAuth2Properties.getRedirectUri());
@@ -58,6 +72,21 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
     }
 
     private void configureResourceServer(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {
-        http.oauth2ResourceServer().jwt().jwtAuthenticationConverter(new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim()));
+
+        http.oauth2ResourceServer()
+                .jwt().jwtAuthenticationConverter(new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim()));
+    }
+
+    private OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient() {
+
+        RestTemplate restTemplate = new RestTemplate(Arrays.asList(new FormHttpMessageConverter(),
+                                                                   new OAuth2AccessTokenResponseHttpMessageConverter()));
+        restTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
+        restTemplate.getInterceptors().add(new UserAgentRequestInterceptor());
+
+        DefaultAuthorizationCodeTokenResponseClient accessTokenResponseClient = new DefaultAuthorizationCodeTokenResponseClient();
+        accessTokenResponseClient.setRestOperations(restTemplate);
+
+        return accessTokenResponseClient;
     }
 }

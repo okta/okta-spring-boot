@@ -16,6 +16,7 @@
 package com.okta.spring.boot.oauth;
 
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
+import com.okta.spring.boot.oauth.http.UserAgentRequestInterceptor;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -37,6 +38,8 @@ import org.springframework.security.oauth2.jwt.JwtIssuerValidator;
 import org.springframework.security.oauth2.jwt.JwtTimestampValidator;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoderJwkSupport;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -75,7 +78,14 @@ class OktaOAuth2ResourceServerAutoConfig {
 
             NimbusJwtDecoderJwkSupport decoder = new NimbusJwtDecoderJwkSupport(oAuth2ResourceServerProperties.getJwt().getJwkSetUri());
             decoder.setJwtValidator(validator);
+            decoder.setRestOperations(restOperations());
 
             return decoder;
+    }
+
+    private RestOperations restOperations() {
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.getInterceptors().add(new UserAgentRequestInterceptor());
+        return restTemplate;
     }
 }
