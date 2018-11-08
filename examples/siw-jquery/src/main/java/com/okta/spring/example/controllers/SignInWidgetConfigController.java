@@ -29,8 +29,8 @@ public class SignInWidgetConfigController {
 
     private final  String clientId;
 
-    public SignInWidgetConfigController(@Value("okta.oauth2.issuer") String issuer,
-                                        @Value("okta.oauth2.client-id") String clientId) {
+    public SignInWidgetConfigController(@Value("${okta.oauth2.issuer}") String issuer,
+                                        @Value("${okta.oauth2.client-id}") String clientId) {
         this.issuer = issuer;
         this.clientId = clientId;
     }

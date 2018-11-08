@@ -15,11 +15,15 @@
  */
 package com.okta.spring.boot.oauth;
 
+import com.okta.spring.boot.oauth.http.UserAgentRequestInterceptor;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -30,6 +34,14 @@ final class OktaOAuth2UserService extends DefaultOAuth2UserService {
 
     OktaOAuth2UserService(String groupClaim) {
         this.groupClaim = groupClaim;
+        setRestOperations(restOperations());
+    }
+
+    private RestOperations restOperations() {
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
+        restTemplate.getInterceptors().add(new UserAgentRequestInterceptor());
+        return restTemplate;
     }
 
     @Override
