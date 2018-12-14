@@ -38,6 +38,10 @@
             <groupId>com.okta.commons</groupId>
             <artifactId>okta-config-check</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.okta.commons</groupId>
+            <artifactId>okta-commons-lang</artifactId>
+        </dependency>
 
         <!-- security -->
         <dependency>

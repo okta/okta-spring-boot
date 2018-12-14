@@ -15,14 +15,19 @@
  */
 package com.okta.spring.boot.oauth.http
 
-import org.hamcrest.MatcherAssert
+import org.mockito.ArgumentCaptor
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpRequest
 import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpResponse
 import org.testng.annotations.Test
 
+import static org.hamcrest.Matchers.allOf
+import static org.hamcrest.Matchers.containsString
 import static org.hamcrest.Matchers.is
+import static org.hamcrest.Matchers.matchesPattern
+import static org.hamcrest.Matchers.not
+import static org.mockito.ArgumentMatchers.eq
 import static org.mockito.Mockito.mock
 import static org.mockito.Mockito.verify
 import static org.mockito.Mockito.when
@@ -44,6 +49,17 @@ class UserAgentRequestInterceptorTest {
         def underTest = new UserAgentRequestInterceptor()
         assertThat underTest.intercept(request, null, execution), is(response)
 
-        verify(headers).add("User-Agent", UserAgent.userAgentString)
+        def userAgentCapture = ArgumentCaptor.forClass(String)
+
+        verify(headers).add(eq("User-Agent"), userAgentCapture.capture())
+        def userAgentString = userAgentCapture.getValue()
+        assertThat userAgentString, allOf(
+                    matchesPattern(".*okta-spring-security/\\d.*"),
+                    matchesPattern(".* spring/\\d.*"),
+                    matchesPattern(".* spring-boot/\\d.*"),
+                    containsString("java/${System.getProperty("java.version")}"),
+                    containsString("${System.getProperty("os.name")}/${System.getProperty("os.version")}"),
+                    not(containsString('${'))
+        )
     }
 }
