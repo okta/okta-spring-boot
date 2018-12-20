@@ -97,6 +97,53 @@ Okta's Spring Security integration will [parse the JWT access token](https://dev
 
 Check out a minimal example that uses the [Okta Signin Widget and JQuery](examples/siw-jquery) or [this blog post](https://developer.okta.com/blog/2018/11/26/spring-boot-2-dot-1-oidc-oauth2-reactive-apis). 
 
+
+### Spring WebFlux
+
+To configure a resource server when using Spring WebFlux, you need to use a couple annotations, and define a `SecurityWebFilterChain` bean.
+
+```java
+@EnableWebFluxSecurity 
+@EnableReactiveMethodSecurity 
+public class SecurityConfiguration {
+
+    @Bean 
+    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
+        http
+            .authorizeExchange()
+                .anyExchange().authenticated()
+                .and()
+            .oauth2ResourceServer()
+                .jwt();
+        return http;
+    }
+}
+```
+
+If you want to support SSO and a resource server in the same application, you can do that too!
+
+```java
+@EnableWebFluxSecurity 
+@EnableReactiveMethodSecurity 
+public class SecurityConfiguration {
+
+    @Bean 
+    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
+        http
+            .authorizeExchange()
+                .anyExchange().authenticated()
+                .and()
+            .oauth2Login()
+                .and()
+            .oauth2ResourceServer()
+                .jwt();
+        return http;
+    }
+}
+```
+
+[Full Stack Reactive with Spring WebFlux, WebSockets, and React](https://developer.okta.com/blog/2018/09/25/spring-webflux-websockets-react) uses both SSO and a resource server. Its current code uses Spring Security's OIDC support. Switching it to [use the Okta Spring Starter](https://github.com/oktadeveloper/okta-spring-webflux-react-example/pull/11) reduces the lines of code quite a bit.
+
 ## Supporting server side applications - OAuth Code flow
 
 Building a server side application and just need to redirect to a login page? This OAuth 2.0 code flow is for you.
