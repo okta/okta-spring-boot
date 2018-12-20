@@ -103,6 +103,12 @@ Check out a minimal example that uses the [Okta Signin Widget and JQuery](exampl
 To configure a resource server when using Spring WebFlux, you need to use a couple annotations, and define a `SecurityWebFilterChain` bean.
 
 ```java
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.web.server.SecurityWebFilterChain;
+
 @EnableWebFluxSecurity 
 @EnableReactiveMethodSecurity 
 public class SecurityConfiguration {
