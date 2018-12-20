@@ -202,7 +202,7 @@ static class WebConfig extends WebSecurityConfigurerAdapter {
 
 ### That's it!
 
-Open up `[http://localhost:8080/](http://localhost:8080/)` in your favorite browser. 
+Open up <http://localhost:8080> in your favorite browser. 
 
 You'll be redirected automatically to an Okta login page. Once you successfully login, you will be redirected back to your app and you'll see the message of the day!
 
