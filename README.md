@@ -69,7 +69,10 @@ public class ExampleApplication {
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
-            http.oauth2ResourceServer().jwt();
+            http
+                .authorizeRequests().anyRequest().authenticated()
+                .and()
+                .oauth2ResourceServer().jwt();
         }
     }
 }
@@ -92,8 +95,7 @@ Hello, joe.coder@example.com
 
 Okta's Spring Security integration will [parse the JWT access token](https://developer.okta.com/blog/2017/06/21/what-the-heck-is-oauth#oauth-flows) from the HTTP request's `Authorization: Bearer` header value.
 
-Check out a minimal example that uses the [Okta Signin Widget and JQuery](examples/siw-jquery) or [this blog post](https://developer.okta.com/blog/2017/09/19/build-a-secure-notes-application-with-kotlin-typescript-and-okta). 
-
+Check out a minimal example that uses the [Okta Signin Widget and JQuery](examples/siw-jquery) or [this blog post](https://developer.okta.com/blog/2018/11/26/spring-boot-2-dot-1-oidc-oauth2-reactive-apis). 
 
 ## Supporting server side applications - OAuth Code flow
 
@@ -147,9 +149,9 @@ static class WebConfig extends WebSecurityConfigurerAdapter {
 
 ### That's it!
 
-Open up the this link in your browser: [http://localhost:8080/](http://localhost:8080/)
+Open up `[http://localhost:8080/](http://localhost:8080/)` in your favorite browser. 
 
-You will be redirected automatically to an Okta login page. Once you successfully login, you will be redirected back to '[http://localhost:8080/](http://localhost:8080/)' and you will see the message of the day!
+You'll be redirected automatically to an Okta login page. Once you successfully login, you will be redirected back to your app and you'll see the message of the day!
 
 This module integrates with Spring Security's OAuth support, all you need is the mark your application with the standard `@EnableOAuth2Client` annotation. 
 
