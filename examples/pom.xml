@@ -34,6 +34,7 @@
         <module>redirect-code-flow</module>
         <module>hosted-login-code-flow</module>
         <module>config-server</module>
+        <module>webflux-resource-server</module>
     </modules>
 
     <build>
