@@ -19,18 +19,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtIssuerValidator;
+import org.springframework.security.oauth2.jwt.JwtTimestampValidator;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 final class TokenUtil {
 
     private static final Logger log = LoggerFactory.getLogger(TokenUtil.class);
+    private static final OAuth2Error INVALID_AUDIENCE = new OAuth2Error(
+                        OAuth2ErrorCodes.INVALID_REQUEST,
+                        "This aud claim is not equal to the configured audience",
+                        "https://tools.ietf.org/html/rfc6750#section-3.1");
 
     private TokenUtil(){}
 
@@ -59,5 +75,19 @@ final class TokenUtil {
             }
         }
         return Collections.emptySet();
+    }
+
+    static OAuth2TokenValidator<Jwt> jwtValidator(String issuer, String audience ) {
+        List<OAuth2TokenValidator<Jwt>> validators = new ArrayList<>();
+            validators.add(new JwtTimestampValidator());
+            validators.add(new JwtIssuerValidator(issuer));
+            validators.add(token -> {
+                Set<String> expectedAudience = new HashSet<>();
+                expectedAudience.add(audience);
+                return !Collections.disjoint(token.getAudience(), expectedAudience)
+                        ? OAuth2TokenValidatorResult.success()
+                        : OAuth2TokenValidatorResult.failure(INVALID_AUDIENCE);
+            });
+        return new DelegatingOAuth2TokenValidator<>(validators);
     }
 }
