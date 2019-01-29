@@ -31,7 +31,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <spring-boot.version>2.1.1.RELEASE</spring-boot.version>
+        <spring-boot.version>2.1.2.RELEASE</spring-boot.version>
         <spring-cloud.version>2.0.2.RELEASE</spring-cloud.version>
         <github.slug>okta/okta-spring-boot</github.slug>
         <okta.sdk.version>1.3.0</okta.sdk.version>
@@ -43,6 +43,7 @@
         <module>sdk</module>
         <module>okta-spring-boot-starter</module>
         <module>integration-tests/oauth2</module>
+        <module>integration-tests/oauth2-reactive</module>
         <module>examples</module>
         <module>coverage</module>
     </modules>

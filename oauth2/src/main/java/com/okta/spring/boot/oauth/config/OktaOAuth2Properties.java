@@ -32,6 +32,7 @@ public final class OktaOAuth2Properties implements Validator {
 
     /**
      * Login route path. This property should NOT be used with applications that have multiple OAuth2 providers.
+     * NOTE: this does NOT work with WebFlux, where the redirect URI will always be: /login/oauth2/code/okta
      */
     private String redirectUri;
 
