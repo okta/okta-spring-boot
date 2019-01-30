@@ -31,7 +31,6 @@ final class UserUtil {
 
     private UserUtil() {}
 
-
     static OAuth2User decorateUser(OAuth2User user, OAuth2UserRequest userRequest, String groupClaim) {
 
         // Only post process requests from the "Okta" reg

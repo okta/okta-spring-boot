@@ -38,7 +38,6 @@ import reactor.core.publisher.Flux;
 @ConditionalOnBean(ReactiveSecurityAutoConfiguration.class)
 class ReactiveOktaOAuth2AutoConfig {
 
-
     @Bean
     ReactiveOAuth2UserService oauth2UserService(OktaOAuth2Properties oktaOAuth2Properties) {
         return new ReactiveOktaOAuth2UserService(oktaOAuth2Properties.getGroupsClaim());
