@@ -35,7 +35,9 @@ import org.springframework.security.oauth2.client.endpoint.WebClientReactiveAuth
 import org.springframework.security.oauth2.client.oidc.authentication.OidcAuthorizationCodeReactiveAuthenticationManager;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcReactiveOAuth2UserService;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserService;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -50,7 +52,7 @@ import reactor.core.publisher.Mono;
 class ReactiveOktaOAuth2ServerHttpServerAutoConfig {
 
     @Bean
-    BeanPostProcessor authManagerServerHttpSecurityBeanPostProcessor(@Qualifier("oauth2UserService") ReactiveOAuth2UserService oAuth2UserService,
+    BeanPostProcessor authManagerServerHttpSecurityBeanPostProcessor(@Qualifier("oauth2UserService") ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService,
                                                                      @Qualifier("oidcUserService") OidcReactiveOAuth2UserService oidcUserService) {
         return new OktaOAuth2LoginServerBeanPostProcessor(oAuth2UserService, oidcUserService);
     }
@@ -58,7 +60,7 @@ class ReactiveOktaOAuth2ServerHttpServerAutoConfig {
     /*
      * Fix for https://github.com/spring-projects/spring-security/issues/6484
      */
-    private static ReactiveAuthenticationManager reactiveAuthenticationManager(ReactiveOAuth2UserService oAuth2UserService,
+    private static ReactiveAuthenticationManager reactiveAuthenticationManager(ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService,
                                                                                OidcReactiveOAuth2UserService oidcUserService) {
         WebClientReactiveAuthorizationCodeTokenResponseClient client = new WebClientReactiveAuthorizationCodeTokenResponseClient();
         ReactiveAuthenticationManager result = new OAuth2LoginReactiveAuthenticationManager(client, oAuth2UserService) {
@@ -102,10 +104,10 @@ class ReactiveOktaOAuth2ServerHttpServerAutoConfig {
 
     static class OktaOAuth2LoginServerBeanPostProcessor implements BeanPostProcessor {
 
-        private final ReactiveOAuth2UserService oAuth2UserService;
+        private final ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService;
         private final OidcReactiveOAuth2UserService oidcUserService;
 
-        OktaOAuth2LoginServerBeanPostProcessor(ReactiveOAuth2UserService oAuth2UserService, OidcReactiveOAuth2UserService oidcUserService) {
+        OktaOAuth2LoginServerBeanPostProcessor(ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService, OidcReactiveOAuth2UserService oidcUserService) {
             this.oAuth2UserService = oAuth2UserService;
             this.oidcUserService = oidcUserService;
         }

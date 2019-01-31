@@ -17,7 +17,10 @@ package com.okta.spring.boot.oauth;
 
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcReactiveOAuth2UserService;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserService;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import reactor.core.publisher.Mono;
 
 final class ReactiveOktaOidcUserService extends OidcReactiveOAuth2UserService {
@@ -25,7 +28,12 @@ final class ReactiveOktaOidcUserService extends OidcReactiveOAuth2UserService {
     private final String groupClaim;
 
     ReactiveOktaOidcUserService(String groupClaim) {
+        this(groupClaim, new ReactiveOktaOAuth2UserService(groupClaim));
+    }
+
+    ReactiveOktaOidcUserService(String groupClaim, ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService) {
         this.groupClaim = groupClaim;
+        setOauth2UserService(oauth2UserService);
     }
 
     @Override

@@ -16,6 +16,7 @@
 package com.okta.spring.boot.oauth;
 
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -27,7 +28,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcReactiveOAuth2UserService;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserService;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import reactor.core.publisher.Flux;
 
 @Configuration
@@ -39,12 +42,13 @@ import reactor.core.publisher.Flux;
 class ReactiveOktaOAuth2AutoConfig {
 
     @Bean
-    ReactiveOAuth2UserService oauth2UserService(OktaOAuth2Properties oktaOAuth2Properties) {
+    ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService(OktaOAuth2Properties oktaOAuth2Properties) {
         return new ReactiveOktaOAuth2UserService(oktaOAuth2Properties.getGroupsClaim());
     }
 
     @Bean
-    OidcReactiveOAuth2UserService oidcUserService(OktaOAuth2Properties oktaOAuth2Properties) {
-        return new ReactiveOktaOidcUserService(oktaOAuth2Properties.getGroupsClaim());
+    OidcReactiveOAuth2UserService oidcUserService(OktaOAuth2Properties oktaOAuth2Properties,
+                                                  @Qualifier("oauth2UserService") ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService) {
+        return new ReactiveOktaOidcUserService(oktaOAuth2Properties.getGroupsClaim(), oAuth2UserService);
     }
 }

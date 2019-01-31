@@ -26,6 +26,7 @@ final class ReactiveOktaOAuth2UserService extends DefaultReactiveOAuth2UserServi
 
     ReactiveOktaOAuth2UserService(String groupClaim) {
         this.groupClaim = groupClaim;
+        setWebClient(WebClientUtil.createWebClient());
     }
 
     @Override
