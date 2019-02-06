@@ -101,4 +101,16 @@
         <cve>CVE-2017-8046</cve>
     </suppress>
 
+    <!-- project reactor and spring-boot-starter-reactor-netty use netty, but they are NOT the same artifact -->
+    <suppress>
+        <notes><![CDATA[ file name: reactor-netty-0.8.4.RELEASE.jar ]]></notes>
+        <gav regex="true">^io\.projectreactor\.netty:reactor-netty:.*$</gav>
+        <cpe>cpe:/a:netty_project:netty</cpe>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[ file name: spring-boot-starter-reactor-netty-2.1.2.RELEASE.jar ]]></notes>
+        <gav regex="true">^org\.springframework\.boot:spring-boot-starter-reactor-netty:.*$</gav>
+        <cpe>cpe:/a:netty_project:netty</cpe>
+    </suppress>
+
 </suppressions>
