@@ -178,8 +178,8 @@ public class ExampleApplication {
     }
 
     @GetMapping("/")
-    public String getMessageOfTheDay(Principal principal) {
-        return principal.getName() + ", this message of the day is boring";
+    public String getMessageOfTheDay((@AuthenticationPrincipal OidcUser user) {
+        return user.getName() + ", this message of the day is boring";
     }
 }
 ```
