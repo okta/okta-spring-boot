@@ -54,6 +54,11 @@ final class RemappedPropertySource extends EnumerablePropertySource<String> {
     }
 
     @Override
+    public boolean containsProperty(String name) {
+        return getProperty(name) != null;
+    }
+
+    @Override
     public String[] getPropertyNames() {
         return aliasMap.keySet().toArray(new String[0]);
     }

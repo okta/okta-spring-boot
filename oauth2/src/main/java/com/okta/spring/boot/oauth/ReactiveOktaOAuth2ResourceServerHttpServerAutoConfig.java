@@ -31,6 +31,7 @@ import org.springframework.security.oauth2.server.resource.BearerTokenAuthentica
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter;
 
 @Configuration
+@ConditionalOnOktaResourceServerProperties
 @AutoConfigureAfter(ReactiveOktaOAuth2ResourceServerAutoConfig.class)
 @EnableConfigurationProperties({OktaOAuth2Properties.class, OAuth2ResourceServerProperties.class})
 @ConditionalOnClass({ EnableWebFluxSecurity.class, BearerTokenAuthenticationToken.class, ReactiveJwtDecoder.class })
@@ -56,7 +57,7 @@ class ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig {
                 final ServerHttpSecurity http = (ServerHttpSecurity) bean;
                 http.oauth2ResourceServer().jwt()
                         .jwtAuthenticationConverter(new ReactiveJwtAuthenticationConverterAdapter(
-                            new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim())));
+                                new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim())));
             }
             return bean;
         }
