@@ -17,6 +17,8 @@ package com.okta.spring.boot.oauth;
 
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
 import com.okta.spring.boot.oauth.http.UserAgentRequestInterceptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.context.ApplicationContext;
@@ -32,7 +34,11 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 
+import static org.springframework.util.StringUtils.isEmpty;
+
 final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Configurer, HttpSecurity> {
+
+    private static final Logger log = LoggerFactory.getLogger(OktaOAuth2Configurer.class);
 
     @Override
     public void init(HttpSecurity http) throws Exception {
@@ -44,14 +50,22 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
             OktaOAuth2Properties oktaOAuth2Properties = context.getBean(OktaOAuth2Properties.class);
 
             // if OAuth2ClientProperties bean is not available do NOT configure
-            if (!context.getBeansOfType(OAuth2ClientProperties.class).isEmpty()) {
+            if (!context.getBeansOfType(OAuth2ClientProperties.class).isEmpty()
+                && !isEmpty(oktaOAuth2Properties.getIssuer())
+                && !isEmpty(oktaOAuth2Properties.getClientId())
+                && !isEmpty(oktaOAuth2Properties.getClientSecret())) {
                 // configure Okta user services
                 configureLogin(http, oktaOAuth2Properties);
+            } else {
+                log.debug("OAuth/OIDC Login not configured due to missing issuer, client-id, or client-secret property");
             }
 
-            if (!context.getBeansOfType(OAuth2ResourceServerProperties.class).isEmpty()) {
+            if (!context.getBeansOfType(OAuth2ResourceServerProperties.class).isEmpty()
+                && !isEmpty(oktaOAuth2Properties.getIssuer())) {
                 // configure Okta specific auth converter (extracts authorities from `groupsClaim`
                 configureResourceServer(http, oktaOAuth2Properties);
+            } else {
+                log.debug("OAuth resource server not configured due to missing issuer or client-id property");
             }
         }
     }

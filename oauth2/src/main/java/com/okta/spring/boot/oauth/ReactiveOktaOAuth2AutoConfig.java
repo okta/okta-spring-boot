@@ -36,6 +36,7 @@ import reactor.core.publisher.Flux;
 @Configuration
 @AutoConfigureAfter(ReactiveSecurityAutoConfiguration.class)
 @EnableConfigurationProperties(OktaOAuth2Properties.class)
+@ConditionalOnOktaClientProperties
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
 @ConditionalOnClass({ Flux.class, EnableWebFluxSecurity.class, ClientRegistration.class })
 @ConditionalOnBean(ReactiveSecurityAutoConfiguration.class)

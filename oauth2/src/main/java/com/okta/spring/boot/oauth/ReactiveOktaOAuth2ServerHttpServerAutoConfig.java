@@ -46,6 +46,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Configuration
+@ConditionalOnOktaClientProperties
 @AutoConfigureAfter(ReactiveOktaOAuth2AutoConfig.class)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
 @ConditionalOnClass({ Flux.class, EnableWebFluxSecurity.class, ClientRegistration.class })
@@ -108,7 +109,8 @@ class ReactiveOktaOAuth2ServerHttpServerAutoConfig {
         private final ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService;
         private final OidcReactiveOAuth2UserService oidcUserService;
 
-        OktaOAuth2LoginServerBeanPostProcessor(ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService, OidcReactiveOAuth2UserService oidcUserService) {
+        OktaOAuth2LoginServerBeanPostProcessor(ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService,
+                                               OidcReactiveOAuth2UserService oidcUserService) {
             this.oAuth2UserService = oAuth2UserService;
             this.oidcUserService = oidcUserService;
         }

@@ -154,9 +154,14 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
         @Override
         public Object getProperty(String name) {
 
-            return containsProperty(name) && environment.containsProperty(conditionalProperty)
+            return containsProperty(name)
                 ? super.getProperty(name)
                 : null;
+        }
+
+        @Override
+        public boolean containsProperty(String name) {
+            return super.containsProperty(name) && environment.containsProperty(conditionalProperty);
         }
     }
     @Override
