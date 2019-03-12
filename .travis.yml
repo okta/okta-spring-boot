@@ -35,4 +35,6 @@ deploy:
   email: developers@okta.com
   name: Travis CI - Auto Doc Build
   on:
+    jdk: oraclejdk8
     branch: master
+    condition: "$TRAVIS_EVENT_TYPE != cron"
