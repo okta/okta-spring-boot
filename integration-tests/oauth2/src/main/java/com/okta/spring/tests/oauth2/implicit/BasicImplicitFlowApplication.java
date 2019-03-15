@@ -49,7 +49,7 @@ public class BasicImplicitFlowApplication {
         @Override
         public void configure(HttpSecurity http) throws Exception {
 
-            Okta.configureBrowserFriendlyResourceServer401EntryPoint(http);
+            Okta.configureResourceServer401ResponseBody(http);
 
             http.authorizeRequests()
                     .antMatchers(HttpMethod.OPTIONS,"/**").permitAll()
