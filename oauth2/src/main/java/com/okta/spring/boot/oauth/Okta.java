@@ -48,7 +48,7 @@ public final class Okta {
      * @param http the ServerHttpSecurity to configure
      * @return the {@code http} to allow method chaining
      */
-    public static ServerHttpSecurity configureBrowserFriendlyResourceServer401EntryPoint(ServerHttpSecurity http) {
+    public static ServerHttpSecurity configureResourceServer401ResponseBody(ServerHttpSecurity http) {
         return http.exceptionHandling()
                 .authenticationEntryPoint(new DelegatingServerAuthenticationEntryPoint(
                                                 // clients that accept plain text, browsers, curl, etc
@@ -70,7 +70,7 @@ public final class Okta {
      * @param http the HttpSecurity to configure
      * @return the {@code http} to allow method chaining
      */
-    public static HttpSecurity configureBrowserFriendlyResourceServer401EntryPoint(HttpSecurity http) throws Exception {
+    public static HttpSecurity configureResourceServer401ResponseBody(HttpSecurity http) throws Exception {
         return http.exceptionHandling()
                     .defaultAuthenticationEntryPointFor(authenticationEntryPoint(), textRequestMatcher(http)).and();
     }

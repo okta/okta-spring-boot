@@ -50,7 +50,7 @@ public class ReactiveImplicitFlowApplication {
         @Bean
         public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
 
-            Okta.configureBrowserFriendlyResourceServer401EntryPoint(http);
+            Okta.configureResourceServer401ResponseBody(http);
 
             return
                 http.authorizeExchange()
