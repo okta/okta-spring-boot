@@ -15,6 +15,7 @@
  */
 package com.okta.spring.tests.oauth2.reactive.implicit;
 
+import com.okta.spring.boot.oauth.Okta;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -48,8 +49,11 @@ public class ReactiveImplicitFlowApplication {
 
         @Bean
         public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
-            return http
-                .authorizeExchange()
+
+            Okta.configureBrowserFriendlyResourceServer401EntryPoint(http);
+
+            return
+                http.authorizeExchange()
                     .anyExchange().authenticated()
                     .and()
                 .oauth2ResourceServer()

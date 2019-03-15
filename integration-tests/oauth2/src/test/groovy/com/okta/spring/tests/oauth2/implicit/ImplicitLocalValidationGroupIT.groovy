@@ -17,11 +17,13 @@ package com.okta.spring.tests.oauth2.implicit
 
 import com.okta.test.mock.Scenario
 import com.okta.test.mock.application.ApplicationTestRunner
+import io.restassured.http.ContentType
 import org.hamcrest.Matchers
 import org.testng.annotations.Test
 
 import static io.restassured.RestAssured.given
 import static com.okta.test.mock.scenarios.Scenario.IMPLICIT_FLOW_LOCAL_VALIDATION
+import static org.hamcrest.Matchers.startsWith
 
 @Scenario(IMPLICIT_FLOW_LOCAL_VALIDATION)
 class ImplicitLocalValidationGroupIT extends ApplicationTestRunner {
@@ -36,5 +38,19 @@ class ImplicitLocalValidationGroupIT extends ApplicationTestRunner {
             .get("http://localhost:${applicationPort}/everyone")
         .then()
             .body(Matchers.equalTo("Everyone has Access: joe.coder@example.com"))
+    }
+
+    @Test
+    void test401ResponseBody() {
+         given()
+            .contentType(ContentType.ANY)
+            .redirects()
+                .follow(false)
+        .when()
+            .get("http://localhost:${applicationPort}/everyone")
+        .then()
+            .statusCode(401)
+            .header("WWW-Authenticate", startsWith("Bearer"))
+            .body(Matchers.equalTo("401 UNAUTHORIZED\n"))
     }
 }

@@ -15,6 +15,7 @@
  */
 package com.okta.spring.tests.oauth2.implicit;
 
+import com.okta.spring.boot.oauth.Okta;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Configuration;
@@ -47,6 +48,9 @@ public class BasicImplicitFlowApplication {
 
         @Override
         public void configure(HttpSecurity http) throws Exception {
+
+            Okta.configureBrowserFriendlyResourceServer401EntryPoint(http);
+
             http.authorizeRequests()
                     .antMatchers(HttpMethod.OPTIONS,"/**").permitAll()
                     .anyRequest().authenticated()
