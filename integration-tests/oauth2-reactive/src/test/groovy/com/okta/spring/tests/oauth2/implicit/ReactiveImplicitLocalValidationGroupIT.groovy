@@ -28,6 +28,8 @@ import static org.hamcrest.Matchers.startsWith
 @Scenario(IMPLICIT_FLOW_LOCAL_VALIDATION)
 class ReactiveImplicitLocalValidationGroupIT extends ApplicationTestRunner {
 
+    private final static String ERROR_401 = "401 Unauthorized"
+
     @Test
     void groupAccessTest() {
         given()
@@ -51,6 +53,6 @@ class ReactiveImplicitLocalValidationGroupIT extends ApplicationTestRunner {
         .then()
             .statusCode(401)
             .header("WWW-Authenticate", startsWith("Bearer"))
-            .body(Matchers.equalTo("401 UNAUTHORIZED"))
+            .body(Matchers.equalTo(ERROR_401))
     }
 }
