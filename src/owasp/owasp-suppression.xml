@@ -113,4 +113,28 @@
         <cpe>cpe:/a:netty_project:netty</cpe>
     </suppress>
 
+    <!-- https://pivotal.io/security/cve-2018-1258
+         Update to 5.0.5.RELEASE+ or Spring Boot 2.0.2.RELEASE+
+         (Wrong version detected by OWASP plugin) -->
+    <suppress>
+        <notes><![CDATA[ file name: spring-security-core-5.1.5.RELEASE.jar ]]></notes>
+        <gav regex="true">^org\.springframework\.security:spring-security-.*:5.1.*$</gav>
+        <cve>CVE-2018-1258</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[ file name: spring-boot-starter-security-2.1.4.RELEASE.jar ]]></notes>
+        <gav regex="true">^org\.springframework\.boot:spring-boot-starter-security:2.1.*$</gav>
+        <cve>CVE-2018-1258</cve>
+    </suppress>
+
+    <!-- https://nvd.nist.gov/vuln/detail/CVE-2019-0232
+         https://tomcat.apache.org/security-9.html#Apache_Tomcat_9.x_vulnerabilities
+         Windows + CGI issue, CGI is disabled by default, and we are only using tomcat in our ITs.
+    -->
+    <suppress>
+        <notes><![CDATA[ file name: tomcat-embed-core-9.0.17.jar ]]></notes>
+        <gav regex="true">^org\.apache\.tomcat\.embed:tomcat-embed-.*:.*$</gav>
+        <cve>CVE-2019-0232</cve>
+    </suppress>
+
 </suppressions>
