@@ -60,12 +60,17 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                 log.debug("OAuth/OIDC Login not configured due to missing issuer, client-id, or client-secret property");
             }
 
-            if (!context.getBeansOfType(OAuth2ResourceServerProperties.class).isEmpty()
-                && !isEmpty(oktaOAuth2Properties.getIssuer())) {
-                // configure Okta specific auth converter (extracts authorities from `groupsClaim`
-                configureResourceServer(http, oktaOAuth2Properties);
+            // resource server configuration
+            if (!context.getBeansOfType(OAuth2ResourceServerProperties.class).isEmpty()) {
+                OAuth2ResourceServerProperties resourceServerProperties = context.getBean(OAuth2ResourceServerProperties.class);
+                if (!isEmpty(resourceServerProperties.getJwt().getIssuerUri())) {
+                    // configure Okta specific auth converter (extracts authorities from `groupsClaim`
+                    configureResourceServer(http, oktaOAuth2Properties);
+                } else {
+                    log.debug("OAuth resource server not configured due to missing issuer property");
+                }
             } else {
-                log.debug("OAuth resource server not configured due to missing issuer or client-id property");
+                log.debug("OAuth resource server not configured due to missing OAuth2ResourceServerProperties bean");
             }
         }
     }

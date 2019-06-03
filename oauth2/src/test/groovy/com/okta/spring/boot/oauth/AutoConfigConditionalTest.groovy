@@ -32,10 +32,12 @@ import org.springframework.boot.autoconfigure.security.reactive.ReactiveUserDeta
 import org.springframework.boot.test.context.runner.AbstractApplicationContextRunner
 import org.springframework.boot.test.context.runner.ReactiveWebApplicationContextRunner
 import org.springframework.boot.test.context.runner.WebApplicationContextRunner
+import org.springframework.boot.web.reactive.context.AnnotationConfigReactiveWebApplicationContext
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.env.ConfigurableEnvironment
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
@@ -54,6 +56,7 @@ import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 
 import javax.servlet.Filter
+import java.util.function.Supplier
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
@@ -88,13 +91,11 @@ class AutoConfigConditionalTest {
     }
 
     @Test
-    void webResourceServerConfig() {
-
-        WebApplicationContextRunner contextRunner = webContextRunner()
+    void webResourceServerConfig_emptyProperties() {
 
         // missing properties, component does not load
-        contextRunner
-            .run {context ->
+        webContextRunner()
+            .run { context ->
                 assertThat(context).doesNotHaveBean(OktaOAuth2ResourceServerAutoConfig)
                 assertThat(context).doesNotHaveBean(JwtDecoder)
                 assertThat(context).doesNotHaveBean(OktaOAuth2AutoConfig)
@@ -104,12 +105,15 @@ class AutoConfigConditionalTest {
                 assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ServerHttpServerAutoConfig)
                 assertThat(context).doesNotHaveBean(OAuth2AuthorizedClientService)
 
-
-            assertFiltersDisabled(context, OAuth2LoginAuthenticationFilter, BearerTokenAuthenticationFilter)
+                assertFiltersDisabled(context, OAuth2LoginAuthenticationFilter, BearerTokenAuthenticationFilter)
         }
+    }
+
+    @Test
+    void webResourceServerConfig_withIssuer() {
 
         // with properties it loads correctly
-        contextRunner.withPropertyValues(
+        webContextRunner().withPropertyValues(
                 "okta.oauth2.issuer=https://test.example.com/")
             .run {context ->
                 assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
@@ -127,11 +131,11 @@ class AutoConfigConditionalTest {
     }
 
     @Test
-    void webLoginConfig() {
+    void webLoginConfig_withIssuer() {
 
         webContextRunner().withPropertyValues(
                 "okta.oauth2.issuer=https://test.example.com/")
-                .run { context ->
+            .run { context ->
 
             assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2AutoConfig)
             assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerAutoConfig)
@@ -147,12 +151,16 @@ class AutoConfigConditionalTest {
             assertFiltersEnabled(context, BearerTokenAuthenticationFilter)
             assertFiltersDisabled(context, OAuth2LoginAuthenticationFilter)
         }
+    }
+
+    @Test
+    void webLoginConfig_withIssuerAndClientInfo() {
 
         webContextRunner().withPropertyValues(
-                "okta.oauth2.issuer=https://test.example.com/",
+                "okta.oauth2.issuer=https://test.example.com",
                 "okta.oauth2.client-id=test-client-id",
                 "okta.oauth2.client-secret=test-client-secret")
-                .run { context ->
+            .run { context ->
             assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2AutoConfig)
             assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerAutoConfig)
             assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig)
@@ -169,13 +177,11 @@ class AutoConfigConditionalTest {
     }
 
     @Test
-    void reactiveResourceServerTest() {
-
-        ReactiveWebApplicationContextRunner contextRunner = reactiveContextRunner()
+    void reactiveResourceServerTest_emptyProperties() {
 
         // missing properties, component does not load
-        contextRunner
-            .run {context ->
+        reactiveContextRunner()
+            .run { context ->
                 assertThat(context).doesNotHaveBean(OktaOAuth2ResourceServerAutoConfig)
                 assertThat(context).doesNotHaveBean(JwtDecoder)
                 assertThat(context).doesNotHaveBean(OktaOAuth2AutoConfig)
@@ -187,12 +193,15 @@ class AutoConfigConditionalTest {
 
                 assertWebFiltersDisabled(context, OAuth2LoginAuthenticationWebFilter)
                 assertJwtBearerWebFilterDisabled(context)
-
         }
+    }
+
+    @Test
+    void reactiveResourceServerTest_withIssuer() {
 
         // with properties it loads correctly
-        contextRunner.withPropertyValues(
-                "okta.oauth2.issuer=https://test.example.com/")
+        reactiveContextRunner().withPropertyValues(
+                    "okta.oauth2.issuer=https://test.example.com")
             .run {context ->
                 assertThat(context).doesNotHaveBean(OktaOAuth2ResourceServerAutoConfig)
                 assertThat(context).doesNotHaveBean(JwtDecoder)
@@ -212,14 +221,12 @@ class AutoConfigConditionalTest {
     }
 
     @Test
-    void reactiveLoginConfig() {
+    void reactiveLoginConfig_withIssuer() {
 
-        reactiveContextRunner().withPropertyValues(
-                "okta.oauth2.issuer=https://test.example.com/",
-                "okta.oauth2.client-id=test-client-id"
-        )
+        reactiveContextRunner()
+                .withPropertyValues(
+                    "okta.oauth2.issuer=https://test.example.com")
                 .run { context ->
-
             assertThat(context).doesNotHaveBean(OktaOAuth2ResourceServerAutoConfig)
             assertThat(context).doesNotHaveBean(JwtDecoder)
             assertThat(context).doesNotHaveBean(OktaOAuth2AutoConfig)
@@ -235,6 +242,10 @@ class AutoConfigConditionalTest {
             assertWebFiltersEnabled(context, AuthenticationWebFilter)
             assertJwtBearerWebFilterEnabled(context)
         }
+    }
+
+    @Test
+    void reactiveLoginConfig_withIssuerAndClientInfo() {
 
         reactiveContextRunner().withPropertyValues(
                 "okta.oauth2.issuer=https://test.example.com/",
@@ -321,22 +332,38 @@ class AutoConfigConditionalTest {
     }
 
     private reactiveContextRunner(Class<?>... appClasses = [SimpleReactiveApp]) {
-        Class[] autoConfigs = [oktaAutoConfigs, appClasses].flatten()
-        ReactiveWebApplicationContextRunner contextRunner = new ReactiveWebApplicationContextRunner()
-                .withConfiguration(AutoConfigurations.of(autoConfigs))
 
-        return withOktaProperties(contextRunner)
+        Class[] autoConfigs = [oktaAutoConfigs, appClasses].flatten()
+        ReactiveWebApplicationContextRunner contextRunner = new ReactiveWebApplicationContextRunner(
+        new Supplier<AnnotationConfigReactiveWebApplicationContext>() {
+            @Override
+            AnnotationConfigReactiveWebApplicationContext get() {
+                return new AnnotationConfigReactiveWebApplicationContext() {
+                    @Override
+                    protected ConfigurableEnvironment createEnvironment() {
+                        def configurableEnv = super.createEnvironment()
+                        new OktaOAuth2PropertiesMappingEnvironmentPostProcessor().postProcessEnvironment(configurableEnv, null)
+                        return configurableEnv
+                    }
+                }
+            }
+        })
+
+        return contextRunner
+                .withConfiguration(AutoConfigurations.of(autoConfigs))
                 .withInitializer(new ConditionEvaluationReportLoggingListener())
     }
 
     private static <T extends AbstractApplicationContextRunner> T withOktaProperties(T contextRunner) {
 
-        return (T) contextRunner.withInitializer(new ApplicationContextInitializer<ConfigurableApplicationContext>() {
-                @Override
-                void initialize(ConfigurableApplicationContext applicationContext) {
-                    new OktaOAuth2PropertiesMappingEnvironmentPostProcessor().postProcessEnvironment(applicationContext.environment, null)
-                }
-            })
+        return (T) contextRunner.withInitializer(new OktaPropertiesContextInitializer())
+    }
+
+    static class OktaPropertiesContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+        @Override
+        void initialize(ConfigurableApplicationContext applicationContext) {
+            new OktaOAuth2PropertiesMappingEnvironmentPostProcessor().postProcessEnvironment(applicationContext.getEnvironment(), null)
+        }
     }
 
     @Configuration

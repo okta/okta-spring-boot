@@ -66,6 +66,12 @@ public final class OktaOAuth2Properties implements Validator {
      */
     private String groupsClaim = "groups";
 
+    // work around for https://github.com/spring-projects/spring-boot/issues/17035
+    private OktaOAuth2Properties() {
+        this(null);
+    }
+
+    @Autowired
     public OktaOAuth2Properties(@Autowired(required = false) OAuth2ClientProperties clientProperties) {
         this.clientProperties = clientProperties;
     }
