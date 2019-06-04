@@ -1,0 +1,10 @@
+com.okta.spring.boot.oauth
+com.okta.spring.boot.oauth.config
+com.okta.spring.boot.oauth.env
+com.okta.spring.boot.oauth.http
+com.okta.spring.boot.sdk
+com.okta.spring.boot.sdk.cache
+com.okta.spring.boot.sdk.config
+com.okta.spring.boot.sdk.env
+com.okta.spring.tests.oauth2.code
+com.okta.spring.tests.oauth2.implicit
