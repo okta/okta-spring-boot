@@ -66,6 +66,8 @@ public final class OktaOAuth2Properties implements Validator {
      */
     private String groupsClaim = "groups";
 
+    private String postLogoutRedirectUri;
+
     // work around for https://github.com/spring-projects/spring-boot/issues/17035
     private OktaOAuth2Properties() {
         this(null);
@@ -139,6 +141,14 @@ public final class OktaOAuth2Properties implements Validator {
         return Optional.ofNullable(clientProperties != null
                 ? clientProperties.getRegistration().get("okta")
                 : null);
+    }
+
+    public String getPostLogoutRedirectUri() {
+        return postLogoutRedirectUri;
+    }
+
+    public void setPostLogoutRedirectUri(String postLogoutRedirectUri) {
+        this.postLogoutRedirectUri = postLogoutRedirectUri;
     }
 
     @Override

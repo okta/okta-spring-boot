@@ -136,6 +136,7 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
         properties.put("spring.security.oauth2.client.provider.okta.token-uri", "${okta.oauth2.issuer}/v1/token");
         properties.put("spring.security.oauth2.client.provider.okta.user-info-uri", "${okta.oauth2.issuer}/v1/userinfo");
         properties.put("spring.security.oauth2.client.provider.okta.jwk-set-uri", "${okta.oauth2.issuer}/v1/keys");
+        properties.put("spring.security.oauth2.client.provider.okta.issuerUri", "${okta.oauth2.issuer}"); // required for OIDC logout
 
         return new ConditionalMapPropertySource("okta-static-discovery", properties, environment, OKTA_OAUTH_ISSUER);
     }
