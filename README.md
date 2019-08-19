@@ -71,12 +71,13 @@ For Apache Maven:
 <dependency>
     <groupId>com.okta.spring</groupId>
     <artifactId>okta-spring-boot-starter</artifactId>
+    <version>1.2.1</version>
 </dependency>
 ```
 
 For Gradle:
 ```groovy
-compile 'com.okta.spring:okta-spring-boot-starter'
+compile 'com.okta.spring:okta-spring-boot-starter:1.2.1'
 ```
 
 ## Supporting client side applications - OAuth Implicit flow
