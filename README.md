@@ -73,6 +73,9 @@ public class ExampleApplication {
                 .authorizeRequests().anyRequest().authenticated()
                 .and()
                 .oauth2ResourceServer().jwt();
+                
+            // Send a 401 message to the browser (w/o this, you'll see a blank page)
+            Okta.configureResourceServer401ResponseBody(http);
         }
     }
 }
@@ -89,6 +92,7 @@ $ curl http://localhost:8080/hello-oauth \
    --header "Authorization: Bearer ${accessToken}"
 ```
 The result should look something like:
+
 ```text
 Hello, joe.coder@example.com
 ```
@@ -103,6 +107,7 @@ Check out a minimal example that uses the [Okta Signin Widget and JQuery](exampl
 To configure a resource server when using Spring WebFlux, you need to use a couple annotations, and define a `SecurityWebFilterChain` bean.
 
 ```java
+import com.okta.spring.boot.oauth.Okta;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
@@ -121,6 +126,10 @@ public class SecurityConfiguration {
                 .and()
             .oauth2ResourceServer()
                 .jwt();
+                
+        // Send a 401 message to the browser (w/o this, you'll see a blank page)
+        Okta.configureResourceServer401ResponseBody(http);
+                
         return http.build();
     }
 }
