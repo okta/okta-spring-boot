@@ -16,15 +16,20 @@
  */
 package com.okta.spring.boot.oauth;
 
+import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.DelegatingReactiveAuthenticationManager;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
@@ -35,7 +40,9 @@ import org.springframework.security.oauth2.client.authentication.OAuth2LoginReac
 import org.springframework.security.oauth2.client.endpoint.WebClientReactiveAuthorizationCodeTokenResponseClient;
 import org.springframework.security.oauth2.client.oidc.authentication.OidcAuthorizationCodeReactiveAuthenticationManager;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcReactiveOAuth2UserService;
+import org.springframework.security.oauth2.client.oidc.web.server.logout.OidcClientInitiatedServerLogoutSuccessHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserService;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -44,6 +51,9 @@ import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 
 @Configuration
 @ConditionalOnOktaClientProperties
@@ -55,8 +65,19 @@ class ReactiveOktaOAuth2ServerHttpServerAutoConfig {
 
     @Bean
     BeanPostProcessor authManagerServerHttpSecurityBeanPostProcessor(@Qualifier("oauth2UserService") ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService,
-                                                                     @Qualifier("oidcUserService") OidcReactiveOAuth2UserService oidcUserService) {
-        return new OktaOAuth2LoginServerBeanPostProcessor(oAuth2UserService, oidcUserService);
+                                                                     @Qualifier("oidcUserService") OidcReactiveOAuth2UserService oidcUserService,
+                                                                     @Autowired(required = false) OidcClientInitiatedServerLogoutSuccessHandler logoutSuccessHandler) {
+        return new OktaOAuth2LoginServerBeanPostProcessor(oAuth2UserService, oidcUserService, logoutSuccessHandler);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(name = "okta.oauth2.postLogoutRedirectUri")
+    OidcClientInitiatedServerLogoutSuccessHandler oidcClientInitiatedServerLogoutSuccessHandler(OktaOAuth2Properties oktaOAuth2Properties,
+                                                                                                ReactiveClientRegistrationRepository repository) throws URISyntaxException {
+        OidcClientInitiatedServerLogoutSuccessHandler logoutSuccessHandler = new OidcClientInitiatedServerLogoutSuccessHandler(repository);
+        logoutSuccessHandler.setPostLogoutRedirectUri(new URI(oktaOAuth2Properties.getPostLogoutRedirectUri()));
+        return logoutSuccessHandler;
     }
 
     /*
@@ -108,17 +129,26 @@ class ReactiveOktaOAuth2ServerHttpServerAutoConfig {
 
         private final ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService;
         private final OidcReactiveOAuth2UserService oidcUserService;
+        private final OidcClientInitiatedServerLogoutSuccessHandler logoutSuccessHandler;
 
         OktaOAuth2LoginServerBeanPostProcessor(ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService,
-                                               OidcReactiveOAuth2UserService oidcUserService) {
+                                               OidcReactiveOAuth2UserService oidcUserService,
+                                               @Nullable OidcClientInitiatedServerLogoutSuccessHandler logoutSuccessHandler) {
             this.oAuth2UserService = oAuth2UserService;
             this.oidcUserService = oidcUserService;
+            this.logoutSuccessHandler = logoutSuccessHandler;
+
         }
 
         @Override
         public Object postProcessAfterInitialization(Object bean, String beanName) {
             if (bean instanceof ServerHttpSecurity) {
-                ((ServerHttpSecurity) bean).oauth2Login().authenticationManager(reactiveAuthenticationManager(oAuth2UserService, oidcUserService));
+                ServerHttpSecurity httpSecurity = (ServerHttpSecurity) bean;
+                httpSecurity.oauth2Login().authenticationManager(reactiveAuthenticationManager(oAuth2UserService, oidcUserService));
+
+                if (logoutSuccessHandler != null) {
+                    httpSecurity.logout().logoutSuccessHandler(logoutSuccessHandler);
+                }
             }
             return bean;
         }

@@ -49,5 +49,6 @@ scenarios:
     - --okta.oauth2.clientSecret=VERY_SECRET
     - --okta.oauth2.scopes=profile,email,openid
     - --okta.oauth2.redirectUri=/authorization-code/callback
+    - --okta.oauth2.postLogoutRedirectUri=/you-are-logged-out
     - --server.servlet.session.tracking-modes=cookie
     protectedPath: /oauth2/authorization/okta
