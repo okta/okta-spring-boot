@@ -49,6 +49,9 @@ public class BasicRedirectCodeFlowApplication {
             http.authorizeRequests().anyRequest().authenticated()
                 .and().oauth2Client()
                 .and().oauth2Login();
+
+            // disable csrf to make testing easier
+            http.csrf().disable();
         }
     }
 

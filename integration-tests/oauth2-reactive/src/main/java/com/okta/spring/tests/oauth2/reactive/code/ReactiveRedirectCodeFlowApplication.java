@@ -48,7 +48,9 @@ public class ReactiveRedirectCodeFlowApplication {
                     .anyExchange().authenticated()
                     .and()
                     .oauth2Login()
-                    .and().build();
+                    .and()
+                    .csrf().disable() // make testing easier
+                    .build();
         }
     }
 

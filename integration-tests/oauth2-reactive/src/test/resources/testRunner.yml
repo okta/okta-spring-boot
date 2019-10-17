@@ -55,5 +55,5 @@ scenarios:
     - --okta.oauth2.scopes=profile,email,openid
 #    - --okta.oauth2.redirectUri=/authorization-code/callback # not implemented until Spring Sec 5.2
     - --server.servlet.session.tracking-modes=cookie
-    - --debug
+    - --okta.oauth2.postLogoutRedirectUri=/you-are-logged-out
     protectedPath: /oauth2/authorization/okta

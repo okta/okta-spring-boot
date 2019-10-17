@@ -18,6 +18,8 @@ package com.okta.spring.boot.oauth
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.LoggerContext
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties
 import com.okta.spring.boot.oauth.env.OktaOAuth2PropertiesMappingEnvironmentPostProcessor
 import org.slf4j.impl.StaticLoggerBinder
@@ -26,6 +28,7 @@ import org.springframework.boot.autoconfigure.logging.ConditionEvaluationReportL
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties
 import org.springframework.boot.autoconfigure.security.oauth2.client.reactive.ReactiveOAuth2ClientAutoConfiguration
 import org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
+import org.springframework.boot.autoconfigure.security.oauth2.resource.reactive.ReactiveOAuth2ResourceServerAutoConfiguration
 import org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
 import org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration
 import org.springframework.boot.autoconfigure.security.reactive.ReactiveUserDetailsServiceAutoConfiguration
@@ -62,23 +65,44 @@ import java.util.stream.Stream
 
 import static org.assertj.core.api.Assertions.assertThat
 
-class AutoConfigConditionalTest {
+class AutoConfigConditionalTest implements HttpMock {
 
     private Level originalLevel = Level.INFO
     private Logger conditionLogger =  ((LoggerContext) StaticLoggerBinder.getSingleton().getLoggerFactory()).getLogger(ConditionEvaluationReportLoggingListener)
 
     private List<Class<?>> oktaAutoConfigs = [
-            OktaOAuth2AutoConfig,
-            OktaOAuth2ResourceServerAutoConfig,
-            ReactiveOktaOAuth2AutoConfig,
-            ReactiveOktaOAuth2ResourceServerAutoConfig,
-            ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig,
-            ReactiveOktaOAuth2ServerHttpServerAutoConfig,
-            OAuth2ResourceServerAutoConfiguration,
-            OAuth2ClientAutoConfiguration,
-            ReactiveOAuth2ClientAutoConfiguration,
-            ReactiveSecurityAutoConfiguration,
-            ReactiveUserDetailsServiceAutoConfiguration]
+        OktaOAuth2AutoConfig,
+        OktaOAuth2ResourceServerAutoConfig,
+        ReactiveOktaOAuth2AutoConfig,
+        ReactiveOktaOAuth2ResourceServerAutoConfig,
+        ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig,
+        ReactiveOktaOAuth2ServerHttpServerAutoConfig,
+        OAuth2ResourceServerAutoConfiguration,
+        OAuth2ClientAutoConfiguration,
+        ReactiveOAuth2ClientAutoConfiguration,
+        ReactiveSecurityAutoConfiguration,
+        ReactiveUserDetailsServiceAutoConfiguration,
+        ReactiveOAuth2ResourceServerAutoConfiguration]
+
+    @Override
+    void configureHttpMock(WireMockServer wireMockServer) {
+        String issuer = mockBaseUrl()
+        wireMockServer.stubFor(
+            WireMock.get("/.well-known/openid-configuration")
+                .willReturn(WireMock.aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(""" {
+                        "issuer": "${issuer}",
+                        "end_session_endpoint":"${issuer}oauth2/v1/logout",
+                        "authorization_endpoint":"${issuer}oauth2/v1/authorize",
+                        "token_endpoint":"${issuer}oauth2/v1/token",
+                        "userinfo_endpoint":"${issuer}oauth2/v1/userinfo",
+                        "registration_endpoint":"${issuer}oauth2/v1/clients",
+                        "jwks_uri":"${issuer}oauth2/v1/keys"
+                    }
+                    """)))
+    }
+
 
     @BeforeClass
     void enableVerboseConditionEvaluationLogging() {
@@ -157,7 +181,8 @@ class AutoConfigConditionalTest {
     void webLoginConfig_withIssuerAndClientInfo() {
 
         webContextRunner().withPropertyValues(
-                "okta.oauth2.issuer=https://test.example.com",
+                "okta.oauth2.issuer=https://test.example.com/",
+                "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}", // work around to not validate the https url
                 "okta.oauth2.client-id=test-client-id",
                 "okta.oauth2.client-secret=test-client-secret")
             .run { context ->
@@ -249,6 +274,7 @@ class AutoConfigConditionalTest {
 
         reactiveContextRunner().withPropertyValues(
                 "okta.oauth2.issuer=https://test.example.com/",
+                "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}", // work around to not validate the https url
                 "okta.oauth2.client-id=test-client-id",
                 "okta.oauth2.client-secret=test-client-secret")
             .run { context ->
@@ -299,7 +325,11 @@ class AutoConfigConditionalTest {
     private static Stream<WebFilter> activeJwtAuthenticationWebFilters(ApplicationContext context) {
         return activeWebFilters(context).stream()
                         .filter { it.getClass() == AuthenticationWebFilter }
-                        .filter { it.authenticationManager.getClass() == JwtReactiveAuthenticationManager}
+                        .filter {
+                            // here be dragons
+                            // TODO: there must be a better way to validate we have a JWT reactive auth manager
+                            it.authenticationManagerResolver.arg$1.getClass() == JwtReactiveAuthenticationManager
+                        }
     }
 
      private static List<WebFilter> activeWebFilters(ApplicationContext context) {
