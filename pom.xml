@@ -121,6 +121,13 @@
                 <version>0.5.4</version>
             </dependency>
 
+            <!-- Dependency overrides for transitive dependencies with CVEs -->
+            <dependency>
+                <groupId>com.nimbusds</groupId>
+                <artifactId>nimbus-jose-jwt</artifactId>
+                <version>7.9</version>
+            </dependency>
+
             <!-- test dependencies -->
             <dependency>
                 <groupId>com.github.tomakehurst</groupId>
@@ -140,5 +147,17 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.owasp</groupId>
+                    <artifactId>dependency-check-maven</artifactId>
+                    <version>5.2.2</version> <!-- TODO: bump the version in the parent pom -->
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 
 </project>
