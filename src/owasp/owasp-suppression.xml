@@ -106,24 +106,19 @@
         <notes><![CDATA[ file name: reactor-netty-0.8.4.RELEASE.jar ]]></notes>
         <gav regex="true">^io\.projectreactor\.netty:reactor-netty:.*$</gav>
         <cpe>cpe:/a:netty_project:netty</cpe>
+        <cpe>cpe:/a:netty:netty</cpe>
     </suppress>
     <suppress>
         <notes><![CDATA[ file name: spring-boot-starter-reactor-netty-2.1.2.RELEASE.jar ]]></notes>
         <gav regex="true">^org\.springframework\.boot:spring-boot-starter-reactor-netty:.*$</gav>
         <cpe>cpe:/a:netty_project:netty</cpe>
+        <cpe>cpe:/a:netty:netty</cpe>
     </suppress>
 
     <!-- https://pivotal.io/security/cve-2018-1258
          Update to 5.0.5.RELEASE+ or Spring Boot 2.0.2.RELEASE+
          (Wrong version detected by OWASP plugin) -->
     <suppress>
-        <notes><![CDATA[ file name: spring-security-core-5.1.5.RELEASE.jar ]]></notes>
-        <gav regex="true">^org\.springframework\.security:spring-security-.*:5.1.*$</gav>
-        <cve>CVE-2018-1258</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[ file name: spring-boot-starter-security-2.1.4.RELEASE.jar ]]></notes>
-        <gav regex="true">^org\.springframework\.boot:spring-boot-starter-security:2.1.*$</gav>
         <cve>CVE-2018-1258</cve>
     </suppress>
 
