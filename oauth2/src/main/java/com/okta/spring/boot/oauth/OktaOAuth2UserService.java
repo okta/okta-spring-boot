@@ -23,12 +23,14 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Collection;
+
 final class OktaOAuth2UserService extends DefaultOAuth2UserService {
 
-    private final String groupClaim;
+    private final Collection<AuthoritiesProvider> authoritiesProviders;
 
-    OktaOAuth2UserService(String groupClaim) {
-        this.groupClaim = groupClaim;
+    OktaOAuth2UserService(Collection<AuthoritiesProvider> authoritiesProviders) {
+        this.authoritiesProviders = authoritiesProviders;
         setRestOperations(restOperations());
     }
 
@@ -42,6 +44,6 @@ final class OktaOAuth2UserService extends DefaultOAuth2UserService {
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) {
         OAuth2User user = super.loadUser(userRequest);
-        return UserUtil.decorateUser(user, userRequest, groupClaim);
+        return UserUtil.decorateUser(user, userRequest, authoritiesProviders);
     }
 }

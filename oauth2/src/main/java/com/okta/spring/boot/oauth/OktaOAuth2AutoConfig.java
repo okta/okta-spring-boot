@@ -23,6 +23,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
@@ -34,12 +35,14 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.net.URI;
+import java.util.Collection;
 
 @Configuration
 @ConditionalOnOktaClientProperties
 @EnableConfigurationProperties(OktaOAuth2Properties.class)
 @ConditionalOnClass({ EnableWebSecurity.class, ClientRegistration.class })
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+@Import(AuthorityProvidersConfig.class)
 class OktaOAuth2AutoConfig {
 
     @Bean
@@ -53,13 +56,13 @@ class OktaOAuth2AutoConfig {
 
     @Bean
     @ConditionalOnMissingBean(name="oAuth2UserService")
-    OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService(OktaOAuth2Properties oktaOAuth2Properties) {
-        return new OktaOAuth2UserService(oktaOAuth2Properties.getGroupsClaim());
+    OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService(Collection<AuthoritiesProvider> authoritiesProviders) {
+        return new OktaOAuth2UserService(authoritiesProviders);
     }
 
     @Bean
     @ConditionalOnMissingBean(name="oidcUserService")
-    OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService(OktaOAuth2Properties oktaOAuth2Properties) {
-        return new OktaOidcUserService(oktaOAuth2Properties.getGroupsClaim());
+    OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService(Collection<AuthoritiesProvider> authoritiesProviders) {
+        return new OktaOidcUserService(oAuth2UserService(authoritiesProviders), authoritiesProviders);
     }
 }

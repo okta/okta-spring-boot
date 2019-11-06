@@ -26,6 +26,7 @@ import org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurity
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcReactiveOAuth2UserService;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -34,6 +35,8 @@ import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserSer
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import reactor.core.publisher.Flux;
 
+import java.util.Collection;
+
 @Configuration
 @AutoConfigureAfter(ReactiveSecurityAutoConfiguration.class)
 @EnableConfigurationProperties(OktaOAuth2Properties.class)
@@ -41,18 +44,19 @@ import reactor.core.publisher.Flux;
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
 @ConditionalOnClass({ Flux.class, EnableWebFluxSecurity.class, ClientRegistration.class })
 @ConditionalOnBean(ReactiveSecurityAutoConfiguration.class)
+@Import(AuthorityProvidersConfig.class)
 class ReactiveOktaOAuth2AutoConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService(OktaOAuth2Properties oktaOAuth2Properties) {
-        return new ReactiveOktaOAuth2UserService(oktaOAuth2Properties.getGroupsClaim());
+    ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService(Collection<AuthoritiesProvider> authoritiesProviders) {
+        return new ReactiveOktaOAuth2UserService(authoritiesProviders);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    OidcReactiveOAuth2UserService oidcUserService(OktaOAuth2Properties oktaOAuth2Properties,
+    OidcReactiveOAuth2UserService oidcUserService(Collection<AuthoritiesProvider> authoritiesProviders,
                                                   @Qualifier("oauth2UserService") ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService) {
-        return new ReactiveOktaOidcUserService(oktaOAuth2Properties.getGroupsClaim(), oAuth2UserService);
+        return new ReactiveOktaOidcUserService(authoritiesProviders, oAuth2UserService);
     }
 }
