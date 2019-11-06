@@ -23,21 +23,23 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import reactor.core.publisher.Mono;
 
+import java.util.Collection;
+
 final class ReactiveOktaOidcUserService extends OidcReactiveOAuth2UserService {
 
-    private final String groupClaim;
+    private final Collection<AuthoritiesProvider> authoritiesProviders;
 
-    ReactiveOktaOidcUserService(String groupClaim) {
-        this(groupClaim, new ReactiveOktaOAuth2UserService(groupClaim));
+    ReactiveOktaOidcUserService(Collection<AuthoritiesProvider> authoritiesProviders) {
+        this(authoritiesProviders, new ReactiveOktaOAuth2UserService(authoritiesProviders));
     }
 
-    ReactiveOktaOidcUserService(String groupClaim, ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService) {
-        this.groupClaim = groupClaim;
+    ReactiveOktaOidcUserService(Collection<AuthoritiesProvider> authoritiesProviders, ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService) {
+        this.authoritiesProviders = authoritiesProviders;
         setOauth2UserService(oauth2UserService);
     }
 
     @Override
     public Mono<OidcUser> loadUser(OidcUserRequest userRequest) {
-        return super.loadUser(userRequest).map(user -> UserUtil.decorateUser(user, userRequest,  groupClaim));
+        return super.loadUser(userRequest).map(user -> UserUtil.decorateUser(user, userRequest,  authoritiesProviders));
     }
 }
