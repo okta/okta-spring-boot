@@ -52,3 +52,14 @@ scenarios:
     - --okta.oauth2.postLogoutRedirectUri=/you-are-logged-out
     - --server.servlet.session.tracking-modes=cookie
     protectedPath: /oauth2/authorization/okta
+
+  pkce-code-flow-remote-validation:
+    command: com.okta.spring.tests.oauth2.code.BasicRedirectCodeFlowApplication
+    args:
+    - --server.port=${applicationPort}
+    - --okta.oauth2.issuer=https://localhost:${mockHttpsPort}/oauth2/default
+    - --okta.oauth2.clientId=OOICU812
+    - --okta.oauth2.scopes=offline_access
+    - --okta.oauth2.redirectUri=/authorization-code/callback
+    - --server.servlet.session.tracking-modes=cookie
+    protectedPath: /oauth2/authorization/okta

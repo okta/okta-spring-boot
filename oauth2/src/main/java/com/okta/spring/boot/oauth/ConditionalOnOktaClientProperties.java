@@ -23,5 +23,5 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE, ElementType.METHOD })
-@ConditionalOnProperty(name = {"spring.security.oauth2.client.registration.okta.client-id", "spring.security.oauth2.client.registration.okta.client-secret"})
+@ConditionalOnProperty(name = {"spring.security.oauth2.client.registration.okta.client-id"})
 @interface ConditionalOnOktaClientProperties {}
