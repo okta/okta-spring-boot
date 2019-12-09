@@ -53,8 +53,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
             // if OAuth2ClientProperties bean is not available do NOT configure
             if (!context.getBeansOfType(OAuth2ClientProperties.class).isEmpty()
                 && !isEmpty(oktaOAuth2Properties.getIssuer())
-                && !isEmpty(oktaOAuth2Properties.getClientId())
-                && !isEmpty(oktaOAuth2Properties.getClientSecret())) {
+                && !isEmpty(oktaOAuth2Properties.getClientId())) {
                 // configure Okta user services
                 configureLogin(http, oktaOAuth2Properties);
 

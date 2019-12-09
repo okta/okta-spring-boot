@@ -41,6 +41,18 @@ public class BasicRedirectCodeFlowApplication {
         return "Welcome home, The message of the day is boring: " + principal.getName();
     }
 
+    @GetMapping("/everyone")
+    @PreAuthorize("hasAuthority('Everyone')")
+    public String everyoneAccess(Principal principal) {
+        return "Everyone has Access: " + principal.getName();
+    }
+
+    @GetMapping("/invalidGroup")
+    @PreAuthorize("hasAuthority('invalidGroup')")
+    public String invalidGroup() {
+        throw new IllegalStateException("Test exception, user should not have access to this method");
+    }
+
 // The following isn't needed as the equivalent is provided by Spring Boot Security by default
     @Configuration
     static class WebConfig extends WebSecurityConfigurerAdapter {

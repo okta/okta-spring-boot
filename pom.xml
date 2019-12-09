@@ -31,7 +31,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <spring-boot.version>2.2.0.RELEASE</spring-boot.version>
+        <spring-boot.version>2.2.2.RELEASE</spring-boot.version>
         <spring-cloud.version>2.1.2.RELEASE</spring-cloud.version>
         <github.slug>okta/okta-spring-boot</github.slug>
         <okta.sdk.version>1.5.2</okta.sdk.version>
@@ -118,7 +118,7 @@
             <dependency>
                 <groupId>com.okta.oidc.tck</groupId>
                 <artifactId>okta-oidc-tck</artifactId>
-                <version>0.5.4</version>
+                <version>0.5.5</version>
             </dependency>
 
             <!-- Dependency overrides for transitive dependencies with CVEs -->

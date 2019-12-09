@@ -34,7 +34,7 @@ final class UserUtil {
     static OAuth2User decorateUser(OAuth2User user, OAuth2UserRequest userRequest, String groupClaim) {
 
         // Only post process requests from the "Okta" reg
-        if (!"Okta".equals(userRequest.getClientRegistration().getClientName())) {
+        if (!"okta".equalsIgnoreCase(userRequest.getClientRegistration().getRegistrationId())) {
             return user;
         }
 
@@ -54,7 +54,7 @@ final class UserUtil {
     static OidcUser decorateUser(OidcUser user, OidcUserRequest userRequest, String groupClaim) {
 
         // Only post process requests from the "Okta" reg
-        if (!"Okta".equals(userRequest.getClientRegistration().getClientName())) {
+        if (!"okta".equals(userRequest.getClientRegistration().getRegistrationId())) {
             return user;
         }
 

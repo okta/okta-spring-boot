@@ -18,12 +18,14 @@ package com.okta.spring.tests.oauth2.reactive.code;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 
 import java.security.Principal;
 import java.util.Date;
@@ -36,6 +38,18 @@ public class ReactiveRedirectCodeFlowApplication {
     @GetMapping(value = "/")
     public Message getMessageOfTheDay(Principal principal) {
         return new Message("Welcome home, The message of the day is boring: " + principal.getName());
+    }
+
+    @GetMapping("/everyone")
+    @PreAuthorize("hasAuthority('Everyone')")
+    public Mono<String> everyoneAccess(Principal principal) {
+        return Mono.just("Everyone has Access: " + principal.getName());
+    }
+
+    @GetMapping("/invalidGroup")
+    @PreAuthorize("hasAuthority('invalidGroup')")
+    public Mono<String> invalidGroup() {
+        throw new IllegalStateException("Test exception, user should not have access to this method");
     }
 
     @EnableWebFluxSecurity
