@@ -84,10 +84,6 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
     private void configureLogin(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {
 
         http.oauth2Login()
-                .userInfoEndpoint()
-                .userService(new OktaOAuth2UserService(oktaOAuth2Properties.getGroupsClaim()))
-                .oidcUserService(new OktaOidcUserService(oktaOAuth2Properties.getGroupsClaim()))
-            .and()
                 .tokenEndpoint()
                     .accessTokenResponseClient(accessTokenResponseClient());
 

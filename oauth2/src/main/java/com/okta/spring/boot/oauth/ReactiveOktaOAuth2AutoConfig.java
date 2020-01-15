@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -43,11 +44,13 @@ import reactor.core.publisher.Flux;
 class ReactiveOktaOAuth2AutoConfig {
 
     @Bean
+    @ConditionalOnMissingBean
     ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService(OktaOAuth2Properties oktaOAuth2Properties) {
         return new ReactiveOktaOAuth2UserService(oktaOAuth2Properties.getGroupsClaim());
     }
 
     @Bean
+    @ConditionalOnMissingBean
     OidcReactiveOAuth2UserService oidcUserService(OktaOAuth2Properties oktaOAuth2Properties,
                                                   @Qualifier("oauth2UserService") ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService) {
         return new ReactiveOktaOidcUserService(oktaOAuth2Properties.getGroupsClaim(), oAuth2UserService);

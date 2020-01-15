@@ -39,13 +39,24 @@ import org.springframework.boot.web.reactive.context.AnnotationConfigReactiveWeb
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.ConfigurableEnvironment
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcReactiveOAuth2UserService
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService
+import org.springframework.security.oauth2.client.userinfo.DefaultReactiveOAuth2UserService
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService
+import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserService
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter
 import org.springframework.security.oauth2.client.web.server.authentication.OAuth2LoginAuthenticationWebFilter
+import org.springframework.security.oauth2.core.oidc.user.OidcUser
+import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.server.resource.authentication.JwtReactiveAuthenticationManager
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationFilter
@@ -190,12 +201,16 @@ class AutoConfigConditionalTest implements HttpMock {
             assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerAutoConfig)
             assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig)
             assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ServerHttpServerAutoConfig)
+            assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2UserService)
+            assertThat(context).doesNotHaveBean(ReactiveOktaOidcUserService)
 
             assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
             assertThat(context).hasSingleBean(JwtDecoder)
             assertThat(context).hasSingleBean(OAuth2ClientProperties)
             assertThat(context).hasSingleBean(OktaOAuth2Properties)
             assertThat(context).hasSingleBean(OktaOAuth2AutoConfig)
+            assertThat(context).hasSingleBean(OktaOAuth2UserService)
+            assertThat(context).hasSingleBean(OktaOidcUserService)
 
             assertFiltersEnabled(context, OAuth2LoginAuthenticationFilter, BearerTokenAuthenticationFilter)
         }
@@ -336,6 +351,8 @@ class AutoConfigConditionalTest implements HttpMock {
             assertThat(context).hasSingleBean(ReactiveOktaOAuth2ResourceServerAutoConfig)
             assertThat(context).hasSingleBean(ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig)
             assertThat(context).hasSingleBean(ReactiveOktaOAuth2ServerHttpServerAutoConfig)
+            assertThat(context).hasSingleBean(ReactiveOktaOAuth2UserService)
+            assertThat(context).hasSingleBean(ReactiveOktaOidcUserService)
 
             assertThat(context).hasSingleBean(OAuth2ClientProperties)
             assertThat(context).hasSingleBean(OktaOAuth2Properties)
@@ -343,6 +360,65 @@ class AutoConfigConditionalTest implements HttpMock {
             assertWebFiltersEnabled(context, OAuth2LoginAuthenticationWebFilter, AuthenticationWebFilter)
             assertJwtBearerWebFilterEnabled(context)
         }
+    }
+
+    @Test
+    void webOverrideOidcUserService() {
+        webContextRunner(OverrideWebOidcComponents).withPropertyValues(
+            "okta.oauth2.issuer=https://test.example.com/",
+            "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}", // work around to not validate the https url
+            "okta.oauth2.client-id=test-client-id",
+            "okta.oauth2.client-secret=test-client-secret")
+            .run { context ->
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2AutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ServerHttpServerAutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2UserService)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOidcUserService)
+
+                assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).hasSingleBean(JwtDecoder)
+                assertThat(context).hasSingleBean(OAuth2ClientProperties)
+                assertThat(context).hasSingleBean(OktaOAuth2Properties)
+                assertThat(context).hasSingleBean(OktaOAuth2AutoConfig)
+
+                assertThat(context).hasSingleBean(DefaultOAuth2UserService)
+                assertThat(context).hasSingleBean(OidcUserService)
+                assertThat(context).doesNotHaveBean(OktaOAuth2UserService)
+                assertThat(context).doesNotHaveBean(OktaOidcUserService)
+
+                assertFiltersEnabled(context, OAuth2LoginAuthenticationFilter, BearerTokenAuthenticationFilter)
+            }
+    }
+
+    @Test
+    void reactiveOverrideOidcUserService() {
+        reactiveContextRunner(OverrideReactiveOidcComponents).withPropertyValues(
+            "okta.oauth2.issuer=https://test.example.com/",
+            "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}", // work around to not validate the https url
+            "okta.oauth2.client-id=test-client-id")
+            .run { context ->
+
+                assertThat(context).doesNotHaveBean(OktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).doesNotHaveBean(JwtDecoder)
+                assertThat(context).doesNotHaveBean(OktaOAuth2AutoConfig)
+
+                assertThat(context).hasSingleBean(ReactiveOktaOAuth2AutoConfig)
+                assertThat(context).hasSingleBean(ReactiveOktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).hasSingleBean(ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig)
+                assertThat(context).hasSingleBean(ReactiveOktaOAuth2ServerHttpServerAutoConfig)
+                assertThat(context).hasSingleBean(OAuth2ClientProperties)
+                assertThat(context).hasSingleBean(OktaOAuth2Properties)
+
+                assertThat(context).hasSingleBean(DefaultReactiveOAuth2UserService)
+                assertThat(context).hasSingleBean(OidcReactiveOAuth2UserService)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2UserService)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOidcUserService)
+
+                assertWebFiltersEnabled(context, OAuth2LoginAuthenticationWebFilter, AuthenticationWebFilter)
+                assertJwtBearerWebFilterEnabled(context)
+            }
     }
 
     private static void assertFiltersEnabled(ApplicationContext context, Class<Filter>... filters) {
@@ -452,4 +528,34 @@ class AutoConfigConditionalTest implements HttpMock {
     @Configuration
     @EnableWebFluxSecurity
     static class SimpleReactiveApp {}
+
+    @Configuration
+    @EnableWebSecurity
+    static class OverrideWebOidcComponents {
+
+        @Bean
+        OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService() { // name is important here
+            return new DefaultOAuth2UserService()
+        }
+
+        @Bean
+        OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService() { // name is important here
+            return new OidcUserService()
+        }
+    }
+
+    @Configuration
+    @EnableWebFluxSecurity
+    static class OverrideReactiveOidcComponents {
+
+        @Bean
+        ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService() {
+            return new DefaultReactiveOAuth2UserService()
+        }
+
+        @Bean
+        OidcReactiveOAuth2UserService oidcUserService() {
+            return new OidcReactiveOAuth2UserService()
+        }
+    }
 }
