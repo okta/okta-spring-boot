@@ -17,15 +17,21 @@ package com.okta.spring.boot.oauth;
 
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.net.URI;
 
@@ -43,5 +49,17 @@ class OktaOAuth2AutoConfig {
         OidcClientInitiatedLogoutSuccessHandler successHandler = new OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository);
         successHandler.setPostLogoutRedirectUri(URI.create(oktaOAuth2Properties.getPostLogoutRedirectUri()));
         return successHandler;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name="oAuth2UserService")
+    OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService(OktaOAuth2Properties oktaOAuth2Properties) {
+        return new OktaOAuth2UserService(oktaOAuth2Properties.getGroupsClaim());
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name="oidcUserService")
+    OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService(OktaOAuth2Properties oktaOAuth2Properties) {
+        return new OktaOidcUserService(oktaOAuth2Properties.getGroupsClaim());
     }
 }
