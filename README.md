@@ -101,7 +101,6 @@ Okta's Spring Security integration will [parse the JWT access token](https://dev
 
 Check out a minimal example that uses the [Okta Signin Widget and JQuery](examples/siw-jquery) or [this blog post](https://developer.okta.com/blog/2018/11/26/spring-boot-2-dot-1-oidc-oauth2-reactive-apis). 
 
-
 ### Spring WebFlux
 
 To configure a resource server when using Spring WebFlux, you need to use a couple annotations, and define a `SecurityWebFilterChain` bean.
@@ -162,6 +161,15 @@ public class SecurityConfiguration {
 ## Supporting server side applications - OAuth Code flow
 
 Building a server side application and just need to redirect to a login page? This OAuth 2.0 code flow is for you.
+
+### Create a Web App on Okta
+
+To create a new OIDC app for Spring Boot on Okta:
+
+1. Log in to your developer account, navigate to **Applications**, and click on **Add Application**.
+2. Select **Web** and click **Next**. 
+3. Give the application a name and add `http://localhost:8080/login/oauth2/code/okta` as a login redirect URI. 
+4. Click **Done**.
 
 ### Configure your properties
 
