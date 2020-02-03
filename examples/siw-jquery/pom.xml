@@ -20,7 +20,7 @@
     <parent>
         <groupId>com.okta.spring.examples</groupId>
         <artifactId>okta-spring-boot-examples</artifactId>
-        <version>1.3.1-SNAPSHOT</version>
+        <version>1.4.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>okta-spring-boot-siw-jquery-example</artifactId>
@@ -32,7 +32,7 @@
         <dependency>
             <groupId>com.okta.spring</groupId>
             <artifactId>okta-spring-boot-starter</artifactId>
-            <version>1.3.1-SNAPSHOT</version>
+            <version>1.4.0-SNAPSHOT</version>
         </dependency>
 
         <!-- Other standard Spring starters -->
