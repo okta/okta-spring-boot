@@ -217,6 +217,11 @@ static class WebConfig extends WebSecurityConfigurerAdapter {
 }
 ```
 
+### Share Sessions Across Web Servers
+
+The Authorization Code Flow (the typical OAuth redirect) uses sessions.  If you have multiple instances of your application, you must configure a [Spring Session](https://docs.spring.io/spring-session/docs/current/reference/html5/) implementation such as Redis, Hazelcast, JDBC, etc.
+
+
 ### That's it!
 
 Open up <http://localhost:8080> in your favorite browser. 
