@@ -39,10 +39,18 @@ Are you writing a backend endpoints in order to support a client side applicatio
 
 You can configure your applications properties with environment variables, system properties, or configuration files. Take a look at the [Spring Boot documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html) for more details.
 
+Only these three properties are required for a web app:
+
 | Property | Default | Details |
 |----------|---------|---------|
 | okta.oauth2.issuer     | N/A | [Authorization Server](/docs/how-to/set-up-auth-server.html) issuer URL, i.e.: https://{yourOktaDomain}/oauth2/default |
 | okta.oauth2.clientId   | N/A | The Client Id of your Okta OIDC application |
+| okta.oauth2.clientSecret   | N/A | The Client Secret of your Okta OIDC application |
+
+There are many more properties that you can configure as well. Here are some examples:
+
+| Property | Default | Details |
+|----------|---------|---------|
 | okta.oauth2.audience   | api://default | The audience of your [Authorization Server](/docs/how-to/set-up-auth-server.html) |
 | okta.oauth2.groupsClaim | groups | The claim key in the Access Token's JWT that corresponds to an array of the users groups. |
 
@@ -51,37 +59,20 @@ You can configure your applications properties with environment variables, syste
 The above client makes a request to `/hello-oauth`, you simply need to create a Spring Boot application and `Controller` to handle the response: 
 
 ```java
-@RestController
 @SpringBootApplication
+@RestController
 public class ExampleApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(ExampleApplication.class, args);
-    }
+	public static void main(String[] args) {
+		SpringApplication.run(DemoApplication.class, args);
+	}
 
-    @GetMapping("/hello-oauth")
-    public String sayHello(Principal principal) {
-        return "Hello, " + principal.getName();
-    }
-    
-    @Configuration
-    static class OktaOAuth2WebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
-
-        @Override
-        protected void configure(HttpSecurity http) throws Exception {
-            http
-                .authorizeRequests().anyRequest().authenticated()
-                .and()
-                .oauth2ResourceServer().jwt();
-                
-            // Send a 401 message to the browser (w/o this, you'll see a blank page)
-            Okta.configureResourceServer401ResponseBody(http);
-        }
-    }
+	@GetMapping("/hello-auth")
+	public String hello(@AuthenticationPrincipal OidcUser user) {
+	    return "Hello, " + user.getFullName();
+	}
 }
 ```
-
-Make sure to configure the `WebSecurityConfigurerAdaptor` with `http.oauth2ResourceServer().jwt()` to enable handling of access tokens.
 
 ### That's it!
 
