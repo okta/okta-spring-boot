@@ -61,7 +61,7 @@ The above client makes a request to `/hello-oauth`, you simply need to create a 
 ```java
 @SpringBootApplication
 @RestController
-public class ExampleApplication {
+public class DemoApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(DemoApplication.class, args);
