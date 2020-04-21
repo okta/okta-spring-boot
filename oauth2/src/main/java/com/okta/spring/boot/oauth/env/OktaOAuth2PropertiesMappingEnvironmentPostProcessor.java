@@ -123,7 +123,7 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
 
     private PropertySource oktaRedirectUriPropertySource(Environment environment) {
         Map<String, Object> properties = new HashMap<>();
-        properties.put("spring.security.oauth2.client.registration.okta.redirect-uri", "{baseUrl}${okta.oauth2.redirect-uri}");
+        properties.put("spring.security.oauth2.client.registration.okta.redirect-uri", "${baseUrl}${okta.oauth2.redirect-uri}");
         return new ConditionalMapPropertySource("okta-redirect-uri-helper", properties, environment, "okta.oauth2.redirect-uri");
     }
 
