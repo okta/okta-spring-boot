@@ -53,6 +53,7 @@ There are many more properties that you can configure as well. Here are some exa
 |----------|---------|---------|
 | okta.oauth2.audience   | api://default | The audience of your [Authorization Server](/docs/how-to/set-up-auth-server.html) |
 | okta.oauth2.groupsClaim | groups | The claim key in the Access Token's JWT that corresponds to an array of the users groups. |
+| okta.oauth2.postLogoutRedirectUri | N/A | Property to enable SSO / RP-Initiated logout. |
 
 ### Create a Controller
 
