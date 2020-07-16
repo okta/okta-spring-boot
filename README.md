@@ -47,7 +47,7 @@ Only these three properties are required for a web app:
 | okta.oauth2.clientId   | N/A | The Client Id of your Okta OIDC application |
 | okta.oauth2.clientSecret   | N/A | The Client Secret of your Okta OIDC application |
 
-There are many more properties that you can configure as well. Here are some examples:
+There are many more properties that you can optionally configure as well. Here are some examples:
 
 | Property | Default | Details |
 |----------|---------|---------|
