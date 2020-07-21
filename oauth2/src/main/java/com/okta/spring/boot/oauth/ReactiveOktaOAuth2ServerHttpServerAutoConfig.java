@@ -72,7 +72,7 @@ class ReactiveOktaOAuth2ServerHttpServerAutoConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(name = "okta.oauth2.postLogoutRedirectUri")
+    @ConditionalOnProperty(name = "okta.oauth2.post-logout-redirect-uri")
     OidcClientInitiatedServerLogoutSuccessHandler oidcClientInitiatedServerLogoutSuccessHandler(OktaOAuth2Properties oktaOAuth2Properties,
                                                                                                 ReactiveClientRegistrationRepository repository) throws URISyntaxException {
         OidcClientInitiatedServerLogoutSuccessHandler logoutSuccessHandler = new OidcClientInitiatedServerLogoutSuccessHandler(repository);
