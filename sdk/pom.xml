@@ -59,7 +59,6 @@
         <dependency>
             <groupId>com.okta.commons</groupId>
             <artifactId>okta-commons-lang</artifactId>
-            <version>1.2.3</version>
         </dependency>
 
         <!-- Test deps -->
