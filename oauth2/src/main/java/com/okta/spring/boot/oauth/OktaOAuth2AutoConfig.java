@@ -46,7 +46,7 @@ import java.util.Collection;
 class OktaOAuth2AutoConfig {
 
     @Bean
-    @ConditionalOnProperty(name = "okta.oauth2.postLogoutRedirectUri")
+    @ConditionalOnProperty(name = "okta.oauth2.post-logout-redirect-uri")
     OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler(OktaOAuth2Properties oktaOAuth2Properties,
                                                                      ClientRegistrationRepository clientRegistrationRepository) {
         OidcClientInitiatedLogoutSuccessHandler successHandler = new OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository);
