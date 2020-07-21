@@ -15,15 +15,15 @@
  */
 package com.okta.spring.boot.sdk;
 
+import com.okta.commons.http.config.Proxy;
 import com.okta.sdk.authc.credentials.ClientCredentials;
 import com.okta.sdk.authc.credentials.TokenClientCredentials;
 import com.okta.sdk.cache.CacheManager;
-import com.okta.sdk.client.AuthenticationScheme;
+import com.okta.sdk.client.AuthorizationMode;
 import com.okta.sdk.client.Client;
 import com.okta.sdk.client.ClientBuilder;
 import com.okta.sdk.client.Clients;
-import com.okta.sdk.client.Proxy;
-import com.okta.sdk.lang.Strings;
+import com.okta.commons.lang.Strings;
 import com.okta.spring.boot.sdk.config.OktaClientProperties;
 import com.okta.spring.boot.sdk.cache.SpringCacheManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,7 +65,7 @@ public class OktaSdkConfig {
     protected Client oktaSdkClient() {
         ClientBuilder builder = Clients.builder()
                 .setCacheManager(oktaSdkCacheManager())
-                .setAuthenticationScheme(oktaSdkAuthenticationScheme())
+                .setAuthorizationMode(oktaSdkAuthenticationMode())
                 .setConnectionTimeout(oktaClientProperties.getConnectionTimeout())
                 .setClientCredentials(oktaSdkClientCredentials())
                 .setOrgUrl(oktaClientProperties.getOrgUrl());
@@ -78,8 +78,8 @@ public class OktaSdkConfig {
         return builder.build();
     }
 
-    private AuthenticationScheme oktaSdkAuthenticationScheme() {
-        return AuthenticationScheme.SSWS;
+    private AuthorizationMode oktaSdkAuthenticationMode() {
+        return AuthorizationMode.SSWS;
     }
 
     private Proxy oktaSdkProxy() {
