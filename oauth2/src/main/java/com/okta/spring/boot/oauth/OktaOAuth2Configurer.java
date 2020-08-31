@@ -25,12 +25,16 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
 import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
+import org.springframework.security.oauth2.server.resource.authentication.OpaqueTokenAuthenticationProvider;
+import org.springframework.security.oauth2.server.resource.introspection.NimbusOpaqueTokenIntrospector;
+import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
@@ -74,6 +78,20 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                     configureResourceServer(http, oktaOAuth2Properties);
                 } else {
                     log.debug("OAuth resource server not configured due to missing issuer property");
+                }
+
+                if (oktaOAuth2Properties.isOpaque() && !isEmpty(resourceServerProperties.getOpaquetoken().getIntrospectionUri())) {
+                    OpaqueTokenIntrospector introspectionClient = new NimbusOpaqueTokenIntrospector(
+                        resourceServerProperties.getOpaquetoken().getIntrospectionUri(),
+                        oktaOAuth2Properties.getClientId(),
+                        oktaOAuth2Properties.getClientSecret());
+
+                    OpaqueTokenAuthenticationProvider opaqueTokenAuthenticationProvider =
+                        new OpaqueTokenAuthenticationProvider(introspectionClient);
+
+                    http.oauth2ResourceServer().opaqueToken()
+                        .authenticationManager(authentication -> opaqueTokenAuthenticationProvider
+                            .authenticate(SecurityContextHolder.getContext().getAuthentication()));
                 }
             } else {
                 log.debug("OAuth resource server not configured due to missing OAuth2ResourceServerProperties bean");
