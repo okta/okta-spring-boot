@@ -213,7 +213,7 @@ If you want to add custom claims to JWT tokens in your custom Authorization Serv
 
 You could then extract the attributes from the tokens by doing something like below:
 
-Authorization Code Flow:
+**Authorization Code Flow:**
 
 ```java
 @Controller
@@ -227,7 +227,7 @@ public class ExampleController {
 }
 ```
 
-Resource Server Flow:
+**Resource Server Flow:**
 
 ```java
 @RestController
