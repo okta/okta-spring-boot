@@ -211,6 +211,36 @@ static class WebConfig extends WebSecurityConfigurerAdapter {
 
 If you want to add custom claims to JWT tokens in your custom Authorization Server, see [Add Custom claim to a token](https://developer.okta.com/docs/guides/customize-tokens-returned-from-okta/add-custom-claim/) for more info.
 
+You could then extract the attributes from the tokens by doing something like below:
+
+Authorization Code Flow:
+
+```java
+@Controller
+public class ExampleController {
+
+    @GetMapping("/profile")
+    @PreAuthorize("hasAuthority('SCOPE_profile')")
+    public ModelAndView userDetails(OAuth2AuthenticationToken authentication) {
+        return new ModelAndView("userProfile" , Collections.singletonMap("details", authentication.getPrincipal().getAttributes()));
+    }
+}
+```
+
+Resource Server Flow:
+
+```java
+@RestController
+public class MessageOfTheDayController {
+
+    @GetMapping("/api/userProfile")
+    @PreAuthorize("hasAuthority('SCOPE_profile')")
+    public Map<String, Object> getUserDetails(JwtAuthenticationToken authentication) {
+        return authentication.getTokenAttributes();
+    }
+}
+```
+
 ### Share Sessions Across Web Servers
 
 The Authorization Code Flow (the typical OAuth redirect) uses sessions.  If you have multiple instances of your application, you must configure a [Spring Session](https://docs.spring.io/spring-session/docs/current/reference/html5/) implementation such as Redis, Hazelcast, JDBC, etc.
