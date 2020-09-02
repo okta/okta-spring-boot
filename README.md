@@ -228,6 +228,8 @@ public class CustomTokenEnhancer implements TokenEnhancer {
 Now, add it to the Authorization Server configuration:
  
 ```java
+@Configuration
+@EnableAuthorizationServer
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
     
     @Override
