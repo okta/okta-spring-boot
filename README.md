@@ -209,6 +209,39 @@ static class WebConfig extends WebSecurityConfigurerAdapter {
 }
 ```
 
+If you want to add custom claims to JWT access tokens, create a custom implementation of 
+Spring Security's `TokenEnhancer` interface: 
+
+```java
+public class CustomTokenEnhancer implements TokenEnhancer {
+
+    @Override
+    public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
+        Map<String, Object> additionalInfo = new HashMap<>();
+        additionalInfo.put("user_id", new Random().nextInt());
+        ((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInfo);
+        return accessToken;
+    }
+}
+```
+
+Now, add it to the Authorization Server configuration:
+ 
+```java
+public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
+    
+    @Override
+    public void configure(AuthorizationServerEndpointsConfigurer endpoints) {
+        TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
+        tokenEnhancerChain.setTokenEnhancers(List.of(new CustomTokenEnhancer(), accessTokenConverter()));
+        endpoints.authenticationManager(authenticationManager)
+                .tokenEnhancer(tokenEnhancerChain)
+                .accessTokenConverter(accessTokenConverter())
+                .tokenStore(tokenStore());
+    }
+}
+```
+
 ### Share Sessions Across Web Servers
 
 The Authorization Code Flow (the typical OAuth redirect) uses sessions.  If you have multiple instances of your application, you must configure a [Spring Session](https://docs.spring.io/spring-session/docs/current/reference/html5/) implementation such as Redis, Hazelcast, JDBC, etc.
