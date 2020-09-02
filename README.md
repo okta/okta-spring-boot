@@ -209,40 +209,7 @@ static class WebConfig extends WebSecurityConfigurerAdapter {
 }
 ```
 
-If you want to add custom claims to JWT access tokens, create a custom implementation of 
-Spring Security's `TokenEnhancer` interface: 
-
-```java
-public class CustomTokenEnhancer implements TokenEnhancer {
-
-    @Override
-    public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
-        Map<String, Object> additionalInfo = new HashMap<>();
-        additionalInfo.put("user_id", new Random().nextInt());
-        ((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInfo);
-        return accessToken;
-    }
-}
-```
-
-Now, add it to the Authorization Server configuration:
- 
-```java
-@Configuration
-@EnableAuthorizationServer
-public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
-    
-    @Override
-    public void configure(AuthorizationServerEndpointsConfigurer endpoints) {
-        TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
-        tokenEnhancerChain.setTokenEnhancers(List.of(new CustomTokenEnhancer(), accessTokenConverter()));
-        endpoints.authenticationManager(authenticationManager)
-                .tokenEnhancer(tokenEnhancerChain)
-                .accessTokenConverter(accessTokenConverter())
-                .tokenStore(tokenStore());
-    }
-}
-```
+If you want to add custom claims to JWT tokens in your custom Authorization Server, see [Add Custom claim to a token](https://developer.okta.com/docs/guides/customize-tokens-returned-from-okta/add-custom-claim/) for more info.
 
 ### Share Sessions Across Web Servers
 
