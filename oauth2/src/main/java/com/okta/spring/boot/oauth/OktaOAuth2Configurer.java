@@ -72,13 +72,17 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
             if (!context.getBeansOfType(OAuth2ResourceServerProperties.class).isEmpty()) {
                 OAuth2ResourceServerProperties resourceServerProperties = context.getBean(OAuth2ResourceServerProperties.class);
 
-                if (!isRootOrgIssuer(resourceServerProperties.getJwt().getIssuerUri()) &&
-                    !isOpaqueTokenValidationConfigured(oktaOAuth2Properties, resourceServerProperties)) {
-                    log.debug("=== Configuring resource server for JWT validation ===");
-                    configureResourceServerWithJwtValidation(http, oktaOAuth2Properties);
-                } else {
-                    log.debug("=== Configuring resource server for Opaque Token validation ===");
+                log.debug("isOpaqueTokenValidationRequired()?: {}", isOpaqueTokenValidationRequired(oktaOAuth2Properties, resourceServerProperties));
+                log.debug("isRootOrgIssuer(resourceServerProperties.getJwt().getIssuerUri())?: {}", isRootOrgIssuer(resourceServerProperties.getJwt().getIssuerUri()));
+                log.debug("isEmpty(resourceServerProperties.getJwt().getIssuerUri()?: {}", isEmpty(resourceServerProperties.getJwt().getIssuerUri()));
+
+                if (isOpaqueTokenValidationRequired(oktaOAuth2Properties, resourceServerProperties) ||
+                    !isRootOrgIssuer(resourceServerProperties.getJwt().getIssuerUri())) {
+                    log.debug("Configuring resource server for Opaque Token validation");
                     configureResourceServerWithOpaqueTokenValidation(http, context);
+                } else if (!isEmpty(resourceServerProperties.getJwt().getIssuerUri())) {
+                    log.debug("Configuring resource server for JWT validation");
+                    configureResourceServerWithJwtValidation(http, oktaOAuth2Properties);
                 }
             } else {
                 log.debug("OAuth resource server not configured due to missing OAuth2ResourceServerProperties bean");
@@ -122,8 +126,8 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         return accessTokenResponseClient;
     }
 
-    private boolean isOpaqueTokenValidationConfigured(OktaOAuth2Properties oktaOAuth2Properties,
-                                                      OAuth2ResourceServerProperties resourceServerProperties) {
+    private boolean isOpaqueTokenValidationRequired(OktaOAuth2Properties oktaOAuth2Properties,
+                                                    OAuth2ResourceServerProperties resourceServerProperties) {
         return oktaOAuth2Properties.isOpaque()
             && !isEmpty(resourceServerProperties.getOpaquetoken().getClientId())
             && !isEmpty(resourceServerProperties.getOpaquetoken().getClientSecret())
