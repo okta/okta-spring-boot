@@ -74,7 +74,7 @@ public final class OktaOAuth2Properties implements Validator {
     /**
      * Identifies Opaque token
      */
-    private Boolean opaque;
+    private Boolean opaque = Boolean.FALSE;
 
     // work around for https://github.com/spring-projects/spring-boot/issues/17035
     private OktaOAuth2Properties() {

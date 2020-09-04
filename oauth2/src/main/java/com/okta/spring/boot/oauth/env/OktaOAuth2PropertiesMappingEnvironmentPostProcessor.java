@@ -15,8 +15,6 @@
  */
 package com.okta.spring.boot.oauth.env;
 
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
@@ -26,6 +24,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.PropertySource;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -75,6 +74,18 @@ import java.util.Map;
  *             <td>${okta.oauth2.issuer}/v1/keys</td>
  *             <td>spring.security.oauth2.resourceserver.jwt.jwk-set-uri</td></td>
  *         </tr>
+ *         <tr>
+ *             <td>${okta.oauth2.clientId}</td>
+ *             <td>spring.security.oauth2.resourceserver.opaquetoken.client-id</td></td>
+ *         </tr>
+ *         <tr>
+ *             <td>${okta.oauth2.clientSecret}</td>
+ *             <td>spring.security.oauth2.resourceserver.opaquetoken.client-secret</td></td>
+ *         </tr>
+ *         <tr>
+ *             <td>${okta.oauth2.introspectionUri}</td>
+ *             <td>spring.security.oauth2.resourceserver.opaquetoken.introspection-uri</td></td>
+ *         </tr>
  *     </table>
  *
  * @since 0.2.0
@@ -86,6 +97,7 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
     private static final String OKTA_OAUTH_CLIENT_ID = OKTA_OAUTH_PREFIX + "client-id";
     private static final String OKTA_OAUTH_CLIENT_SECRET = OKTA_OAUTH_PREFIX + "client-secret";
     private static final String OKTA_OAUTH_SCOPES = OKTA_OAUTH_PREFIX + "scopes"; // array vs string
+    private static final String OKTA_OAUTH_CLIENT_INTROSPECTION_URI = OKTA_OAUTH_PREFIX + "introspection-uri";
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
@@ -134,14 +146,9 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
         Map<String, Object> properties = new HashMap<>();
         properties.put("spring.security.oauth2.resourceserver.jwt.issuer-uri", "${okta.oauth2.issuer}");
         properties.put("spring.security.oauth2.resourceserver.jwt.jwk-set-uri", "${okta.oauth2.issuer}/v1/keys");
-
-        if (BooleanUtils.toBoolean("${okta.oauth2.opaque}") &&
-            StringUtils.isNotBlank("${okta.oauth2.clientSecret}")) {
-            properties.put("spring.security.oauth2.resourceserver.opaquetoken.client-id", "${okta.oauth2.clientId}");
-            properties.put("spring.security.oauth2.resourceserver.opaquetoken.client-secret", "${okta.oauth2.clientSecret}");
-            properties.put("spring.security.oauth2.resourceserver.opaquetoken.introspection-uri", "${okta.oauth2.introspectionUri");
-        }
-
+        properties.put("spring.security.oauth2.resourceserver.opaquetoken.client-id", "${okta.oauth2.clientId}");
+        properties.put("spring.security.oauth2.resourceserver.opaquetoken.client-secret", "${okta.oauth2.clientSecret}");
+        properties.put("spring.security.oauth2.resourceserver.opaquetoken.introspection-uri", "${okta.oauth2.issuer}/v1/introspect");
         properties.put("spring.security.oauth2.client.provider.okta.authorization-uri", "${okta.oauth2.issuer}/v1/authorize");
         properties.put("spring.security.oauth2.client.provider.okta.token-uri", "${okta.oauth2.issuer}/v1/token");
         properties.put("spring.security.oauth2.client.provider.okta.user-info-uri", "${okta.oauth2.issuer}/v1/userinfo");
