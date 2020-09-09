@@ -35,7 +35,7 @@
         <spring-cloud.version>2.2.1.RELEASE</spring-cloud.version>
         <github.slug>okta/okta-spring-boot</github.slug>
         <okta.sdk.version>1.5.4</okta.sdk.version>
-        <okta.commons.version>1.2.2</okta.commons.version>
+        <okta.commons.version>1.2.3</okta.commons.version>
     </properties>
 
     <modules>
