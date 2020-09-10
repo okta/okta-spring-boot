@@ -99,7 +99,6 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
     private static final String OKTA_OAUTH_CLIENT_ID = OKTA_OAUTH_PREFIX + "client-id";
     private static final String OKTA_OAUTH_CLIENT_SECRET = OKTA_OAUTH_PREFIX + "client-secret";
     private static final String OKTA_OAUTH_SCOPES = OKTA_OAUTH_PREFIX + "scopes"; // array vs string
-    private static final String OKTA_OAUTH_CLIENT_INTROSPECTION_URI = OKTA_OAUTH_PREFIX + "introspection-uri";
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
