@@ -16,25 +16,34 @@
 package com.okta.spring.boot.oauth;
 
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
+import com.okta.spring.boot.oauth.http.UserAgentRequestInterceptor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
+import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Collection;
 
 @Configuration
@@ -64,5 +73,23 @@ class OktaOAuth2AutoConfig {
     @ConditionalOnMissingBean(name="oidcUserService")
     OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService(Collection<AuthoritiesProvider> authoritiesProviders) {
         return new OktaOidcUserService(oAuth2UserService(authoritiesProviders), authoritiesProviders);
+    }
+
+    @Bean
+    @ConditionalOnProperty(name="okta.oauth2.opaque", havingValue="true")
+    OpaqueTokenIntrospector oktaOpaqueTokenIntrospector(OktaOAuth2Properties oktaOAuth2Properties,
+                                                        OAuth2ResourceServerProperties oAuth2ResourceServerProperties) {
+        RestTemplate restTemplate = new RestTemplate(Arrays.asList(
+            new FormHttpMessageConverter(),
+            new OAuth2AccessTokenResponseHttpMessageConverter(),
+            new StringHttpMessageConverter()));
+        restTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
+        restTemplate.getInterceptors().add(new UserAgentRequestInterceptor());
+
+        return new OktaOpaqueTokenIntrospector(
+            oAuth2ResourceServerProperties.getOpaquetoken().getIntrospectionUri(),
+            oktaOAuth2Properties.getClientId(),
+            oktaOAuth2Properties.getClientSecret(),
+            restTemplate);
     }
 }
