@@ -114,7 +114,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
     private void configureResourceServerWithOpaqueTokenValidation(HttpSecurity http, ApplicationContext context) throws Exception {
 
         http.oauth2ResourceServer()
-            .opaqueToken().introspector(context.getBean(OpaqueTokenIntrospector.class));
+            .opaqueToken().introspector(context.getBean(OktaOpaqueTokenIntrospector.class));
     }
 
     private OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient() {
