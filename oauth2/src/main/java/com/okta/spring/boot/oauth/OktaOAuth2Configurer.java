@@ -24,6 +24,7 @@ import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2Clien
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient;
@@ -72,17 +73,14 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
             if (!context.getBeansOfType(OAuth2ResourceServerProperties.class).isEmpty()) {
                 OAuth2ResourceServerProperties resourceServerProperties = context.getBean(OAuth2ResourceServerProperties.class);
 
-                log.debug(":: isIssuerUriEmpty? :: {}",
-                    isEmpty(resourceServerProperties.getJwt().getIssuerUri()));
-                log.debug(":: isOpaqueTokenValidationRequired? :: {}",
-                    isOpaqueTokenValidationRequired(oktaOAuth2Properties, resourceServerProperties));
-                log.debug(":: isRootOrgIssuer? :: {}",
-                    isRootOrgIssuer(resourceServerProperties.getJwt().getIssuerUri()));
+                log.debug("isOpaqueTokenValidationRequired()?: {}", isOpaqueTokenValidationRequired(oktaOAuth2Properties, resourceServerProperties));
+                log.debug("isRootOrgIssuer(resourceServerProperties.getJwt().getIssuerUri())?: {}", isRootOrgIssuer(resourceServerProperties.getJwt().getIssuerUri()));
+                log.debug("isEmpty(resourceServerProperties.getJwt().getIssuerUri()?: {}", isEmpty(resourceServerProperties.getJwt().getIssuerUri()));
 
                 if (isOpaqueTokenValidationRequired(oktaOAuth2Properties, resourceServerProperties) ||
                     !isRootOrgIssuer(resourceServerProperties.getJwt().getIssuerUri())) {
                     log.debug("Configuring resource server for Opaque Token validation");
-                    configureResourceServerWithOpaqueTokenValidation(http, context);
+                    configureResourceServerWithOpaqueTokenValidation(http, oktaOAuth2Properties, resourceServerProperties);
                 } else if (!isEmpty(resourceServerProperties.getJwt().getIssuerUri())) {
                     log.debug("Configuring resource server for JWT validation");
                     configureResourceServerWithJwtValidation(http, oktaOAuth2Properties);
@@ -110,23 +108,37 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
             .jwt().jwtAuthenticationConverter(new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim()));
     }
 
-    private void configureResourceServerWithOpaqueTokenValidation(HttpSecurity http, ApplicationContext context) throws Exception {
+    private void configureResourceServerWithOpaqueTokenValidation(HttpSecurity http,
+                                                                  OktaOAuth2Properties oktaOAuth2Properties,
+                                                                  OAuth2ResourceServerProperties resourceServerProperties)
+        throws Exception {
+
+        OpaqueTokenIntrospector opaqueTokenIntrospector = new OktaOpaqueTokenIntrospector(
+            resourceServerProperties.getOpaquetoken().getIntrospectionUri(),
+            oktaOAuth2Properties.getClientId(),
+            oktaOAuth2Properties.getClientSecret(),
+            restTemplate());
 
         http.oauth2ResourceServer()
-            .opaqueToken().introspector(context.getBean(OpaqueTokenIntrospector.class));
+            .opaqueToken().introspector(opaqueTokenIntrospector);
     }
 
     private OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient() {
 
-        RestTemplate restTemplate = new RestTemplate(Arrays.asList(new FormHttpMessageConverter(),
-                                                                   new OAuth2AccessTokenResponseHttpMessageConverter()));
+        DefaultAuthorizationCodeTokenResponseClient accessTokenResponseClient = new DefaultAuthorizationCodeTokenResponseClient();
+        accessTokenResponseClient.setRestOperations(restTemplate());
+        return accessTokenResponseClient;
+    }
+
+    private RestTemplate restTemplate() {
+
+        RestTemplate restTemplate = new RestTemplate(Arrays.asList(
+            new FormHttpMessageConverter(),
+            new OAuth2AccessTokenResponseHttpMessageConverter(),
+            new StringHttpMessageConverter()));
         restTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
         restTemplate.getInterceptors().add(new UserAgentRequestInterceptor());
-
-        DefaultAuthorizationCodeTokenResponseClient accessTokenResponseClient = new DefaultAuthorizationCodeTokenResponseClient();
-        accessTokenResponseClient.setRestOperations(restTemplate);
-
-        return accessTokenResponseClient;
+        return restTemplate;
     }
 
     private boolean isOpaqueTokenValidationRequired(OktaOAuth2Properties oktaOAuth2Properties,
@@ -145,5 +157,4 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         }
         return true;
     }
-
 }
