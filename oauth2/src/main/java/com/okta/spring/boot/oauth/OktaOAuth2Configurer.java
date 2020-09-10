@@ -29,7 +29,7 @@ import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationC
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
-import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
+import org.springframework.security.oauth2.server.resource.introspection.NimbusOpaqueTokenIntrospector;
 import org.springframework.web.client.RestTemplate;
 
 import static org.springframework.util.StringUtils.isEmpty;
@@ -71,7 +71,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                     isRootOrgIssuer(resourceServerProperties.getJwt().getIssuerUri()));
 
                 try {
-                    context.getBean(OpaqueTokenIntrospector.class);
+                    context.getBean(NimbusOpaqueTokenIntrospector.class);
                     log.debug("Configuring resource server for Opaque Token validation");
                     configureResourceServerWithOpaqueTokenValidation(http, context);
                 } catch (NoSuchBeanDefinitionException e) {
@@ -108,7 +108,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
     private void configureResourceServerWithOpaqueTokenValidation(HttpSecurity http, ApplicationContext context) throws Exception {
 
         http.oauth2ResourceServer()
-            .opaqueToken().introspector(context.getBean(OpaqueTokenIntrospector.class));
+            .opaqueToken().introspector(context.getBean(NimbusOpaqueTokenIntrospector.class));
     }
 
     private OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient(RestTemplate restTemplate) {

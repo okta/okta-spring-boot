@@ -78,8 +78,8 @@ class OktaOAuth2AutoConfig {
 
     @Bean
     @ConditionalOnProperty(name="okta.oauth2.opaque", havingValue="true")
-    OpaqueTokenIntrospector opaqueTokenIntrospector(OktaOAuth2Properties oktaOAuth2Properties,
-                                                    OAuth2ResourceServerProperties oAuth2ResourceServerProperties) {
+    OpaqueTokenIntrospector nimbusOpaqueTokenIntrospector(OktaOAuth2Properties oktaOAuth2Properties,
+                                                          OAuth2ResourceServerProperties oAuth2ResourceServerProperties) {
         return new NimbusOpaqueTokenIntrospector(
             oAuth2ResourceServerProperties.getOpaquetoken().getIntrospectionUri(),
             oktaOAuth2Properties.getClientId(),
