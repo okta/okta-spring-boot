@@ -60,7 +60,7 @@ public class OktaOpaqueTokenIntrospector implements OpaqueTokenIntrospector {
     private static final String ACCESS_TOKEN_TYPE_HINT = "access_token";
 
     private Converter<String, RequestEntity<?>> requestEntityConverter;
-    private RestOperations restOperations;
+    private final RestOperations restOperations;
 
     public OktaOpaqueTokenIntrospector(String introspectionUri, String clientId, String clientSecret, RestOperations restOperations) {
         Assert.notNull(introspectionUri, "introspectionUri cannot be null");
@@ -101,7 +101,7 @@ public class OktaOpaqueTokenIntrospector implements OpaqueTokenIntrospector {
 
     public OAuth2AuthenticatedPrincipal introspect(String token) {
 
-        RequestEntity<?> requestEntity = (RequestEntity)this.requestEntityConverter.convert(token);
+        RequestEntity<?> requestEntity = this.requestEntityConverter.convert(token);
         if (requestEntity == null) {
             throw new OAuth2IntrospectionException("requestEntityConverter returned a null entity");
         } else {
@@ -134,8 +134,8 @@ public class OktaOpaqueTokenIntrospector implements OpaqueTokenIntrospector {
 
     private HTTPResponse adaptToNimbusResponse(ResponseEntity<String> responseEntity) {
         HTTPResponse response = new HTTPResponse(responseEntity.getStatusCodeValue());
-        response.setHeader("Content-Type", new String[]{responseEntity.getHeaders().getContentType().toString()});
-        response.setContent((String)responseEntity.getBody());
+        response.setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        response.setContent(responseEntity.getBody());
         if (response.getStatusCode() != 200) {
             throw new OAuth2IntrospectionException("Introspection endpoint responded with " + response.getStatusCode());
         } else {

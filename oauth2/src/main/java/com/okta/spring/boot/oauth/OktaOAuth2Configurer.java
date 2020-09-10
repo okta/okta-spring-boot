@@ -76,7 +76,6 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
 
                 try {
                     context.getBean(OktaOpaqueTokenIntrospector.class);
-
                     log.debug("Configuring resource server for Opaque Token validation");
                     configureResourceServerWithOpaqueTokenValidation(http, context);
                 } catch (NoSuchBeanDefinitionException e) {
