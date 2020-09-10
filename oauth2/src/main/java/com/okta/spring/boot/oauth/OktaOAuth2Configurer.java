@@ -15,6 +15,7 @@
  */
 package com.okta.spring.boot.oauth;
 
+import com.okta.commons.configcheck.ConfigurationValidator;
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
 import com.okta.spring.boot.oauth.http.UserAgentRequestInterceptor;
 import org.slf4j.Logger;
@@ -31,6 +32,7 @@ import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCo
 import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
 import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
+import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
@@ -69,11 +71,21 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
             // resource server configuration
             if (!context.getBeansOfType(OAuth2ResourceServerProperties.class).isEmpty()) {
                 OAuth2ResourceServerProperties resourceServerProperties = context.getBean(OAuth2ResourceServerProperties.class);
-                if (!isEmpty(resourceServerProperties.getJwt().getIssuerUri())) {
-                    // configure Okta specific auth converter (extracts authorities from `groupsClaim`
-                    configureResourceServer(http, oktaOAuth2Properties);
-                } else {
-                    log.debug("OAuth resource server not configured due to missing issuer property");
+
+                log.debug(":: isIssuerUriEmpty? :: {}",
+                    isEmpty(resourceServerProperties.getJwt().getIssuerUri()));
+                log.debug(":: isOpaqueTokenValidationRequired? :: {}",
+                    isOpaqueTokenValidationRequired(oktaOAuth2Properties, resourceServerProperties));
+                log.debug(":: isRootOrgIssuer? :: {}",
+                    isRootOrgIssuer(resourceServerProperties.getJwt().getIssuerUri()));
+
+                if (isOpaqueTokenValidationRequired(oktaOAuth2Properties, resourceServerProperties) ||
+                    !isRootOrgIssuer(resourceServerProperties.getJwt().getIssuerUri())) {
+                    log.debug("Configuring resource server for Opaque Token validation");
+                    configureResourceServerWithOpaqueTokenValidation(http, context);
+                } else if (!isEmpty(resourceServerProperties.getJwt().getIssuerUri())) {
+                    log.debug("Configuring resource server for JWT validation");
+                    configureResourceServerWithJwtValidation(http, oktaOAuth2Properties);
                 }
             } else {
                 log.debug("OAuth resource server not configured due to missing OAuth2ResourceServerProperties bean");
@@ -92,10 +104,16 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         }
     }
 
-    private void configureResourceServer(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {
+    private void configureResourceServerWithJwtValidation(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {
 
         http.oauth2ResourceServer()
-                .jwt().jwtAuthenticationConverter(new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim()));
+            .jwt().jwtAuthenticationConverter(new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim()));
+    }
+
+    private void configureResourceServerWithOpaqueTokenValidation(HttpSecurity http, ApplicationContext context) throws Exception {
+
+        http.oauth2ResourceServer()
+            .opaqueToken().introspector(context.getBean(OpaqueTokenIntrospector.class));
     }
 
     private OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient() {
@@ -110,4 +128,22 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
 
         return accessTokenResponseClient;
     }
+
+    private boolean isOpaqueTokenValidationRequired(OktaOAuth2Properties oktaOAuth2Properties,
+                                                    OAuth2ResourceServerProperties resourceServerProperties) {
+        return oktaOAuth2Properties.isOpaque()
+            && !isEmpty(resourceServerProperties.getOpaquetoken().getClientId())
+            && !isEmpty(resourceServerProperties.getOpaquetoken().getClientSecret())
+            && !isEmpty(resourceServerProperties.getOpaquetoken().getIntrospectionUri());
+    }
+
+    private boolean isRootOrgIssuer(String issuerUri) {
+        try {
+            ConfigurationValidator.assertOrgUrl(issuerUri);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+        return true;
+    }
+
 }
