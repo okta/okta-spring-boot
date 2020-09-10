@@ -72,7 +72,7 @@ public final class OktaOAuth2Properties implements Validator {
     private String postLogoutRedirectUri;
 
     /**
-     * Identifies Opaque token
+     * Signals need for opaque token validation/introspection (if set to true).
      */
     private boolean opaque = false;
 
@@ -159,12 +159,8 @@ public final class OktaOAuth2Properties implements Validator {
         this.postLogoutRedirectUri = postLogoutRedirectUri;
     }
 
-    public boolean getOpaque() {
-        return opaque;
-    }
-
     public boolean isOpaque() {
-        return getOpaque();
+        return opaque;
     }
 
     public void setOpaque(boolean opaque) {
