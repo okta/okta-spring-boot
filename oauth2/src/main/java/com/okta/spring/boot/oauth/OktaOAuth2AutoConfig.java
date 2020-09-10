@@ -39,6 +39,7 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.oauth2.server.resource.introspection.NimbusOpaqueTokenIntrospector;
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 import org.springframework.web.client.RestTemplate;
 
@@ -77,13 +78,12 @@ class OktaOAuth2AutoConfig {
 
     @Bean
     @ConditionalOnProperty(name="okta.oauth2.opaque", havingValue="true")
-    OpaqueTokenIntrospector oktaOpaqueTokenIntrospector(OktaOAuth2Properties oktaOAuth2Properties,
-                                                        OAuth2ResourceServerProperties oAuth2ResourceServerProperties) {
-        return new OktaOpaqueTokenIntrospector(
+    OpaqueTokenIntrospector opaqueTokenIntrospector(OktaOAuth2Properties oktaOAuth2Properties,
+                                                    OAuth2ResourceServerProperties oAuth2ResourceServerProperties) {
+        return new NimbusOpaqueTokenIntrospector(
             oAuth2ResourceServerProperties.getOpaquetoken().getIntrospectionUri(),
             oktaOAuth2Properties.getClientId(),
-            oktaOAuth2Properties.getClientSecret(),
-            restTemplate());
+            oktaOAuth2Properties.getClientSecret());
     }
 
     @Bean

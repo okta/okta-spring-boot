@@ -29,6 +29,7 @@ import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationC
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
+import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 import org.springframework.web.client.RestTemplate;
 
 import static org.springframework.util.StringUtils.isEmpty;
@@ -66,10 +67,11 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
             if (!context.getBeansOfType(OAuth2ResourceServerProperties.class).isEmpty()) {
                 OAuth2ResourceServerProperties resourceServerProperties = context.getBean(OAuth2ResourceServerProperties.class);
 
-                log.debug("isRootOrgIssuer(resourceServerProperties.getJwt().getIssuerUri())?: {}", isRootOrgIssuer(resourceServerProperties.getJwt().getIssuerUri()));
+                log.debug("isRootOrgIssuer(resourceServerProperties.getJwt().getIssuerUri())?: {}",
+                    isRootOrgIssuer(resourceServerProperties.getJwt().getIssuerUri()));
 
                 try {
-                    context.getBean(OktaOpaqueTokenIntrospector.class);
+                    context.getBean(OpaqueTokenIntrospector.class);
                     log.debug("Configuring resource server for Opaque Token validation");
                     configureResourceServerWithOpaqueTokenValidation(http, context);
                 } catch (NoSuchBeanDefinitionException e) {
@@ -106,7 +108,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
     private void configureResourceServerWithOpaqueTokenValidation(HttpSecurity http, ApplicationContext context) throws Exception {
 
         http.oauth2ResourceServer()
-            .opaqueToken().introspector(context.getBean(OktaOpaqueTokenIntrospector.class));
+            .opaqueToken().introspector(context.getBean(OpaqueTokenIntrospector.class));
     }
 
     private OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient(RestTemplate restTemplate) {
