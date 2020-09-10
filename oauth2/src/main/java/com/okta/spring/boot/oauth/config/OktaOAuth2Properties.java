@@ -72,8 +72,8 @@ public final class OktaOAuth2Properties implements Validator {
     private String postLogoutRedirectUri;
 
     /**
-     * Flag to indicate the need for opaque token validation/introspection (if set to true).
-     * If this is not set (or) set to false, opaque introspection will not be performed.
+     * Flag to indicate the need for opaque token validation/introspection.
+     * If set to true, opaque token introspection will be performed.
      */
     private boolean opaque = false;
 
