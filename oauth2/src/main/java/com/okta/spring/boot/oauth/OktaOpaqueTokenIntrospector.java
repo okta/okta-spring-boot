@@ -68,6 +68,7 @@ public class OktaOpaqueTokenIntrospector implements OpaqueTokenIntrospector {
         Assert.notNull(introspectionUri, "introspectionUri cannot be null");
         Assert.notNull(clientId, "clientId cannot be null");
         Assert.notNull(clientSecret, "clientSecret cannot be null");
+        Assert.notNull(restOperations, "restOperations cannot be null");
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.requestEntityConverter = this.defaultRequestEntityConverter(URI.create(introspectionUri), clientId, clientSecret);
