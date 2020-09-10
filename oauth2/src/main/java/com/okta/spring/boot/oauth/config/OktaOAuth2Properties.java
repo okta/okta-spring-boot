@@ -71,6 +71,11 @@ public final class OktaOAuth2Properties implements Validator {
      */
     private String postLogoutRedirectUri;
 
+    /**
+     * Identifies Opaque token
+     */
+    private Boolean opaque = Boolean.FALSE;
+
     // work around for https://github.com/spring-projects/spring-boot/issues/17035
     private OktaOAuth2Properties() {
         this(null);
@@ -152,6 +157,18 @@ public final class OktaOAuth2Properties implements Validator {
 
     public void setPostLogoutRedirectUri(String postLogoutRedirectUri) {
         this.postLogoutRedirectUri = postLogoutRedirectUri;
+    }
+
+    public Boolean getOpaque() {
+        return opaque;
+    }
+
+    public Boolean isOpaque() {
+        return getOpaque();
+    }
+
+    public void setOpaque(Boolean opaque) {
+        this.opaque = opaque;
     }
 
     @Override
