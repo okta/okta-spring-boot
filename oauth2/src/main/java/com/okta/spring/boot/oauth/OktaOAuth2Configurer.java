@@ -72,9 +72,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
             if (!context.getBeansOfType(OAuth2ResourceServerProperties.class).isEmpty()) {
                 OAuth2ResourceServerProperties resourceServerProperties = context.getBean(OAuth2ResourceServerProperties.class);
 
-                log.debug("isOpaqueTokenValidationRequired()?: {}", isOpaqueTokenValidationRequired(oktaOAuth2Properties, resourceServerProperties));
                 log.debug("isRootOrgIssuer(resourceServerProperties.getJwt().getIssuerUri())?: {}", isRootOrgIssuer(resourceServerProperties.getJwt().getIssuerUri()));
-                log.debug("isEmpty(resourceServerProperties.getJwt().getIssuerUri()?: {}", isEmpty(resourceServerProperties.getJwt().getIssuerUri()));
 
                 try {
                     context.getBean(OktaOpaqueTokenIntrospector.class);
@@ -127,14 +125,6 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         accessTokenResponseClient.setRestOperations(restTemplate);
 
         return accessTokenResponseClient;
-    }
-
-    private boolean isOpaqueTokenValidationRequired(OktaOAuth2Properties oktaOAuth2Properties,
-                                                    OAuth2ResourceServerProperties resourceServerProperties) {
-        return oktaOAuth2Properties.isOpaque()
-            && !isEmpty(resourceServerProperties.getOpaquetoken().getClientId())
-            && !isEmpty(resourceServerProperties.getOpaquetoken().getClientSecret())
-            && !isEmpty(resourceServerProperties.getOpaquetoken().getIntrospectionUri());
     }
 
     private boolean isRootOrgIssuer(String issuerUri) {
