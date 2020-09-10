@@ -36,6 +36,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
@@ -78,16 +79,21 @@ class OktaOAuth2AutoConfig {
     @ConditionalOnProperty(name="okta.oauth2.opaque", havingValue="true")
     OpaqueTokenIntrospector oktaOpaqueTokenIntrospector(OktaOAuth2Properties oktaOAuth2Properties,
                                                         OAuth2ResourceServerProperties oAuth2ResourceServerProperties) {
-        RestTemplate restTemplate = new RestTemplate(Arrays.asList(
-            new FormHttpMessageConverter(),
-            new StringHttpMessageConverter()));
-        restTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
-        restTemplate.getInterceptors().add(new UserAgentRequestInterceptor());
-
         return new OktaOpaqueTokenIntrospector(
             oAuth2ResourceServerProperties.getOpaquetoken().getIntrospectionUri(),
             oktaOAuth2Properties.getClientId(),
             oktaOAuth2Properties.getClientSecret(),
-            restTemplate);
+            restTemplate());
+    }
+
+    @Bean
+    RestTemplate restTemplate() {
+        RestTemplate restTemplate = new RestTemplate(Arrays.asList(
+            new FormHttpMessageConverter(),
+            new OAuth2AccessTokenResponseHttpMessageConverter(),
+            new StringHttpMessageConverter()));
+        restTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
+        restTemplate.getInterceptors().add(new UserAgentRequestInterceptor());
+        return restTemplate;
     }
 }
