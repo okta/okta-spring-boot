@@ -51,7 +51,11 @@ import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler
 import org.springframework.security.oauth2.client.oidc.web.server.logout.OidcClientInitiatedServerLogoutSuccessHandler
-import org.springframework.security.oauth2.client.userinfo.*
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService
+import org.springframework.security.oauth2.client.userinfo.DefaultReactiveOAuth2UserService
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService
+import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserService
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter
 import org.springframework.security.oauth2.client.web.server.authentication.OAuth2LoginAuthenticationWebFilter
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
@@ -62,6 +66,7 @@ import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthen
 import org.springframework.security.web.FilterChainProxy
 import org.springframework.security.web.server.WebFilterChainProxy
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter
+import org.springframework.security.web.server.authorization.AuthorizationWebFilter
 import org.springframework.web.server.WebFilter
 import org.testng.TestException
 import org.testng.annotations.AfterClass
@@ -260,7 +265,7 @@ class AutoConfigConditionalTest implements HttpMock {
         webContextRunner().withPropertyValues(
                 "okta.oauth2.issuer=https://test.example.com/",
                 "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}", // work around to not validate the https url
-                "okta.oauth2.client-id=test-client-id", "okta.oauth2.client-secret=test-client-secret")
+                "okta.oauth2.client-id=test-client-id")
             .run { context ->
             assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2AutoConfig)
             assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerAutoConfig)
