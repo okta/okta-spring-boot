@@ -29,8 +29,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoderJwkSupport;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.security.oauth2.server.resource.introspection.NimbusOpaqueTokenIntrospector;
-import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
@@ -59,13 +57,13 @@ class OktaOAuth2ResourceServerAutoConfig {
         return restTemplate;
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    OpaqueTokenIntrospector opaqueTokenIntrospector(OktaOAuth2Properties oktaOAuth2Properties,
-                                                    OAuth2ResourceServerProperties oAuth2ResourceServerProperties) {
-        return new NimbusOpaqueTokenIntrospector(
-            oAuth2ResourceServerProperties.getOpaquetoken().getIntrospectionUri(),
-            oktaOAuth2Properties.getClientId(),
-            oktaOAuth2Properties.getClientSecret());
-    }
+//    @Bean
+//    @ConditionalOnMissingBean
+//    OpaqueTokenIntrospector opaqueTokenIntrospector(OktaOAuth2Properties oktaOAuth2Properties,
+//                                                    OAuth2ResourceServerProperties oAuth2ResourceServerProperties) {
+//        return new NimbusOpaqueTokenIntrospector(
+//            oAuth2ResourceServerProperties.getOpaquetoken().getIntrospectionUri(),
+//            oktaOAuth2Properties.getClientId(),
+//            oktaOAuth2Properties.getClientSecret());
+//    }
 }
