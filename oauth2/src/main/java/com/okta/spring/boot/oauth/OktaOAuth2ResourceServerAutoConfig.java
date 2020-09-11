@@ -66,6 +66,7 @@ class OktaOAuth2ResourceServerAutoConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     OpaqueTokenIntrospector opaqueTokenIntrospector(OktaOAuth2Properties oktaOAuth2Properties,
                                                     OAuth2ResourceServerProperties oAuth2ResourceServerProperties) {
         return new NimbusOpaqueTokenIntrospector(

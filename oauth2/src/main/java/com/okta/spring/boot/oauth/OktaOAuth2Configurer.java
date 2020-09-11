@@ -73,10 +73,10 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
 //                    resourceServerProperties.getJwt().setJwkSetUri(null);
 //                }
 
-                if (!isEmpty(resourceServerProperties.getJwt().getIssuerUri())) {
-                    // configure Okta specific auth converter (extracts authorities from `groupsClaim`)
-                    configureResourceServer(http, oktaOAuth2Properties);
-                }
+//                if (!isEmpty(resourceServerProperties.getJwt().getIssuerUri())) {
+//                    // configure Okta specific auth converter (extracts authorities from `groupsClaim`)
+//                    configureResourceServer(http, oktaOAuth2Properties);
+//                }
             } else {
                 log.debug("OAuth resource server not configured due to missing OAuth2ResourceServerProperties bean");
             }
