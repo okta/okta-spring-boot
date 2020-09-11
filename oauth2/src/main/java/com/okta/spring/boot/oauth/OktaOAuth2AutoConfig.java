@@ -77,8 +77,8 @@ class OktaOAuth2AutoConfig {
     }
 
     @Bean
-    OpaqueTokenIntrospector opaqueTokenIntrospectorpaqueTokenIntrospector(OktaOAuth2Properties oktaOAuth2Properties,
-                                                                          OAuth2ResourceServerProperties oAuth2ResourceServerProperties) {
+    OpaqueTokenIntrospector opaqueTokenIntrospector(OktaOAuth2Properties oktaOAuth2Properties,
+                                                    OAuth2ResourceServerProperties oAuth2ResourceServerProperties) {
         return new NimbusOpaqueTokenIntrospector(
             oAuth2ResourceServerProperties.getOpaquetoken().getIntrospectionUri(),
             oktaOAuth2Properties.getClientId(),
