@@ -68,13 +68,13 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                     isRootOrgIssuer(resourceServerProperties.getJwt().getIssuerUri()));
 
                 if (isRootOrgIssuer(resourceServerProperties.getJwt().getIssuerUri())) {
-                    // clear all the jwt properties & opaque token introspection will be used
+                    // clear all jwt properties & opaque token introspection will be used
                     resourceServerProperties.getJwt().setIssuerUri(null);
                     resourceServerProperties.getJwt().setJwkSetUri(null);
                 }
 
                 if (!isEmpty(resourceServerProperties.getJwt().getIssuerUri())) {
-                    // configure Okta specific auth converter (extracts authorities from `groupsClaim`
+                    // configure Okta specific auth converter (extracts authorities from `groupsClaim`)
                     configureResourceServer(http, oktaOAuth2Properties);
                 }
             } else {
