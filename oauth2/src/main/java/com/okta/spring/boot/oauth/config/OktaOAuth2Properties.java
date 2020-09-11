@@ -71,12 +71,6 @@ public final class OktaOAuth2Properties implements Validator {
      */
     private String postLogoutRedirectUri;
 
-    /**
-     * Flag to indicate the need for opaque token validation/introspection.
-     * If set to true, opaque token introspection will be performed.
-     */
-    private boolean opaque = false;
-
     // work around for https://github.com/spring-projects/spring-boot/issues/17035
     private OktaOAuth2Properties() {
         this(null);
@@ -158,14 +152,6 @@ public final class OktaOAuth2Properties implements Validator {
 
     public void setPostLogoutRedirectUri(String postLogoutRedirectUri) {
         this.postLogoutRedirectUri = postLogoutRedirectUri;
-    }
-
-    public boolean isOpaque() {
-        return opaque;
-    }
-
-    public void setOpaque(boolean opaque) {
-        this.opaque = opaque;
     }
 
     @Override
