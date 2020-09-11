@@ -150,8 +150,7 @@ class AutoConfigConditionalTest implements HttpMock {
 
         // with properties it loads correctly
         webContextRunner().withPropertyValues(
-                "okta.oauth2.issuer=https://test.example.com/",
-        "okta.oauth2.client-id=test-client-id", "okta.oauth2.client-secret=test-client-secret")
+                "okta.oauth2.issuer=https://test.example.com/")
             .run {context ->
                 assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
                 assertThat(context).hasSingleBean(JwtDecoder)
@@ -172,8 +171,7 @@ class AutoConfigConditionalTest implements HttpMock {
     void webLoginConfig_withIssuer() {
 
         webContextRunner().withPropertyValues(
-                "okta.oauth2.issuer=https://test.example.com/",
-            "okta.oauth2.client-id=test-client-id", "okta.oauth2.client-secret=test-client-secret")
+                "okta.oauth2.issuer=https://test.example.com/")
             .run { context ->
 
             assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2AutoConfig)
