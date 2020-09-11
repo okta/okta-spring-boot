@@ -67,11 +67,11 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                 log.debug(":: isRootOrgIssuer? :: {}",
                     isRootOrgIssuer(resourceServerProperties.getJwt().getIssuerUri()));
 
-                if (isRootOrgIssuer(resourceServerProperties.getJwt().getIssuerUri())) {
-                    // clear all jwt properties & opaque token introspection will be used
-                    resourceServerProperties.getJwt().setIssuerUri(null);
-                    resourceServerProperties.getJwt().setJwkSetUri(null);
-                }
+//                if (isRootOrgIssuer(resourceServerProperties.getJwt().getIssuerUri())) {
+//                    // clear all jwt properties & opaque token introspection will be used
+//                    resourceServerProperties.getJwt().setIssuerUri(null);
+//                    resourceServerProperties.getJwt().setJwkSetUri(null);
+//                }
 
                 if (!isEmpty(resourceServerProperties.getJwt().getIssuerUri())) {
                     // configure Okta specific auth converter (extracts authorities from `groupsClaim`)
@@ -101,13 +101,6 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         http.oauth2ResourceServer()
             .jwt().jwtAuthenticationConverter(new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim()));
     }
-
-//    private void configureResourceServerWithOpaqueTokenValidation(HttpSecurity http, OpaqueTokenIntrospector opaqueTokenIntrospector)
-//        throws Exception {
-//
-//        http.oauth2ResourceServer()
-//            .opaqueToken().introspector(opaqueTokenIntrospector);
-//    }
 
     private OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient(RestTemplate restTemplate) {
 
