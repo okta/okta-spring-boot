@@ -69,13 +69,13 @@ class OktaOAuth2ResourceServerAutoConfig {
         return restTemplate;
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    OpaqueTokenIntrospector opaqueTokenIntrospector(OktaOAuth2Properties oktaOAuth2Properties,
-                                                    OAuth2ResourceServerProperties oAuth2ResourceServerProperties) {
-        return new NimbusOpaqueTokenIntrospector(
-            oAuth2ResourceServerProperties.getOpaquetoken().getIntrospectionUri(),
-            oktaOAuth2Properties.getClientId(),
-            oktaOAuth2Properties.getClientSecret());
-    }
+//    @Bean
+//    @ConditionalOnMissingBean
+//    OpaqueTokenIntrospector opaqueTokenIntrospector(OktaOAuth2Properties oktaOAuth2Properties,
+//                                                    OAuth2ResourceServerProperties oAuth2ResourceServerProperties) {
+//        return new NimbusOpaqueTokenIntrospector(
+//            oAuth2ResourceServerProperties.getOpaquetoken().getIntrospectionUri(),
+//            oktaOAuth2Properties.getClientId(),
+//            oktaOAuth2Properties.getClientSecret());
+//    }
 }
