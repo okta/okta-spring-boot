@@ -26,10 +26,6 @@ import org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.O
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.FormHttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
-import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoderJwkSupport;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -37,8 +33,6 @@ import org.springframework.security.oauth2.server.resource.introspection.NimbusO
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.Arrays;
 
 @Configuration
 @AutoConfigureBefore(OAuth2ResourceServerAutoConfiguration.class)
@@ -73,16 +67,5 @@ class OktaOAuth2ResourceServerAutoConfig {
             oAuth2ResourceServerProperties.getOpaquetoken().getIntrospectionUri(),
             oktaOAuth2Properties.getClientId(),
             oktaOAuth2Properties.getClientSecret());
-    }
-
-    @Bean
-    RestTemplate restTemplate() {
-        RestTemplate restTemplate = new RestTemplate(Arrays.asList(
-            new FormHttpMessageConverter(),
-            new OAuth2AccessTokenResponseHttpMessageConverter(),
-            new StringHttpMessageConverter()));
-        restTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
-        restTemplate.getInterceptors().add(new UserAgentRequestInterceptor());
-        return restTemplate;
     }
 }
