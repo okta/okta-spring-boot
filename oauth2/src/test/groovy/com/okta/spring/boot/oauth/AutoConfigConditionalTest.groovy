@@ -51,11 +51,7 @@ import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler
 import org.springframework.security.oauth2.client.oidc.web.server.logout.OidcClientInitiatedServerLogoutSuccessHandler
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService
-import org.springframework.security.oauth2.client.userinfo.DefaultReactiveOAuth2UserService
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserService
-import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserService
+import org.springframework.security.oauth2.client.userinfo.*
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter
 import org.springframework.security.oauth2.client.web.server.authentication.OAuth2LoginAuthenticationWebFilter
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
@@ -66,7 +62,6 @@ import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthen
 import org.springframework.security.web.FilterChainProxy
 import org.springframework.security.web.server.WebFilterChainProxy
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter
-import org.springframework.security.web.server.authorization.AuthorizationWebFilter
 import org.springframework.web.server.WebFilter
 import org.testng.TestException
 import org.testng.annotations.AfterClass
@@ -158,7 +153,7 @@ class AutoConfigConditionalTest implements HttpMock {
                 "okta.oauth2.issuer=https://test.example.com/")
             .run {context ->
                 assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
-                assertThat(context).hasSingleBean(JwtDecoder)
+                //assertThat(context).hasSingleBean(JwtDecoder)
                 assertThat(context).doesNotHaveBean(OktaOAuth2AutoConfig)
                 assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2AutoConfig)
                 assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerAutoConfig)
@@ -188,7 +183,7 @@ class AutoConfigConditionalTest implements HttpMock {
             assertThat(context).doesNotHaveBean(AuthoritiesProvider)
 
             assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
-            assertThat(context).hasSingleBean(JwtDecoder)
+            //assertThat(context).hasSingleBean(JwtDecoder)
             assertThat(context).hasSingleBean(OktaOAuth2Properties)
 
             assertFiltersEnabled(context, BearerTokenAuthenticationFilter)
@@ -214,7 +209,7 @@ class AutoConfigConditionalTest implements HttpMock {
             assertThat(context).doesNotHaveBean(OidcClientInitiatedServerLogoutSuccessHandler)
 
             assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
-            assertThat(context).hasSingleBean(JwtDecoder)
+            //assertThat(context).hasSingleBean(JwtDecoder)
             assertThat(context).hasSingleBean(OAuth2ClientProperties)
             assertThat(context).hasSingleBean(OktaOAuth2Properties)
             assertThat(context).hasSingleBean(OktaOAuth2AutoConfig)
@@ -246,7 +241,7 @@ class AutoConfigConditionalTest implements HttpMock {
                 assertThat(context).doesNotHaveBean(OidcClientInitiatedServerLogoutSuccessHandler)
 
                 assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
-                assertThat(context).hasSingleBean(JwtDecoder)
+                //assertThat(context).hasSingleBean(JwtDecoder)
                 assertThat(context).hasSingleBean(OAuth2ClientProperties)
                 assertThat(context).hasSingleBean(OktaOAuth2Properties)
                 assertThat(context).hasSingleBean(OktaOAuth2AutoConfig)
@@ -273,7 +268,7 @@ class AutoConfigConditionalTest implements HttpMock {
             assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ServerHttpServerAutoConfig)
 
             assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
-            assertThat(context).hasSingleBean(JwtDecoder)
+            //assertThat(context).hasSingleBean(JwtDecoder)
             assertThat(context).hasSingleBean(OAuth2ClientProperties)
             assertThat(context).hasSingleBean(OktaOAuth2Properties)
             assertThat(context).hasSingleBean(OktaOAuth2AutoConfig)
@@ -457,7 +452,7 @@ class AutoConfigConditionalTest implements HttpMock {
                 assertThat(context).doesNotHaveBean(ReactiveOktaOidcUserService)
 
                 assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
-                assertThat(context).hasSingleBean(JwtDecoder)
+                //assertThat(context).hasSingleBean(JwtDecoder)
                 assertThat(context).hasSingleBean(OAuth2ClientProperties)
                 assertThat(context).hasSingleBean(OktaOAuth2Properties)
                 assertThat(context).hasSingleBean(OktaOAuth2AutoConfig)
