@@ -160,8 +160,8 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
         Map<String, Object> properties = new HashMap<>();
         properties.put("spring.security.oauth2.resourceserver.jwt.issuer-uri", "${okta.oauth2.issuer}");
         properties.put("spring.security.oauth2.resourceserver.jwt.jwk-set-uri", "${okta.oauth2.issuer}/v1/keys");
-        properties.put("spring.security.oauth2.resourceserver.opaquetoken.client-id", "${okta.oauth2.clientId}");
-        properties.put("spring.security.oauth2.resourceserver.opaquetoken.client-secret", "${okta.oauth2.clientSecret}");
+        properties.put("spring.security.oauth2.resourceserver.opaquetoken.client-id", "${okta.oauth2.client-id}");
+        properties.put("spring.security.oauth2.resourceserver.opaquetoken.client-secret", "${okta.oauth2.client-secret}");
         properties.put("spring.security.oauth2.resourceserver.opaquetoken.introspection-uri", "${okta.oauth2.issuer}/v1/introspect");
         properties.put("spring.security.oauth2.client.provider.okta.authorization-uri", "${okta.oauth2.issuer}/v1/authorize");
         properties.put("spring.security.oauth2.client.provider.okta.token-uri", "${okta.oauth2.issuer}/v1/token");
