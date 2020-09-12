@@ -18,15 +18,18 @@ package com.okta.spring.boot.oauth;
 import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
-public class OktaOpaqueTokenConditional extends AllNestedConditions {
+public class OktaOpaqueTokenIntrospectConditional extends AllNestedConditions {
 
-    public OktaOpaqueTokenConditional() {
+    public OktaOpaqueTokenIntrospectConditional() {
         super(ConfigurationPhase.REGISTER_BEAN);
     }
 
-    @ConditionalOnProperty(name="okta.oauth2.clientId")
+    @ConditionalOnProperty(name="okta.oauth2.client-id")
     static class ClientIdCondition { }
 
-    @ConditionalOnProperty(name="okta.oauth2.clientSecret")
+    @ConditionalOnProperty(name="okta.oauth2.client-secret")
     static class ClientSecretCondition { }
+
+    @ConditionalOnProperty(name="okta.oauth2.issuer")
+    static class IssuerCondition { }
 }
