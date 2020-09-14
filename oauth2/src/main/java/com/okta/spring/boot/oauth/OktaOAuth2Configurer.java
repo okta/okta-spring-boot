@@ -15,6 +15,7 @@
  */
 package com.okta.spring.boot.oauth;
 
+import com.okta.commons.lang.Strings;
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
 import com.okta.spring.boot.oauth.http.UserAgentRequestInterceptor;
 import org.slf4j.Logger;
@@ -33,6 +34,8 @@ import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInit
 import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Arrays;
 
 import static org.springframework.util.StringUtils.isEmpty;
@@ -73,7 +76,6 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                 log.debug(":: isRootOrgIssuer? :: {}",
                     isRootOrgIssuer(resourceServerProperties.getJwt().getIssuerUri()));
 
-                //TODO: Deal with the root org issuer case (should follow opaque token flow)
 //                if (isRootOrgIssuer(resourceServerProperties.getJwt().getIssuerUri())) {
 //                    // clear all jwt properties & opaque token introspection will be used
 //                    resourceServerProperties.getJwt().setIssuerUri(null);
@@ -120,7 +122,30 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         return accessTokenResponseClient;
     }
 
-    private boolean isRootOrgIssuer(String issuerUri) {
-        return !issuerUri.contains("/oauth2/default");
+    /**
+     * Check if the issuer is root/org URI.
+     *
+     * Issuer URL that does not follow the pattern '/oauth2/default' (or) '/oauth2/some_id_string' is
+     * considered root/org issuer.
+     *
+     * e.g. https://dev-12345.okta.com/oauth2/ausar5cbq5TRRsbcJ0h7 (non-root issuer/org url)
+     *      https://dev-12345.okta.com (root/org url)
+     *
+     * @param issuerUri
+     * @return true if root/org, false otherwise
+     */
+    private boolean isRootOrgIssuer(String issuerUri) throws MalformedURLException {
+        String uriPath = new URL(issuerUri).getPath();
+
+        if (Strings.hasText(uriPath)) {
+            String[] tokenizedUri = uriPath.split("/");
+            if (tokenizedUri.length >= 2 &&
+                "oauth2".equals(tokenizedUri[0]) &&
+                Strings.hasText(tokenizedUri[1])) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
