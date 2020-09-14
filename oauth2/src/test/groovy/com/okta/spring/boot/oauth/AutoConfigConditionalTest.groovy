@@ -66,7 +66,6 @@ import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthen
 import org.springframework.security.web.FilterChainProxy
 import org.springframework.security.web.server.WebFilterChainProxy
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter
-import org.springframework.security.web.server.authorization.AuthorizationWebFilter
 import org.springframework.web.server.WebFilter
 import org.testng.TestException
 import org.testng.annotations.AfterClass
@@ -114,7 +113,8 @@ class AutoConfigConditionalTest implements HttpMock {
                         "token_endpoint":"${issuer}oauth2/v1/token",
                         "userinfo_endpoint":"${issuer}oauth2/v1/userinfo",
                         "registration_endpoint":"${issuer}oauth2/v1/clients",
-                        "jwks_uri":"${issuer}oauth2/v1/keys"
+                        "jwks_uri":"${issuer}oauth2/v1/keys",
+                        "introspection_endpoint":"${issuer}oauth2/v1/introspect"
                     }
                     """)))
     }
