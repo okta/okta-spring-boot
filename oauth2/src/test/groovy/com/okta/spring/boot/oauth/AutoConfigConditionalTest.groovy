@@ -116,7 +116,8 @@ class AutoConfigConditionalTest implements HttpMock {
                         "token_endpoint":"${issuer}oauth2/v1/token",
                         "userinfo_endpoint":"${issuer}oauth2/v1/userinfo",
                         "registration_endpoint":"${issuer}oauth2/v1/clients",
-                        "jwks_uri":"${issuer}oauth2/v1/keys"
+                        "jwks_uri":"${issuer}oauth2/v1/keys",
+                        "introspection_endpoint":"${issuer}oauth2/v1/introspect"
                     }
                     """)))
     }
