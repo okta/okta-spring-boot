@@ -23,16 +23,21 @@ import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2Clien
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
 import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
+import org.springframework.security.oauth2.server.resource.authentication.OpaqueTokenAuthenticationProvider;
 import org.springframework.web.client.RestTemplate;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import static org.springframework.util.StringUtils.isEmpty;
@@ -65,21 +70,43 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
             } else {
                 log.debug("OAuth/OIDC Login not configured due to missing issuer, client-id, or client-secret property");
             }
+        }
+    }
 
-            // resource server configuration
-            if (!context.getBeansOfType(OAuth2ResourceServerProperties.class).isEmpty()) {
-                OAuth2ResourceServerProperties resourceServerProperties = context.getBean(OAuth2ResourceServerProperties.class);
+    @Override
+    public void configure(HttpSecurity http) throws Exception {
+        ApplicationContext context = http.getSharedObject(ApplicationContext.class);
 
-//                if (TokenUtil.isRootOrgIssuer(resourceServerProperties.getJwt().getIssuerUri())) {
-//                    // clear all jwt properties & opaque token introspection will be used
-//                    resourceServerProperties.getJwt().setIssuerUri(null);
-//                    resourceServerProperties.getJwt().setJwkSetUri(null);
-//                }
+        //TODO: do we need to check this at all? depends on answer to below TODO.
+        if (!context.getBeansOfType(OAuth2ResourceServerProperties.class).isEmpty()) {
+            //OAuth2ResourceServerProperties oAuth2ResourceServerProperties = context.getBean(OAuth2ResourceServerProperties.class);
 
-                if (!isEmpty(resourceServerProperties.getJwt().getIssuerUri())) {
-                    // configure Okta specific auth converter (extracts authorities from `groupsClaim`)
-                    configureResourceServer(http, oktaOAuth2Properties);
-                }
+            if (!context.getBeansOfType(OktaOAuth2Properties.class).isEmpty()) {
+                OktaOAuth2Properties oktaOAuth2Properties = context.getBean(OktaOAuth2Properties.class);
+
+                http.oauth2ResourceServer(httpSecurityOAuth2ResourceServerConfigurer -> {
+
+                    try {
+                        Method getAuthenticationProviderMethod =
+                            OAuth2ResourceServerConfigurer.class.getDeclaredMethod("getAuthenticationProvider", null);
+                        getAuthenticationProviderMethod.setAccessible(true);
+
+                        AuthenticationProvider authenticationProvider =
+                            (AuthenticationProvider) getAuthenticationProviderMethod.invoke(httpSecurityOAuth2ResourceServerConfigurer, null);
+
+                        //TODO: should we get issuer from oAuth2ResourceServerProperties.getJwt().getIssuerUri() instead?
+                        if (TokenUtil.isRootOrgIssuer(oktaOAuth2Properties.getIssuer()) ||
+                            authenticationProvider instanceof OpaqueTokenAuthenticationProvider) {
+                            log.debug("Configuring resource server for Opaque Token validation/introspection");
+                            http.oauth2ResourceServer().opaqueToken();
+                        } else if (authenticationProvider instanceof JwtAuthenticationProvider) {
+                            log.debug("Configuring resource server for JWT validation");
+                            configureResourceServer(http, oktaOAuth2Properties);
+                        }
+                    } catch (Exception e) {
+                        log.error("Error occurred while configuring resource server", e);
+                    }
+                });
             } else {
                 log.debug("OAuth resource server not configured due to missing OAuth2ResourceServerProperties bean");
             }
