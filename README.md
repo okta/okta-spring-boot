@@ -213,29 +213,14 @@ If you want to add custom claims to JWT tokens in your custom Authorization Serv
 
 You could then extract the attributes from the tokens by doing something like below:
 
-**Authorization Code Flow:**
-
-```java
-@Controller
-public class ExampleController {
-
-    @GetMapping("/profile")
-    @PreAuthorize("hasAuthority('SCOPE_profile')")
-    public ModelAndView userDetails(OAuth2AuthenticationToken authentication) {
-        return new ModelAndView("userProfile" , Collections.singletonMap("details", authentication.getPrincipal().getAttributes()));
-    }
-}
-```
-
-**Resource Server Flow:**
-
 ```java
 @RestController
-public class MessageOfTheDayController {
+public class ExampleController {
 
     @GetMapping("/email")
     @PreAuthorize("hasAuthority('SCOPE_profile')")
     public String getEmail(AbstractOAuth2TokenAuthenticationToken authentication) {
+        // AbstractOAuth2TokenAuthenticationToken is an abstraction for BearerTokenAuthentication & JwtAuthenticationToken. 
         return (String) authentication.getTokenAttributes().get("sub");
     }
 }
