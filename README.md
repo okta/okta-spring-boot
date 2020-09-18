@@ -233,10 +233,10 @@ public class ExampleController {
 @RestController
 public class MessageOfTheDayController {
 
-    @GetMapping("/api/userProfile")
+    @GetMapping("/email")
     @PreAuthorize("hasAuthority('SCOPE_profile')")
-    public Map<String, Object> getUserDetails(JwtAuthenticationToken authentication) {
-        return authentication.getTokenAttributes();
+    public String getEmail(AbstractOAuth2TokenAuthenticationToken authentication) {
+        return (String) authentication.getTokenAttributes().get("sub");
     }
 }
 ```
