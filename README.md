@@ -211,7 +211,7 @@ static class WebConfig extends WebSecurityConfigurerAdapter {
 
 If you want to add custom claims to JWT tokens in your custom Authorization Server, see [Add Custom claim to a token](https://developer.okta.com/docs/guides/customize-tokens-returned-from-okta/add-custom-claim/) for more info.
 
-You could then extract the attributes from the tokens by doing something like below:
+You could then extract the attributes from the token by doing something like below:
 
 ```java
 @RestController
@@ -219,7 +219,7 @@ public class ExampleController {
 
     @GetMapping("/email")
     @PreAuthorize("hasAuthority('SCOPE_profile')")
-    public String getEmail(AbstractOAuth2TokenAuthenticationToken authentication) {
+    public String getUserEmail(AbstractOAuth2TokenAuthenticationToken authentication) {
         // AbstractOAuth2TokenAuthenticationToken is an abstraction for BearerTokenAuthentication & JwtAuthenticationToken. 
         return (String) authentication.getTokenAttributes().get("sub");
     }
