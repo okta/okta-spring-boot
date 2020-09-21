@@ -220,7 +220,7 @@ public class ExampleController {
     @GetMapping("/email")
     @PreAuthorize("hasAuthority('SCOPE_profile')")
     public String getUserEmail(AbstractOAuth2TokenAuthenticationToken authentication) {
-        // AbstractOAuth2TokenAuthenticationToken is an abstraction for BearerTokenAuthentication & JwtAuthenticationToken. 
+        // AbstractOAuth2TokenAuthenticationToken works for both JWT and opaque access tokens
         return (String) authentication.getTokenAttributes().get("sub");
     }
 }
