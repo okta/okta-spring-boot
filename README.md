@@ -218,7 +218,6 @@ You could then extract the attributes from the token by doing something like bel
 public class ExampleController {
 
     @GetMapping("/email")
-    @PreAuthorize("hasAuthority('SCOPE_profile')")
     public String getUserEmail(AbstractOAuth2TokenAuthenticationToken authentication) {
         // AbstractOAuth2TokenAuthenticationToken works for both JWT and opaque access tokens
         return (String) authentication.getTokenAttributes().get("sub");
