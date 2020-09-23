@@ -150,6 +150,31 @@ public class SecurityConfiguration {
 
 [Full Stack Reactive with Spring WebFlux, WebSockets, and React](https://developer.okta.com/blog/2018/09/25/spring-webflux-websockets-react) uses both SSO and a resource server. Its current code uses Spring Security's OIDC support. [Changing it to use the Okta Spring Starter](https://github.com/oktadeveloper/okta-spring-webflux-react-example/pull/11) reduces the lines of code quite a bit.
 
+### Spring MVC
+
+To configure a resource server when using Spring MVC, you need to extend the `WebSecurityConfigurerAdapter` bean and override the `configure` method.
+
+```java
+@Configuration
+static class OktaOAuth2WebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+
+        http.authorizeRequests()
+            .anyRequest().authenticated()
+        .and()
+            .oauth2ResourceServer().jwt();
+
+        // process CORS annotations
+        http.cors();
+
+        // force a non-empty response body for 401's to make the response more browser friendly
+        Okta.configureResourceServer401ResponseBody(http);
+    }
+}
+```
+
 ## Supporting server side applications - OAuth Code flow
 
 Building a server side application and just need to redirect to a login page? This OAuth 2.0 code flow is for you.
