@@ -177,7 +177,7 @@ To configure a resource server when using Spring MVC, you need to extend the `We
 
 ```java
 @Configuration
-static class OktaOAuth2WebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
+public class OktaOAuth2WebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
