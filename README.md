@@ -33,7 +33,7 @@ compile 'com.okta.spring:okta-spring-boot-starter'
 
 ## Supporting client side applications - OAuth Implicit flow
 
-Are you writing a backend endpoints in order to support a client side application? If so follow along, otherwise skip to the next section.
+Are you writing backend endpoints in order to support a client side application? If so follow along, otherwise skip to the next section.
 
 ### Configure your properties
 
@@ -237,6 +237,26 @@ Open up <http://localhost:8080> in your favorite browser.
 You'll be redirected automatically to an Okta login page. Once you successfully login, you will be redirected back to your app and you'll see the message of the day!
 
 This module integrates with Spring Security's OAuth support, all you need is the mark your application with the standard `@EnableOAuth2Client` annotation. 
+
+## Proxy
+
+If you're running your application (with this okta-spring-boot dependency) from behind a network proxy, you could add JVM args to your application like below:
+
+```bash
+-Dhttps.proxyHost=host
+-Dhttps.proxyPort=port
+-Dhttps.proxyUser="user"          # optional
+-Dhttps.proxyPassword="password". # optional 
+```
+
+or, you could set it programatically like:
+
+```java
+System.setProperty("https.proxyHost", "https://example-proxy.com");
+System.setProperty("https.proxyPort", "443");
+```
+
+Note: The above samples apply only for `HTTPS` proxy type. Replace `https` with your proxy type as applicable. See [here](https://docs.oracle.com/javase/8/docs/api/java/net/doc-files/net-properties.html) for the complete list of properties.
 
 # Inject the Okta Java SDK
 
