@@ -24,7 +24,7 @@ curl https://start.spring.io/starter.zip -d dependencies=web,okta -d javaVersion
 ```
 * Configure it with Okta's CLI:
 ```bash
-cd demo && okta apps create
+unzip demo.zip && cd demo && okta apps create
 ```
 * Run it:
 ```bash
