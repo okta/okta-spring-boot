@@ -54,10 +54,10 @@ class OktaOAuth2ResourceServerAutoConfig {
     JwtDecoder jwtDecoder(OAuth2ResourceServerProperties oAuth2ResourceServerProperties,
                           OktaOAuth2Properties oktaOAuth2Properties) {
 
-            NimbusJwtDecoderJwkSupport decoder = new NimbusJwtDecoderJwkSupport(oAuth2ResourceServerProperties.getJwt().getJwkSetUri());
-            decoder.setJwtValidator(TokenUtil.jwtValidator(oAuth2ResourceServerProperties.getJwt().getIssuerUri(), oktaOAuth2Properties.getAudience()));
-            decoder.setRestOperations(restOperations());
-            return decoder;
+        NimbusJwtDecoderJwkSupport decoder = new NimbusJwtDecoderJwkSupport(oAuth2ResourceServerProperties.getJwt().getJwkSetUri());
+        decoder.setJwtValidator(TokenUtil.jwtValidator(oAuth2ResourceServerProperties.getJwt().getIssuerUri(), oktaOAuth2Properties.getAudience()));
+        decoder.setRestOperations(restOperations());
+        return decoder;
     }
 
 
@@ -69,12 +69,11 @@ class OktaOAuth2ResourceServerAutoConfig {
 
     @Bean
     @Conditional(OktaOpaqueTokenIntrospectConditional.class)
-    OpaqueTokenIntrospector opaqueTokenIntrospector(OAuth2ResourceServerProperties oAuth2ResourceServerProperties,
-                                                    OktaOAuth2Properties oktaOAuth2Properties) {
+    OpaqueTokenIntrospector opaqueTokenIntrospector(OAuth2ResourceServerProperties oAuth2ResourceServerProperties) {
         return new NimbusOpaqueTokenIntrospector(
             oAuth2ResourceServerProperties.getOpaquetoken().getIntrospectionUri(),
-            oktaOAuth2Properties.getClientId(),
-            oktaOAuth2Properties.getClientSecret());
+            oAuth2ResourceServerProperties.getOpaquetoken().getClientId(),
+            oAuth2ResourceServerProperties.getOpaquetoken().getClientSecret());
     }
 
     @Bean

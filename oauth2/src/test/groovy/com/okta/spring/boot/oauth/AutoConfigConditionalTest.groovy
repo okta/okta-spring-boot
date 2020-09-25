@@ -51,11 +51,7 @@ import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler
 import org.springframework.security.oauth2.client.oidc.web.server.logout.OidcClientInitiatedServerLogoutSuccessHandler
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService
-import org.springframework.security.oauth2.client.userinfo.DefaultReactiveOAuth2UserService
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserService
-import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserService
+import org.springframework.security.oauth2.client.userinfo.*
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter
 import org.springframework.security.oauth2.client.web.server.authentication.OAuth2LoginAuthenticationWebFilter
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
@@ -326,7 +322,7 @@ class AutoConfigConditionalTest implements HttpMock {
                 assertWebFiltersDisabled(context, OAuth2LoginAuthenticationWebFilter)
                 assertWebFiltersEnabled(context, ServerHttpSecurity.OAuth2ResourceServerSpec.BearerTokenAuthenticationWebFilter)
                 assertJwtBearerWebFilterEnabled(context)
-        }
+            }
     }
 
     @Test

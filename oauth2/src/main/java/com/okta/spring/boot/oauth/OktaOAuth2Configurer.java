@@ -20,10 +20,8 @@ import com.okta.spring.boot.oauth.http.UserAgentRequestInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.converter.FormHttpMessageConverter;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
@@ -33,11 +31,9 @@ import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCo
 import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
 import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
-import org.springframework.security.oauth2.server.resource.authentication.OpaqueTokenAuthenticationProvider;
 import org.springframework.web.client.RestTemplate;
 
-import java.lang.reflect.Method;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 
 import static org.springframework.util.StringUtils.isEmpty;
@@ -46,6 +42,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
 
     private static final Logger log = LoggerFactory.getLogger(OktaOAuth2Configurer.class);
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void init(HttpSecurity http) throws Exception {
 
@@ -67,48 +64,30 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                     http.logout().logoutSuccessHandler(context.getBean(OidcClientInitiatedLogoutSuccessHandler.class));
                 }
 
+                // if issuer is root org, use opaque token validation
+                if (TokenUtil.isRootOrgIssuer(oktaOAuth2Properties.getIssuer())) {
+                    configureResourceServerForOpaqueTokenValidation(http);
+                    return;
+                }
+
+                OAuth2ResourceServerConfigurer oAuth2ResourceServerConfigurer =
+                    http.getConfigurer(OAuth2ResourceServerConfigurer.class);
+
+                if (oAuth2ResourceServerConfigurer != null) {
+                    Field jwtConfigurerField =
+                        OAuth2ResourceServerConfigurer.class.getDeclaredField("jwtConfigurer");
+                    jwtConfigurerField.setAccessible(true);
+
+                    OAuth2ResourceServerConfigurer.JwtConfigurer jwtConfigurer =
+                        (OAuth2ResourceServerConfigurer.JwtConfigurer) jwtConfigurerField.get(oAuth2ResourceServerConfigurer);
+
+                    if (jwtConfigurer != null) {
+                        http.oauth2ResourceServer()
+                            .jwt().jwtAuthenticationConverter(new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim()));
+                    }
+                }
             } else {
                 log.debug("OAuth/OIDC Login not configured due to missing issuer, client-id, or client-secret property");
-            }
-        }
-    }
-
-    @Override
-    public void configure(HttpSecurity http) throws Exception {
-        ApplicationContext context = http.getSharedObject(ApplicationContext.class);
-
-        //TODO: do we need to check this at all? depends on answer to below TODO.
-        if (!context.getBeansOfType(OAuth2ResourceServerProperties.class).isEmpty()) {
-            //OAuth2ResourceServerProperties oAuth2ResourceServerProperties = context.getBean(OAuth2ResourceServerProperties.class);
-
-            if (!context.getBeansOfType(OktaOAuth2Properties.class).isEmpty()) {
-                OktaOAuth2Properties oktaOAuth2Properties = context.getBean(OktaOAuth2Properties.class);
-
-                http.oauth2ResourceServer(httpSecurityOAuth2ResourceServerConfigurer -> {
-
-                    try {
-                        Method getAuthenticationProviderMethod =
-                            OAuth2ResourceServerConfigurer.class.getDeclaredMethod("getAuthenticationProvider", null);
-                        getAuthenticationProviderMethod.setAccessible(true);
-
-                        AuthenticationProvider authenticationProvider =
-                            (AuthenticationProvider) getAuthenticationProviderMethod.invoke(httpSecurityOAuth2ResourceServerConfigurer, null);
-
-                        //TODO: should we get issuer from oAuth2ResourceServerProperties.getJwt().getIssuerUri() instead?
-                        if (TokenUtil.isRootOrgIssuer(oktaOAuth2Properties.getIssuer()) ||
-                            authenticationProvider instanceof OpaqueTokenAuthenticationProvider) {
-                            log.debug("Configuring resource server for Opaque Token validation/introspection");
-                            http.oauth2ResourceServer().opaqueToken();
-                        } else if (authenticationProvider instanceof JwtAuthenticationProvider) {
-                            log.debug("Configuring resource server for JWT validation");
-                            configureResourceServer(http, oktaOAuth2Properties);
-                        }
-                    } catch (Exception e) {
-                        log.error("Error occurred while configuring resource server", e);
-                    }
-                });
-            } else {
-                log.debug("OAuth resource server not configured due to missing OAuth2ResourceServerProperties bean");
             }
         }
     }
@@ -124,10 +103,9 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         }
     }
 
-    private void configureResourceServer(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {
+    private void configureResourceServerForOpaqueTokenValidation(HttpSecurity http) throws Exception {
 
-        http.oauth2ResourceServer()
-            .jwt().jwtAuthenticationConverter(new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim()));
+        http.oauth2ResourceServer().opaqueToken();
     }
 
     private OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient() {
