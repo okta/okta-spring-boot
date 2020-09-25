@@ -77,7 +77,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
 
                 if (oAuth2ResourceServerConfigurer != null) {
 
-                    // fix error reported by findbugs plugin: DP_DO_INSIDE_DO_PRIVILEGED
+                    // code below is wrapped in AccessController to address findbugs error 'DP_DO_INSIDE_DO_PRIVILEGED'
                     //noinspection unchecked
                     Field jwtConfigurerField = (Field) AccessController.doPrivileged((PrivilegedAction) () -> {
                         Field result = null;
@@ -101,8 +101,6 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                         }
                     }
                 }
-            } else {
-                log.debug("OAuth/OIDC Login not configured due to missing issuer, client-id, or client-secret property");
             }
         }
     }
