@@ -334,7 +334,7 @@ class AutoConfigConditionalTest implements HttpMock {
                 assertWebFiltersDisabled(context, OAuth2LoginAuthenticationWebFilter)
                 assertWebFiltersEnabled(context, ServerHttpSecurity.OAuth2ResourceServerSpec.BearerTokenAuthenticationWebFilter)
                 assertJwtBearerWebFilterEnabled(context)
-        }
+            }
     }
 
     @Test
