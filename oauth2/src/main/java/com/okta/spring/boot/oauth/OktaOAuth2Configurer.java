@@ -34,6 +34,8 @@ import org.springframework.security.oauth2.core.http.converter.OAuth2AccessToken
 import org.springframework.web.client.RestTemplate;
 
 import java.lang.reflect.Field;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Arrays;
 
 import static org.springframework.util.StringUtils.isEmpty;
@@ -74,16 +76,29 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                     http.getConfigurer(OAuth2ResourceServerConfigurer.class);
 
                 if (oAuth2ResourceServerConfigurer != null) {
-                    Field jwtConfigurerField =
-                        OAuth2ResourceServerConfigurer.class.getDeclaredField("jwtConfigurer");
-                    jwtConfigurerField.setAccessible(true);
 
-                    OAuth2ResourceServerConfigurer.JwtConfigurer jwtConfigurer =
-                        (OAuth2ResourceServerConfigurer.JwtConfigurer) jwtConfigurerField.get(oAuth2ResourceServerConfigurer);
+                    // fix error reported by findbugs plugin: DP_DO_INSIDE_DO_PRIVILEGED
+                    //noinspection unchecked
+                    Field jwtConfigurerField = (Field) AccessController.doPrivileged((PrivilegedAction) () -> {
+                        Field result = null;
+                        try {
+                            result = OAuth2ResourceServerConfigurer.class.getDeclaredField("jwtConfigurer");
+                            result.setAccessible(true);
+                        } catch (NoSuchFieldException e) {
+                            log.error("Could not get field 'jwtConfigurer' of {} via reflection",
+                                OAuth2ResourceServerConfigurer.class.getName(), e);
+                        }
+                        return result;
+                    });
 
-                    if (jwtConfigurer != null) {
-                        http.oauth2ResourceServer()
-                            .jwt().jwtAuthenticationConverter(new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim()));
+                    if (jwtConfigurerField != null) {
+                        OAuth2ResourceServerConfigurer.JwtConfigurer jwtConfigurerValue =
+                            (OAuth2ResourceServerConfigurer.JwtConfigurer) jwtConfigurerField.get(oAuth2ResourceServerConfigurer);
+
+                        if (jwtConfigurerValue != null) {
+                            http.oauth2ResourceServer()
+                                .jwt().jwtAuthenticationConverter(new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim()));
+                        }
                     }
                 }
             } else {
