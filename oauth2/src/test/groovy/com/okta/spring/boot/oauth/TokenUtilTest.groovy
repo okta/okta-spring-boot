@@ -110,6 +110,7 @@ class TokenUtilTest {
     @Test
     void issuerUri_rootOrgTest() {
         assertThat "issuer uri expected to be root/org)", TokenUtil.isRootOrgIssuer("https://sample.okta.com")
+        assertThat "issuer uri expected to be root/org)", TokenUtil.isRootOrgIssuer("https://dev-12345.oktapreview.com/")
         assertThat "issuer uri expected to be root/org)", TokenUtil.isRootOrgIssuer("https://example.io")
     }
 
