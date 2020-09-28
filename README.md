@@ -258,7 +258,18 @@ System.setProperty("https.proxyPort", "443");
 
 See [here](https://docs.oracle.com/javase/8/docs/api/java/net/doc-files/net-properties.html) for the complete list of properties.
 
-Note: This way of setting the Proxy would not work for `webflux` since system properties are not supported by Spring's `WebClient`. However, you can do something along the lines of the solution posted [here](https://github.com/reactor/reactor-netty/issues/887#issuecomment-549439355).
+Note: This way of setting the Proxy would not work for `webflux` since system properties are not supported by Spring's `WebClient`. 
+
+You could achieve the same by settting `tcpConfiguration` like:
+
+```java
+HttpClient httpClient = HttpClient.create()
+    .tcpConfiguration(tcpClient - > tcpClient
+        .proxy(proxy - > proxy
+            .type(ProxyProvider.Proxy.HTTPS)
+            .host("example-proxy.com")
+            .port(8080)));
+```
 
 # Inject the Okta Java SDK
 
