@@ -29,7 +29,10 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
+import org.springframework.security.oauth2.core.DefaultOAuth2AuthenticatedPrincipal;
+import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoderJwkSupport;
@@ -40,6 +43,7 @@ import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
+import java.util.Collection;
 
 @Configuration
 @AutoConfigureBefore(OAuth2ResourceServerAutoConfiguration.class)
@@ -69,11 +73,21 @@ class OktaOAuth2ResourceServerAutoConfig {
 
     @Bean
     @Conditional(OktaOpaqueTokenIntrospectConditional.class)
-    OpaqueTokenIntrospector opaqueTokenIntrospector(OAuth2ResourceServerProperties oAuth2ResourceServerProperties) {
-        return new NimbusOpaqueTokenIntrospector(
+    OpaqueTokenIntrospector opaqueTokenIntrospector(OktaOAuth2Properties oktaOAuth2Properties,
+                                                    OAuth2ResourceServerProperties oAuth2ResourceServerProperties) {
+
+        OpaqueTokenIntrospector delegate = new NimbusOpaqueTokenIntrospector(
             oAuth2ResourceServerProperties.getOpaquetoken().getIntrospectionUri(),
             oAuth2ResourceServerProperties.getOpaquetoken().getClientId(),
             oAuth2ResourceServerProperties.getOpaquetoken().getClientSecret());
+
+        return token -> {
+            OAuth2AuthenticatedPrincipal principal = delegate.introspect(token);
+            Collection<GrantedAuthority> mappedAuthorities =
+                (Collection<GrantedAuthority>) TokenUtil.tokenClaimsToAuthorities(principal.getAttributes(), oktaOAuth2Properties.getGroupsClaim());
+            return new DefaultOAuth2AuthenticatedPrincipal(
+                principal.getName(), principal.getAttributes(), mappedAuthorities);
+        };
     }
 
     @Bean
