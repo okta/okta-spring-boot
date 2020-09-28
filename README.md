@@ -21,7 +21,7 @@ Okta's Spring Boot Starter will enable your Spring Boot application to work with
 * Create a Springboot Application with [Spring initializr](https://start.spring.io/):
 ```bash
 curl https://start.spring.io/starter.zip -d dependencies=web,okta -o <<yourProjectName>>.zip
-unzip <<yourProjectName>>.zip
+unzip <<yourProjectName>>.zip -d <<yourProjectName>>
 cd <<yourProjectName>>
 ```
 * Configure it with [Okta CLI](https://github.com/oktadeveloper/okta-cli/blob/master/README.md):
