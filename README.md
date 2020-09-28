@@ -18,19 +18,24 @@ Okta's Spring Boot Starter will enable your Spring Boot application to work with
 
 ## Quickstart
 
-* Create a Springboot Application with [Spring initializr](https://start.spring.io/):
-```bash
-curl https://start.spring.io/starter.tgz -d dependencies=web,okta -d baseDir=<<yourProjectName>> | tar -xzvf -
-cd <<yourProjectName>>
-```
-* Configure it with [Okta CLI](https://github.com/oktadeveloper/okta-cli/blob/master/README.md):
-```bash
-okta apps create
-```
-* Run it:
-```bash
-./mvnw spring-boot:run
-```
+1. Create a Spring Boot application with [Spring initializr](https://start.spring.io/):
+
+   ```bash
+   curl https://start.spring.io/starter.tgz -d dependencies=web,okta -d baseDir=<<yourProjectName>> | tar -xzvf -
+   cd <<yourProjectName>>
+   ```
+   
+2. Configure it with [Okta CLI](https://github.com/oktadeveloper/okta-cli/blob/master/README.md):
+
+   ```bash
+   okta apps create
+   ```
+
+3. Run it:
+ 
+   ```bash
+   ./mvnw spring-boot:run
+   ```
 
 ## Include the dependency
 
