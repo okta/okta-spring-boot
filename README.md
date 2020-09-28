@@ -258,7 +258,7 @@ System.setProperty("https.proxyPort", "443");
 
 See [here](https://docs.oracle.com/javase/8/docs/api/java/net/doc-files/net-properties.html) for the complete list of properties.
 
-Note: This way of setting the Proxy would not work for `webflux` since system properties are not supported by Spring's `WebClient`. 
+Note: This way of setting the Proxy would not work for `webflux` since system properties are not supported by Spring's `WebClient` (See [here](https://github.com/spring-projects/spring-security/issues/8882)). 
 
 You could achieve the same by settting `tcpConfiguration` like:
 
