@@ -256,7 +256,7 @@ System.setProperty("https.proxyHost", "https://example-proxy.com");
 System.setProperty("https.proxyPort", "443");
 ```
 
-Note: The above samples apply only for `HTTPS` proxy type. Replace `https` with your proxy type as applicable. See [here](https://docs.oracle.com/javase/8/docs/api/java/net/doc-files/net-properties.html) for the complete list of properties.
+See [here](https://docs.oracle.com/javase/8/docs/api/java/net/doc-files/net-properties.html) for the complete list of properties.
 
 # Inject the Okta Java SDK
 
