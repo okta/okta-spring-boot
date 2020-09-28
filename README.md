@@ -268,7 +268,7 @@ HttpClient httpClient = HttpClient.create()
         .proxy(proxy - > proxy
             .type(ProxyProvider.Proxy.HTTPS)
             .host("example-proxy.com")
-            .port(8080)));
+            .port(443)));
 ```
 
 # Inject the Okta Java SDK
