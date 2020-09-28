@@ -258,7 +258,7 @@ System.setProperty("https.proxyPort", "443");
 
 See [here](https://docs.oracle.com/javase/8/docs/api/java/net/doc-files/net-properties.html) for the complete list of properties.
 
-**Note:**  Spring WebFlux (and `WebClient`) do not support these properties. (See spring-projects/spring-security#8882).
+**Note:**  Spring WebFlux (and `WebClient`) do not support these properties. (See [spring-projects/spring-security#8882](https://github.com/spring-projects/spring-security/issues/8882)).
 
 # Inject the Okta Java SDK
 
