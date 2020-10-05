@@ -78,7 +78,6 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                 if (oAuth2ResourceServerConfigurer != null) {
 
                     // code below is wrapped in AccessController to address findbugs error 'DP_DO_INSIDE_DO_PRIVILEGED'
-                    //noinspection unchecked
                     Field jwtConfigurerField = (Field) AccessController.doPrivileged((PrivilegedAction) () -> {
                         Field result = null;
                         try {
@@ -124,7 +123,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
     private OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient() {
 
         RestTemplate restTemplate = new RestTemplate(Arrays.asList(new FormHttpMessageConverter(),
-            new OAuth2AccessTokenResponseHttpMessageConverter()));
+                                                                   new OAuth2AccessTokenResponseHttpMessageConverter()));
         restTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
         restTemplate.getInterceptors().add(new UserAgentRequestInterceptor());
 
