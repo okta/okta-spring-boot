@@ -6,15 +6,36 @@
 Okta Spring Boot Starter
 ========================
 
-Okta's Spring Boot Starter will enable your Spring Boot application to work with Okta via OAuth 2.0/OIDC.  Jump to our [quickstart](https://developer.okta.com/quickstart/#/angular/java/spring) to see how to configure various clients or follow along below to use curl.
+Okta's Spring Boot Starter will enable your Spring Boot application to work with Okta via OAuth 2.0/OIDC.
 
-**NOTE:** This library works with Spring Boot 2.2+. If you need support for Spring Boot 1.5.x, use version version 0.6.
+**NOTE:** This library works with Spring Boot 2.2+. If you need support for Spring Boot 1.5.x, use version 0.6.
 
 ## What you need
 
 * An Okta account (sign up for a [forever-free developer account](https://developer.okta.com/signup/))
-* An OIDC application (typically a 'SPA' application)
+* An OIDC application (typically a 'Web' application)
 * An [access token](https://developer.okta.com/docs/api/resources/oauth2.html)
+
+## Quickstart
+
+1. Create a Spring Boot application with [Spring initializr](https://start.spring.io/):
+
+   ```bash
+   curl https://start.spring.io/starter.tgz -d dependencies=web,okta -d baseDir=<<yourProjectName>> | tar -xzvf -
+   cd <<yourProjectName>>
+   ```
+   
+2. Configure it with [Okta CLI](https://github.com/oktadeveloper/okta-cli/blob/master/README.md):
+
+   ```bash
+   okta apps create
+   ```
+
+3. Run it:
+ 
+   ```bash
+   ./mvnw spring-boot:run
+   ```
 
 ## Include the dependency
 
@@ -33,7 +54,7 @@ compile 'com.okta.spring:okta-spring-boot-starter'
 
 ## Supporting client side applications - OAuth Implicit flow
 
-Are you writing a backend endpoints in order to support a client side application? If so follow along, otherwise skip to the next section.
+Are you writing backend endpoints in order to support a client side application? If so follow along, otherwise skip to the next section.
 
 ### Configure your properties
 
@@ -209,6 +230,22 @@ static class WebConfig extends WebSecurityConfigurerAdapter {
 }
 ```
 
+If you want to add custom claims to JWT tokens in your custom Authorization Server, see [Add Custom claim to a token](https://developer.okta.com/docs/guides/customize-tokens-returned-from-okta/add-custom-claim/) for more info.
+
+You could then extract the attributes from the token by doing something like below:
+
+```java
+@RestController
+public class ExampleController {
+
+    @GetMapping("/email")
+    public String getUserEmail(AbstractOAuth2TokenAuthenticationToken authentication) {
+        // AbstractOAuth2TokenAuthenticationToken works for both JWT and opaque access tokens
+        return (String) authentication.getTokenAttributes().get("sub");
+    }
+}
+```
+
 ### Share Sessions Across Web Servers
 
 The Authorization Code Flow (the typical OAuth redirect) uses sessions.  If you have multiple instances of your application, you must configure a [Spring Session](https://docs.spring.io/spring-session/docs/current/reference/html5/) implementation such as Redis, Hazelcast, JDBC, etc.
@@ -222,6 +259,28 @@ You'll be redirected automatically to an Okta login page. Once you successfully 
 
 This module integrates with Spring Security's OAuth support, all you need is the mark your application with the standard `@EnableOAuth2Client` annotation. 
 
+## Proxy
+
+If you're running your application (with this okta-spring-boot dependency) from behind a network proxy, you could add JVM args to your application like:
+
+```bash
+-Dhttps.proxyHost=host
+-Dhttps.proxyPort=port
+-Dhttps.proxyUser="user"          # optional
+-Dhttps.proxyPassword="password". # optional 
+```
+
+or, you could set it programmatically like:
+
+```java
+System.setProperty("https.proxyHost", "https://example-proxy.com");
+System.setProperty("https.proxyPort", "443");
+```
+
+See [here](https://docs.oracle.com/javase/8/docs/api/java/net/doc-files/net-properties.html) for the complete list of properties.
+
+**Note:**  Spring WebFlux (and `WebClient`) do not support these properties. (See [spring-projects/spring-security#8882](https://github.com/spring-projects/spring-security/issues/8882)).
+
 # Inject the Okta Java SDK
 
 To integrate the [Okta Java SDK](https://github.com/okta/okta-sdk-java) into your Spring Boot application you just need to add a dependency:
@@ -233,7 +292,13 @@ To integrate the [Okta Java SDK](https://github.com/okta/okta-sdk-java) into you
 </dependency>
 ```
 
-Then define the `okta.client.token` property. See [creating an API token](https://developer.okta.com/docs/api/getting_started/getting_a_token) for more info.
+Then define the following properties:
+
+| Key | Description |
+------|--------------
+| `okta.client.orgUrl` | Your Okta Url: `https://{yourOktaDomain}`, i.e. `https://dev-123456.okta.com` |
+| `okta.client.token` | An Okta API token, see [creating an API token](https://developer.okta.com/docs/api/getting_started/getting_a_token) for more info. |
+
 
 All that is left is to inject the client (`com.okta.sdk.client.Client`)! Take a look at [this post](https://spring.io/blog/2007/07/11/setter-injection-versus-constructor-injection-and-the-use-of-required/) for more info on the best way to inject your beans.
 
