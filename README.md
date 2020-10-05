@@ -294,8 +294,8 @@ To integrate the [Okta Java SDK](https://github.com/okta/okta-sdk-java) into you
 
 Then define the following properties:
 
-|| key || description ||
-------------------------
+| Key | Description |
+------|--------------
 | `okta.client.orgUrl` | Your Okta Url: `https://{yourOktaDomain}`, i.e. `https://dev-123456.okta.com` |
 | `okta.client.token` | An Okta API token, see [creating an API token](https://developer.okta.com/docs/api/getting_started/getting_a_token) for more info. |
 
