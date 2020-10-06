@@ -17,13 +17,11 @@ package com.okta.spring.tests.oauth2.implicit
 
 import com.okta.test.mock.Scenario
 import com.okta.test.mock.application.ApplicationTestRunner
-import io.restassured.http.ContentType
 import org.hamcrest.Matchers
 import org.testng.annotations.Test
 
 import static com.okta.test.mock.scenarios.Scenario.IMPLICIT_FLOW_REMOTE_VALIDATION
 import static io.restassured.RestAssured.given
-import static org.hamcrest.Matchers.startsWith
 
 @Scenario(IMPLICIT_FLOW_REMOTE_VALIDATION)
 class ImplicitRemoteValidationGroupIT extends ApplicationTestRunner {
@@ -42,17 +40,4 @@ class ImplicitRemoteValidationGroupIT extends ApplicationTestRunner {
             .body(Matchers.equalTo("Everyone has Access: joe.coder@example.com"))
     }
 
-    @Test
-    void test401ResponseBody() {
-         given()
-            .contentType(ContentType.ANY)
-            .redirects()
-                .follow(false)
-        .when()
-            .get("http://localhost:${applicationPort}/everyone")
-        .then()
-            .statusCode(401)
-            .header("WWW-Authenticate", startsWith("Bearer"))
-            .body(Matchers.equalTo(ERROR_401))
-    }
 }
