@@ -27,13 +27,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.FormHttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
 import org.springframework.security.oauth2.core.DefaultOAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
-import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoderJwkSupport;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -42,7 +38,6 @@ import org.springframework.security.oauth2.server.resource.introspection.OpaqueT
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
 import java.util.Collection;
 
 @Configuration
@@ -88,16 +83,5 @@ class OktaOAuth2ResourceServerAutoConfig {
             return new DefaultOAuth2AuthenticatedPrincipal(
                 principal.getName(), principal.getAttributes(), mappedAuthorities);
         };
-    }
-
-    @Bean
-    RestTemplate restTemplate() {
-        RestTemplate restTemplate = new RestTemplate(Arrays.asList(
-            new FormHttpMessageConverter(),
-            new OAuth2AccessTokenResponseHttpMessageConverter(),
-            new StringHttpMessageConverter()));
-        restTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
-        restTemplate.getInterceptors().add(new UserAgentRequestInterceptor());
-        return restTemplate;
     }
 }

@@ -84,7 +84,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                             result = OAuth2ResourceServerConfigurer.class.getDeclaredField("jwtConfigurer");
                             result.setAccessible(true);
                         } catch (NoSuchFieldException e) {
-                            log.error("Could not get field 'jwtConfigurer' of {} via reflection",
+                            log.warn("Could not get field 'jwtConfigurer' of {} via reflection",
                                 OAuth2ResourceServerConfigurer.class.getName(), e);
                         }
                         return result;
@@ -95,9 +95,17 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                             (OAuth2ResourceServerConfigurer.JwtConfigurer) jwtConfigurerField.get(oAuth2ResourceServerConfigurer);
 
                         if (jwtConfigurerValue != null) {
+                            log.info("JWT configurer is set in OAuth resource server configuration. " +
+                                "JWT validation will be configured.");
                             http.oauth2ResourceServer()
                                 .jwt().jwtAuthenticationConverter(new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim()));
+                        } else {
+                            log.info("JWT configurer is NOT set in OAuth resource server configuration. " +
+                                "Opaque Token validation/introspection will be configured.");
+                            configureResourceServerForOpaqueTokenValidation(http);
                         }
+                    } else {
+                        log.warn("JWT configurer field was not found in OAuth resource server configuration");
                     }
                 }
             }
