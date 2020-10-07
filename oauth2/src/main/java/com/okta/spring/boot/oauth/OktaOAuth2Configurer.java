@@ -68,6 +68,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
 
                 // if issuer is root org, use opaque token validation
                 if (TokenUtil.isRootOrgIssuer(oktaOAuth2Properties.getIssuer())) {
+                    log.info("Opaque Token validation/introspection will be configured.");
                     configureResourceServerForOpaqueTokenValidation(http, oktaOAuth2Properties);
                     return;
                 }
