@@ -37,6 +37,7 @@ class ImplicitRemoteValidationGroupIT extends ApplicationTestRunner {
         .when()
             .get("http://localhost:${applicationPort}/everyone")
         .then()
+            .statusCode(200)
             .body(Matchers.equalTo("Everyone has Access: joe.coder@example.com"))
     }
 

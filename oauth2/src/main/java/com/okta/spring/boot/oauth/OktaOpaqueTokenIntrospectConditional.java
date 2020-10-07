@@ -18,7 +18,7 @@ package com.okta.spring.boot.oauth;
 import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
-public class OktaOpaqueTokenIntrospectConditional extends AllNestedConditions {
+class OktaOpaqueTokenIntrospectConditional extends AllNestedConditions {
 
     public OktaOpaqueTokenIntrospectConditional() {
         super(ConfigurationPhase.REGISTER_BEAN);
