@@ -68,7 +68,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
 
                 // if issuer is root org, use opaque token validation
                 if (TokenUtil.isRootOrgIssuer(oktaOAuth2Properties.getIssuer())) {
-                    log.info("Opaque Token validation/introspection will be configured.");
+                    log.debug("Opaque Token validation/introspection will be configured.");
                     configureResourceServerForOpaqueTokenValidation(http, oktaOAuth2Properties);
                     return;
                 }
@@ -96,17 +96,20 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                             (OAuth2ResourceServerConfigurer.JwtConfigurer) jwtConfigurerField.get(oAuth2ResourceServerConfigurer);
 
                         if (jwtConfigurerValue != null) {
-                            log.info("JWT configurer is set in OAuth resource server configuration. " +
+                            log.debug("JWT configurer is set in OAuth resource server configuration. " +
                                 "JWT validation will be configured.");
                             http.oauth2ResourceServer()
                                 .jwt().jwtAuthenticationConverter(new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim()));
                         } else {
-                            log.info("JWT configurer is NOT set in OAuth resource server configuration. " +
+                            log.debug("JWT configurer is NOT set in OAuth resource server configuration. " +
                                 "Opaque Token validation/introspection will be configured.");
                             configureResourceServerForOpaqueTokenValidation(http, oktaOAuth2Properties);
                         }
                     } else {
-                        log.warn("JWT configurer field was not found in OAuth resource server configuration");
+                        String errMsg = "JWT configurer field was not found in OAuth resource server configuration. " +
+                            "Version incompatibility with Spring Security detected." +
+                            "Check https://github.com/okta/okta-spring-boot for project updates.";
+                        throw new RuntimeException(errMsg);
                     }
                 }
             }

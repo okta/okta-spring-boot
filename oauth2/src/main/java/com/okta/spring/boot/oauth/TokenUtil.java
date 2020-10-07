@@ -116,12 +116,12 @@ final class TokenUtil {
             if (tokenizedUri.length >= 2 &&
                 "oauth2".equals(tokenizedUri[0]) &&
                 Strings.hasText(tokenizedUri[1])) {
-                log.debug("{} is not root/org issuer", issuerUri);
+                log.debug("The issuer URL: '{}' is an Okta custom authorization server", issuerUri);
                 return false;
             }
         }
 
-        log.debug("{} is root/org issuer", issuerUri);
+        log.debug("The issuer URL: '{}' is an Okta root/org authorization server", issuerUri);
         return true;
     }
 }
