@@ -68,7 +68,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
 
                 // if issuer is root org, use opaque token validation
                 if (TokenUtil.isRootOrgIssuer(oktaOAuth2Properties.getIssuer())) {
-                    configureResourceServerForOpaqueTokenValidation(http);
+                    configureResourceServerForOpaqueTokenValidation(http, oktaOAuth2Properties);
                     return;
                 }
 
@@ -102,7 +102,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                         } else {
                             log.info("JWT configurer is NOT set in OAuth resource server configuration. " +
                                 "Opaque Token validation/introspection will be configured.");
-                            configureResourceServerForOpaqueTokenValidation(http);
+                            configureResourceServerForOpaqueTokenValidation(http, oktaOAuth2Properties);
                         }
                     } else {
                         log.warn("JWT configurer field was not found in OAuth resource server configuration");
@@ -123,8 +123,11 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         }
     }
 
-    private void configureResourceServerForOpaqueTokenValidation(HttpSecurity http) throws Exception {
+    private void configureResourceServerForOpaqueTokenValidation(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {
 
+        if (isEmpty(oktaOAuth2Properties.getClientSecret())) {
+            throw new IllegalArgumentException("Missing property 'okta.oauth2.client-secret'");
+        }
         http.oauth2ResourceServer().opaqueToken();
     }
 
