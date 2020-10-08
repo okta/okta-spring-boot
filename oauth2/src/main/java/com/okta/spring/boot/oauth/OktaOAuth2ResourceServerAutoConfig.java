@@ -73,7 +73,7 @@ class OktaOAuth2ResourceServerAutoConfig {
     @Bean
     @Conditional(OktaOpaqueTokenIntrospectConditional.class)
     OpaqueTokenIntrospector opaqueTokenIntrospector(OktaOAuth2Properties oktaOAuth2Properties,
-                                                    OAuth2ResourceServerProperties oAuth2ResourceServerProperties) throws Exception {
+                                                    OAuth2ResourceServerProperties oAuth2ResourceServerProperties) {
 
         RestTemplate restTemplate = (RestTemplate) restOperations();
         restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(
