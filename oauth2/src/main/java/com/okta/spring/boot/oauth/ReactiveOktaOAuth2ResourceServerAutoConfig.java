@@ -23,11 +23,21 @@ import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2Res
 import org.springframework.boot.autoconfigure.security.oauth2.resource.reactive.ReactiveOAuth2ResourceServerAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.core.DefaultOAuth2AuthenticatedPrincipal;
+import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.security.oauth2.server.resource.BearerTokenAuthenticationToken;
+import org.springframework.security.oauth2.server.resource.introspection.NimbusReactiveOpaqueTokenIntrospector;
+import org.springframework.security.oauth2.server.resource.introspection.ReactiveOpaqueTokenIntrospector;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import java.util.Collection;
+import java.util.Collections;
 
 @Configuration
 @AutoConfigureBefore(ReactiveOAuth2ResourceServerAutoConfiguration.class)
@@ -40,8 +50,41 @@ class ReactiveOktaOAuth2ResourceServerAutoConfig {
     @Bean
     ReactiveJwtDecoder jwtDecoder(OAuth2ResourceServerProperties oAuth2ResourceServerProperties, OktaOAuth2Properties oktaOAuth2Properties) {
 
-        NimbusReactiveJwtDecoder jwtDecoder = new NimbusReactiveJwtDecoder(oAuth2ResourceServerProperties.getJwt().getJwkSetUri());
-        jwtDecoder.setJwtValidator(TokenUtil.jwtValidator(oAuth2ResourceServerProperties.getJwt().getIssuerUri(), oktaOAuth2Properties.getAudience()));
-        return jwtDecoder;
+        NimbusReactiveJwtDecoder.JwkSetUriReactiveJwtDecoderBuilder builder =
+            NimbusReactiveJwtDecoder.withJwkSetUri(oAuth2ResourceServerProperties.getJwt().getJwkSetUri());
+        builder.webClient(webClient());
+        NimbusReactiveJwtDecoder decoder = builder.build();
+        decoder.setJwtValidator(TokenUtil.jwtValidator(oAuth2ResourceServerProperties.getJwt().getIssuerUri(), oktaOAuth2Properties.getAudience()));
+        return decoder;
+    }
+
+    private WebClient webClient() {
+        WebClient webClient = WebClient.builder().build();
+        return webClient;
+    }
+
+    @Bean
+    @Conditional(OktaOpaqueTokenIntrospectConditional.class)
+    ReactiveOpaqueTokenIntrospector reactiveOpaqueTokenIntrospector(OktaOAuth2Properties oktaOAuth2Properties,
+                                                                    OAuth2ResourceServerProperties oAuth2ResourceServerProperties) {
+
+        WebClient webClient = WebClient.builder().defaultHeaders((h) -> {
+            h.setBasicAuth(oAuth2ResourceServerProperties.getOpaquetoken().getClientId(),
+                oAuth2ResourceServerProperties.getOpaquetoken().getClientSecret());
+        }).build();
+
+        ReactiveOpaqueTokenIntrospector delegate = new NimbusReactiveOpaqueTokenIntrospector(
+            oAuth2ResourceServerProperties.getOpaquetoken().getIntrospectionUri(),
+            webClient);
+
+        return token -> delegate.introspect(token)
+            .map(principal -> new DefaultOAuth2AuthenticatedPrincipal(
+                principal.getName(),
+                principal.getAttributes(),
+                extractAuthorities(principal, oktaOAuth2Properties)));
+    }
+
+    private Collection<GrantedAuthority> extractAuthorities(OAuth2AuthenticatedPrincipal principal, OktaOAuth2Properties oktaOAuth2Properties) {
+        return Collections.unmodifiableCollection(TokenUtil.tokenClaimsToAuthorities(principal.getAttributes(), oktaOAuth2Properties.getGroupsClaim()));
     }
 }

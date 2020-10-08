@@ -61,7 +61,6 @@ class OktaOAuth2ResourceServerAutoConfig {
         return decoder;
     }
 
-
     private RestTemplate restTemplate() {
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.getInterceptors().add(new UserAgentRequestInterceptor());
