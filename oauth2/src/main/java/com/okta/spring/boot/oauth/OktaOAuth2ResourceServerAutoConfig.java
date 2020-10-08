@@ -29,6 +29,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.DefaultOAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
@@ -37,13 +38,9 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoderJwkSupport;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.introspection.NimbusOpaqueTokenIntrospector;
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
-import org.springframework.util.Assert;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
-import java.lang.reflect.Field;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Collection;
 
 @Configuration
@@ -78,38 +75,14 @@ class OktaOAuth2ResourceServerAutoConfig {
     OpaqueTokenIntrospector opaqueTokenIntrospector(OktaOAuth2Properties oktaOAuth2Properties,
                                                     OAuth2ResourceServerProperties oAuth2ResourceServerProperties) throws Exception {
 
+        RestTemplate restTemplate = (RestTemplate) restOperations();
+        restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(
+            oAuth2ResourceServerProperties.getOpaquetoken().getClientId(),
+            oAuth2ResourceServerProperties.getOpaquetoken().getClientSecret()));
+
         OpaqueTokenIntrospector delegate = new NimbusOpaqueTokenIntrospector(
             oAuth2ResourceServerProperties.getOpaquetoken().getIntrospectionUri(),
-            oAuth2ResourceServerProperties.getOpaquetoken().getClientId(),
-            oAuth2ResourceServerProperties.getOpaquetoken().getClientSecret());
-
-        /* NimbusOpaqueTokenIntrospector constructor does not presently allow instantiation
-           with client-id, client-secret & restOperations combination.
-           We will now add 'UserAgentRequestInterceptor` header to the `restOperations`
-           put in by NimbusOpaqueTokenIntrospector.
-        */
-        Field restOperationsField = (Field) AccessController.doPrivileged((PrivilegedAction) () -> {
-            Field result = null;
-            try {
-                result = NimbusOpaqueTokenIntrospector.class.getDeclaredField("restOperations");
-                result.setAccessible(true);
-            } catch (NoSuchFieldException e) {
-                log.warn("Could not get field 'restOperations' of {} via reflection",
-                    NimbusOpaqueTokenIntrospector.class.getName(), e);
-            }
-            return result;
-        });
-
-        String errMsg = "restOperations field was not found in NimbusOpaqueTokenIntrospector class. " +
-            "Version incompatibility with Spring Security detected." +
-            "Check https://github.com/okta/okta-spring-boot for project updates.";
-        Assert.notNull(restOperationsField, errMsg);
-
-        RestTemplate restTemplate = (RestTemplate) restOperationsField.get(delegate);
-        Assert.notNull(restTemplate, errMsg);
-        restTemplate.getInterceptors().add(new UserAgentRequestInterceptor());
-
-        restOperationsField.set(delegate, restTemplate);
+            restTemplate);
 
         return token -> {
             OAuth2AuthenticatedPrincipal principal = delegate.introspect(token);
