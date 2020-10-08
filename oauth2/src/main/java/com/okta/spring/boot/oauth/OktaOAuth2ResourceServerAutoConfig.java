@@ -32,14 +32,14 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.DefaultOAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoderJwkSupport;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.introspection.NimbusOpaqueTokenIntrospector;
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
-import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Collection;
+import java.util.Collections;
 
 @Configuration
 @AutoConfigureBefore(OAuth2ResourceServerAutoConfiguration.class)
@@ -54,14 +54,15 @@ class OktaOAuth2ResourceServerAutoConfig {
     JwtDecoder jwtDecoder(OAuth2ResourceServerProperties oAuth2ResourceServerProperties,
                           OktaOAuth2Properties oktaOAuth2Properties) {
 
-        NimbusJwtDecoderJwkSupport decoder = new NimbusJwtDecoderJwkSupport(oAuth2ResourceServerProperties.getJwt().getJwkSetUri());
-        decoder.setJwtValidator(TokenUtil.jwtValidator(oAuth2ResourceServerProperties.getJwt().getIssuerUri(), oktaOAuth2Properties.getAudience()));
-        decoder.setRestOperations(restOperations());
+        NimbusJwtDecoder.JwkSetUriJwtDecoderBuilder builder = NimbusJwtDecoder.withJwkSetUri(oAuth2ResourceServerProperties.getJwt().getJwkSetUri());
+        builder.restOperations(restTemplate());
+        NimbusJwtDecoder decoder = builder.build();
+        decoder.setJwtValidator(TokenUtil.jwtValidator(oktaOAuth2Properties.getIssuer(), oktaOAuth2Properties.getAudience()));
         return decoder;
     }
 
 
-    private RestOperations restOperations() {
+    private RestTemplate restTemplate() {
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.getInterceptors().add(new UserAgentRequestInterceptor());
         return restTemplate;
@@ -72,7 +73,7 @@ class OktaOAuth2ResourceServerAutoConfig {
     OpaqueTokenIntrospector opaqueTokenIntrospector(OktaOAuth2Properties oktaOAuth2Properties,
                                                     OAuth2ResourceServerProperties oAuth2ResourceServerProperties) {
 
-        RestTemplate restTemplate = (RestTemplate) restOperations();
+        RestTemplate restTemplate = restTemplate();
         restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(
             oAuth2ResourceServerProperties.getOpaquetoken().getClientId(),
             oAuth2ResourceServerProperties.getOpaquetoken().getClientSecret()));
@@ -84,7 +85,7 @@ class OktaOAuth2ResourceServerAutoConfig {
         return token -> {
             OAuth2AuthenticatedPrincipal principal = delegate.introspect(token);
             Collection<GrantedAuthority> mappedAuthorities =
-                (Collection<GrantedAuthority>) TokenUtil.tokenClaimsToAuthorities(principal.getAttributes(), oktaOAuth2Properties.getGroupsClaim());
+                Collections.unmodifiableCollection(TokenUtil.tokenClaimsToAuthorities(principal.getAttributes(), oktaOAuth2Properties.getGroupsClaim()));
             return new DefaultOAuth2AuthenticatedPrincipal(
                 principal.getName(), principal.getAttributes(), mappedAuthorities);
         };
