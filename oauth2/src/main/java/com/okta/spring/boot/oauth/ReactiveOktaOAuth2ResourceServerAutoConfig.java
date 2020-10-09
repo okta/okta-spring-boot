@@ -41,6 +41,7 @@ import java.util.Collections;
 
 @Configuration
 @AutoConfigureBefore(ReactiveOAuth2ResourceServerAutoConfiguration.class)
+@ConditionalOnOktaResourceServerProperties
 @EnableConfigurationProperties({OktaOAuth2Properties.class, OAuth2ResourceServerProperties.class})
 @ConditionalOnClass({ EnableWebFluxSecurity.class, BearerTokenAuthenticationToken.class, ReactiveJwtDecoder.class })
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
