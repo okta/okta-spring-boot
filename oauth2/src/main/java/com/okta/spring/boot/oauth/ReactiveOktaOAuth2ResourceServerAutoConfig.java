@@ -41,7 +41,6 @@ import java.util.Collections;
 
 @Configuration
 @AutoConfigureBefore(ReactiveOAuth2ResourceServerAutoConfiguration.class)
-@ConditionalOnOktaResourceServerProperties
 @EnableConfigurationProperties({OktaOAuth2Properties.class, OAuth2ResourceServerProperties.class})
 @ConditionalOnClass({ EnableWebFluxSecurity.class, BearerTokenAuthenticationToken.class, ReactiveJwtDecoder.class })
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
@@ -59,8 +58,7 @@ class ReactiveOktaOAuth2ResourceServerAutoConfig {
     }
 
     private WebClient webClient() {
-        WebClient webClient = WebClient.builder().build();
-        return webClient;
+        return WebClientUtil.createWebClient();
     }
 
     @Bean
@@ -68,10 +66,10 @@ class ReactiveOktaOAuth2ResourceServerAutoConfig {
     ReactiveOpaqueTokenIntrospector reactiveOpaqueTokenIntrospector(OktaOAuth2Properties oktaOAuth2Properties,
                                                                     OAuth2ResourceServerProperties oAuth2ResourceServerProperties) {
 
-        WebClient webClient = WebClient.builder().defaultHeaders((h) -> {
-            h.setBasicAuth(oAuth2ResourceServerProperties.getOpaquetoken().getClientId(),
-                oAuth2ResourceServerProperties.getOpaquetoken().getClientSecret());
-        }).build();
+        WebClient webClient = WebClient.builder().defaultHeaders((header) ->
+            header.setBasicAuth(oAuth2ResourceServerProperties.getOpaquetoken().getClientId(),
+                oAuth2ResourceServerProperties.getOpaquetoken().getClientSecret()))
+            .build();
 
         ReactiveOpaqueTokenIntrospector delegate = new NimbusReactiveOpaqueTokenIntrospector(
             oAuth2ResourceServerProperties.getOpaquetoken().getIntrospectionUri(),
