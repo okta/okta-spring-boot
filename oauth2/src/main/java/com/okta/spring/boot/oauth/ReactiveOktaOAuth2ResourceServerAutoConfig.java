@@ -18,6 +18,7 @@ package com.okta.spring.boot.oauth;
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.reactive.ReactiveOAuth2ResourceServerAutoConfiguration;
@@ -25,6 +26,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.DefaultOAuth2AuthenticatedPrincipal;
@@ -48,6 +50,7 @@ import java.util.Collections;
 class ReactiveOktaOAuth2ResourceServerAutoConfig {
 
     @Bean
+    @ConditionalOnMissingBean
     ReactiveJwtDecoder jwtDecoder(OAuth2ResourceServerProperties oAuth2ResourceServerProperties, OktaOAuth2Properties oktaOAuth2Properties) {
 
         NimbusReactiveJwtDecoder.JwkSetUriReactiveJwtDecoderBuilder builder =
@@ -67,10 +70,11 @@ class ReactiveOktaOAuth2ResourceServerAutoConfig {
     ReactiveOpaqueTokenIntrospector reactiveOpaqueTokenIntrospector(OktaOAuth2Properties oktaOAuth2Properties,
                                                                     OAuth2ResourceServerProperties oAuth2ResourceServerProperties) {
 
-        WebClient webClient = WebClient.builder().defaultHeaders((header) ->
+        WebClient webClient = WebClient.builder().defaultHeaders((header) -> {
             header.setBasicAuth(oAuth2ResourceServerProperties.getOpaquetoken().getClientId(),
-                oAuth2ResourceServerProperties.getOpaquetoken().getClientSecret()))
-            .build();
+                                oAuth2ResourceServerProperties.getOpaquetoken().getClientSecret());
+            header.add(HttpHeaders.USER_AGENT, WebClientUtil.USER_AGENT_VALUE);
+        }).build();
 
         ReactiveOpaqueTokenIntrospector delegate = new NimbusReactiveOpaqueTokenIntrospector(
             oAuth2ResourceServerProperties.getOpaquetoken().getIntrospectionUri(),
