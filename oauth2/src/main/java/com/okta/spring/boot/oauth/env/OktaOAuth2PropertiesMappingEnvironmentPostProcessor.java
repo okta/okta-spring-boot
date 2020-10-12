@@ -24,7 +24,10 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.PropertySource;
+
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -105,6 +108,7 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
         environment.getPropertySources().addLast(remappedOktaOAuth2ScopesPropertySource(environment));
         // okta's endpoints can be resolved from an issuer
         environment.getPropertySources().addLast(oktaStaticDiscoveryPropertySource(environment));
+        environment.getPropertySources().addLast(oktaOpaqueTokenPropertySource(environment));
         environment.getPropertySources().addLast(oktaRedirectUriPropertySource(environment));
     }
 
@@ -144,9 +148,6 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
         Map<String, Object> properties = new HashMap<>();
         properties.put("spring.security.oauth2.resourceserver.jwt.issuer-uri", "${okta.oauth2.issuer}");
         properties.put("spring.security.oauth2.resourceserver.jwt.jwk-set-uri", "${okta.oauth2.issuer}/v1/keys");
-        properties.put("spring.security.oauth2.resourceserver.opaque-token.client-id", "${okta.oauth2.client-id}");
-        properties.put("spring.security.oauth2.resourceserver.opaque-token.client-secret", "${okta.oauth2.client-secret}");
-        properties.put("spring.security.oauth2.resourceserver.opaque-token.introspection-uri", "${okta.oauth2.issuer}/v1/introspect");
         properties.put("spring.security.oauth2.client.provider.okta.authorization-uri", "${okta.oauth2.issuer}/v1/authorize");
         properties.put("spring.security.oauth2.client.provider.okta.token-uri", "${okta.oauth2.issuer}/v1/token");
         properties.put("spring.security.oauth2.client.provider.okta.user-info-uri", "${okta.oauth2.issuer}/v1/userinfo");
@@ -156,15 +157,25 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
         return new ConditionalMapPropertySource("okta-static-discovery", properties, environment, OKTA_OAUTH_ISSUER);
     }
 
+    private PropertySource oktaOpaqueTokenPropertySource(Environment environment) {
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("spring.security.oauth2.resourceserver.opaque-token.client-id", "${okta.oauth2.client-id}");
+        properties.put("spring.security.oauth2.resourceserver.opaque-token.client-secret", "${okta.oauth2.client-secret}");
+        properties.put("spring.security.oauth2.resourceserver.opaque-token.introspection-uri", "${okta.oauth2.issuer}/v1/introspect");
+
+        return new ConditionalMapPropertySource("okta-opaque-token", properties, environment, OKTA_OAUTH_ISSUER, OKTA_OAUTH_CLIENT_SECRET);
+    }
+
     private static class ConditionalMapPropertySource extends MapPropertySource {
 
         private final Environment environment;
-        private final String conditionalProperty;
+        private final List<String> conditionalProperties;
 
-        private ConditionalMapPropertySource(String name, Map<String, Object> source, Environment environment, String conditionalProperty) {
+        private ConditionalMapPropertySource(String name, Map<String, Object> source, Environment environment, String... conditionalProperties) {
             super(name, source);
             this.environment = environment;
-            this.conditionalProperty = conditionalProperty;
+            this.conditionalProperties = Arrays.asList(conditionalProperties);
         }
 
         @Override
@@ -177,7 +188,8 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
 
         @Override
         public boolean containsProperty(String name) {
-            return super.containsProperty(name) && environment.containsProperty(conditionalProperty);
+            return super.containsProperty(name)
+                   && conditionalProperties.stream().allMatch(environment::containsProperty);
         }
     }
     @Override
