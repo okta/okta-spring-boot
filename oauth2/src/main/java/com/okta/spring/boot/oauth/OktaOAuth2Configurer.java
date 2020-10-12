@@ -69,7 +69,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                 // if issuer is root org, use opaque token validation
                 if (TokenUtil.isRootOrgIssuer(oktaOAuth2Properties.getIssuer())) {
                     log.debug("Opaque Token validation/introspection will be configured.");
-                    configureResourceServerForOpaqueTokenValidation(http, oktaOAuth2Properties);
+                    configureResourceServerForOpaqueTokenValidation(http);
                     return;
                 }
 
@@ -103,13 +103,13 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                         } else {
                             log.debug("JWT configurer is NOT set in OAuth resource server configuration. " +
                                 "Opaque Token validation/introspection will be configured.");
-                            configureResourceServerForOpaqueTokenValidation(http, oktaOAuth2Properties);
+                            configureResourceServerForOpaqueTokenValidation(http);
                         }
                     } else {
                         String errMsg = "JWT configurer field was not found in OAuth resource server configuration. " +
                             "Version incompatibility with Spring Security detected." +
                             "Check https://github.com/okta/okta-spring-boot for project updates.";
-                        throw new RuntimeException(errMsg);
+                        throw new IllegalStateException(errMsg);
                     }
                 }
             }
@@ -127,11 +127,8 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         }
     }
 
-    private void configureResourceServerForOpaqueTokenValidation(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {
+    private void configureResourceServerForOpaqueTokenValidation(HttpSecurity http) throws Exception {
 
-        if (isEmpty(oktaOAuth2Properties.getClientSecret())) {
-            throw new IllegalArgumentException("Missing property 'okta.oauth2.client-secret'");
-        }
         http.oauth2ResourceServer().opaqueToken();
     }
 
