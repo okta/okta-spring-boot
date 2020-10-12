@@ -80,7 +80,7 @@ class OktaOAuth2PropertiesMappingEnvironmentPostProcessorTest {
         assertThat environment.getProperty(RS_INTROSPECTION_URI), nullValue()
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     void missingClientSecret() {
         def environment = buildAndProcessEnvironment([
             "okta.oauth2.client-id": "test-client-id",
@@ -97,8 +97,8 @@ class OktaOAuth2PropertiesMappingEnvironmentPostProcessorTest {
         assertThat environment.getProperty(TOKEN_URI), is("https://issuer.example.com/foobar/v1/token")
         assertThat environment.getProperty(USER_INFO_URI), is("https://issuer.example.com/foobar/v1/userinfo")
         assertThat environment.getProperty(PROVIDER_KEYS_URI), is("https://issuer.example.com/foobar/v1/keys")
-        assertThat environment.getProperty(RS_CLIENT_ID), is("test-client-id")
-        assertThat environment.getProperty(RS_INTROSPECTION_URI), is("https://issuer.example.com/foobar/v1/introspect")
+        assertThat environment.getProperty(RS_CLIENT_ID), nullValue()
+        assertThat environment.getProperty(RS_INTROSPECTION_URI), nullValue()
         assertThat environment.getProperty(RS_CLIENT_SECRET), nullValue()
     }
 
