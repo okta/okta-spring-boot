@@ -244,7 +244,7 @@ public class OAuth2ResourceServerSecurityConfiguration extends WebSecurityConfig
 }
 ```
 
-Refer Spring Security documentation [here](https://docs.spring.io/spring-security/site/docs/current/reference/html5/#oauth2resourceserver) for more detailed resource server configuration information.
+Refer Spring Security documentation [here](https://docs.spring.io/spring-security/site/docs/current/reference/html5/#oauth2resourceserver) for more details on resource server configuration.
 
 ## Supporting server side applications - OAuth Code flow
 
