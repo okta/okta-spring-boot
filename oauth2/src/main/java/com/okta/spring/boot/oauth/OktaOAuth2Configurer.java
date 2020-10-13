@@ -37,6 +37,7 @@ import java.lang.reflect.Field;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Arrays;
+import java.util.Optional;
 
 import static org.springframework.util.StringUtils.isEmpty;
 
@@ -54,6 +55,8 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         if (!context.getBeansOfType(OktaOAuth2Properties.class).isEmpty()) {
             OktaOAuth2Properties oktaOAuth2Properties = context.getBean(OktaOAuth2Properties.class);
 
+            // Auth Code Flow Config
+
             // if OAuth2ClientProperties bean is not available do NOT configure
             if (!context.getBeansOfType(OAuth2ClientProperties.class).isEmpty()
                 && !isEmpty(oktaOAuth2Properties.getIssuer())
@@ -65,55 +68,71 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                 if (!context.getBeansOfType(OidcClientInitiatedLogoutSuccessHandler.class).isEmpty()) {
                     http.logout().logoutSuccessHandler(context.getBean(OidcClientInitiatedLogoutSuccessHandler.class));
                 }
+            } else {
+                log.debug("OAuth/OIDC Login not configured due to missing issuer, client-id, or client-secret property");
+            }
 
-                // if issuer is root org, use opaque token validation
-                if (TokenUtil.isRootOrgIssuer(oktaOAuth2Properties.getIssuer())) {
-                    log.debug("Opaque Token validation/introspection will be configured.");
-                    configureResourceServerForOpaqueTokenValidation(http);
-                    return;
-                }
+            // Resource Server Config
 
-                OAuth2ResourceServerConfigurer oAuth2ResourceServerConfigurer =
-                    http.getConfigurer(OAuth2ResourceServerConfigurer.class);
+            // if issuer is root org, use opaque token validation
+            if (TokenUtil.isRootOrgIssuer(oktaOAuth2Properties.getIssuer())) {
+                log.debug("Opaque Token validation/introspection will be configured.");
+                configureResourceServerForOpaqueTokenValidation(http, oktaOAuth2Properties);
+                return;
+            }
 
-                if (oAuth2ResourceServerConfigurer != null) {
+            OAuth2ResourceServerConfigurer oAuth2ResourceServerConfigurer = http.getConfigurer(OAuth2ResourceServerConfigurer.class);
 
-                    // code below is wrapped in AccessController to address findbugs error 'DP_DO_INSIDE_DO_PRIVILEGED'
-                    Field jwtConfigurerField = (Field) AccessController.doPrivileged((PrivilegedAction) () -> {
-                        Field result = null;
-                        try {
-                            result = OAuth2ResourceServerConfigurer.class.getDeclaredField("jwtConfigurer");
-                            result.setAccessible(true);
-                        } catch (NoSuchFieldException e) {
-                            log.warn("Could not get field 'jwtConfigurer' of {} via reflection",
-                                OAuth2ResourceServerConfigurer.class.getName(), e);
-                        }
-                        return result;
-                    });
-
-                    if (jwtConfigurerField != null) {
-                        OAuth2ResourceServerConfigurer.JwtConfigurer jwtConfigurerValue =
-                            (OAuth2ResourceServerConfigurer.JwtConfigurer) jwtConfigurerField.get(oAuth2ResourceServerConfigurer);
-
-                        if (jwtConfigurerValue != null) {
-                            log.debug("JWT configurer is set in OAuth resource server configuration. " +
-                                "JWT validation will be configured.");
-                            http.oauth2ResourceServer()
-                                .jwt().jwtAuthenticationConverter(new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim()));
-                        } else {
-                            log.debug("JWT configurer is NOT set in OAuth resource server configuration. " +
-                                "Opaque Token validation/introspection will be configured.");
-                            configureResourceServerForOpaqueTokenValidation(http);
-                        }
-                    } else {
-                        String errMsg = "JWT configurer field was not found in OAuth resource server configuration. " +
-                            "Version incompatibility with Spring Security detected." +
-                            "Check https://github.com/okta/okta-spring-boot for project updates.";
-                        throw new IllegalStateException(errMsg);
-                    }
-                }
+            if (getJwtConfigurer(oAuth2ResourceServerConfigurer).isPresent()) {
+                log.debug("JWT configurer is set in OAuth resource server configuration. " +
+                    "JWT validation will be configured.");
+                configureResourceServerForJwtValidation(http, oktaOAuth2Properties);
+            } else if (getOpaqueTokenConfigurer(oAuth2ResourceServerConfigurer).isPresent()) {
+                log.debug("JWT configurer is NOT set in OAuth resource server configuration. " +
+                    "Opaque Token validation/introspection will be configured.");
+                configureResourceServerForOpaqueTokenValidation(http, oktaOAuth2Properties);
+            } else {
+                log.debug("Defaulting to Okta JWT resource server configuration.");
+                configureResourceServerForJwtValidation(http, oktaOAuth2Properties);
             }
         }
+    }
+
+    private Optional<OAuth2ResourceServerConfigurer.JwtConfigurer> getJwtConfigurer(OAuth2ResourceServerConfigurer oAuth2ResourceServerConfigurer) throws IllegalAccessException {
+        if (oAuth2ResourceServerConfigurer != null) {
+            return getFieldValue(oAuth2ResourceServerConfigurer, "jwtConfigurer");
+        }
+        return Optional.empty();
+    }
+
+    private Optional<OAuth2ResourceServerConfigurer.OpaqueTokenConfigurer> getOpaqueTokenConfigurer(OAuth2ResourceServerConfigurer oAuth2ResourceServerConfigurer) throws IllegalAccessException {
+        if (oAuth2ResourceServerConfigurer != null) {
+            return getFieldValue(oAuth2ResourceServerConfigurer, "opaqueTokenConfigurer");
+        }
+        return Optional.empty();
+    }
+
+    private <T> Optional<T> getFieldValue(Object source, String fieldName) throws IllegalAccessException {
+        Field field = (Field) AccessController.doPrivileged((PrivilegedAction) () -> {
+            Field result = null;
+            try {
+                result = OAuth2ResourceServerConfigurer.class.getDeclaredField("opaqueTokenConfigurer");
+                result.setAccessible(true);
+            } catch (NoSuchFieldException e) {
+                log.warn("Could not get field 'opaqueTokenConfigurer' of {} via reflection",
+                    OAuth2ResourceServerConfigurer.class.getName(), e);
+            }
+            return result;
+        });
+
+        if (field == null) {
+            String errMsg = "Expected field '" + fieldName + "' was not found in OAuth resource server configuration. " +
+                            "Version incompatibility with Spring Security detected." +
+                            "Check https://github.com/okta/okta-spring-boot for project updates.";
+            throw new RuntimeException(errMsg);
+        }
+
+        return Optional.ofNullable((T) field.get(source));
     }
 
     private void configureLogin(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {
@@ -127,9 +146,16 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         }
     }
 
-    private void configureResourceServerForOpaqueTokenValidation(HttpSecurity http) throws Exception {
+    private void configureResourceServerForJwtValidation(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {
+        http.oauth2ResourceServer()
+            .jwt().jwtAuthenticationConverter(new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim()));
+    }
 
-        http.oauth2ResourceServer().opaqueToken();
+    private void configureResourceServerForOpaqueTokenValidation(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {
+
+        if (!isEmpty(oktaOAuth2Properties.getClientId()) && !isEmpty(oktaOAuth2Properties.getClientSecret())) {
+            http.oauth2ResourceServer().opaqueToken();
+        }
     }
 
     private OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient() {
