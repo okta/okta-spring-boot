@@ -152,28 +152,74 @@ public class SecurityConfiguration {
 
 ### Spring MVC
 
-To configure a resource server when using Spring MVC, you need to extend the `WebSecurityConfigurerAdapter` bean and override the `configure` method.
+1. Annotate your application main class with `@SpringBootApplication`.
 
 ```java
-@Configuration
-public class OktaOAuth2WebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
+@SpringBootApplication
+public class OAuth2ResourceServerApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(OAuth2ResourceServerApplication.class, args);
+	}
+}
+```
+
+2. Create your controller class and specify the url mappings.
+
+```java
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class OAuth2ResourceServerController {
+
+	@GetMapping("/")
+	public String index(@AuthenticationPrincipal Jwt jwt) {
+		return String.format("Hello, %s!", jwt.getSubject());
+	}
+
+	@GetMapping("/message")
+	public String message() {
+		return "secret message";
+	}
+
+	@PostMapping("/message")
+	public String createMessage(@RequestBody String message) {
+		return String.format("Message was created. Content: %s", message);
+	}
+}
+```
+
+3. Specify your resource server configuration (JWT or Opaque) by extending the `WebSecurityConfigurerAdapter` class 
+and overriding the `configure` method.
+
+```java
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+
+@EnableWebSecurity
+public class OAuth2ResourceServerSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
         http.authorizeRequests()
+            .antMatchers(HttpMethod.GET, "/message/**").hasAuthority("SCOPE_message:read")
+            .antMatchers(HttpMethod.POST, "/message/**").hasAuthority("SCOPE_message:write")
             .anyRequest().authenticated()
-        .and()
-            .oauth2ResourceServer().jwt();
-
-        // process CORS annotations
-        http.cors();
-
-        // force a non-empty response body for 401's to make the response more browser friendly
-        Okta.configureResourceServer401ResponseBody(http);
+            .and()
+            .oauth2ResourceServer().jwt(); // replace .jwt() with .opaqueToken() for Opaque Token case
     }
 }
 ```
+
+Refer Spring Security documentation [here](https://docs.spring.io/spring-security/site/docs/current/reference/html5/#oauth2resourceserver) for more detailed resource server configuration information.
 
 ## Supporting server side applications - OAuth Code flow
 
