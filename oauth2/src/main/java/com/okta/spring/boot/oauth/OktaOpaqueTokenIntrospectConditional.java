@@ -20,7 +20,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 class OktaOpaqueTokenIntrospectConditional extends AllNestedConditions {
 
-    public OktaOpaqueTokenIntrospectConditional() {
+    OktaOpaqueTokenIntrospectConditional() {
         super(ConfigurationPhase.REGISTER_BEAN);
     }
 
