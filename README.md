@@ -215,7 +215,7 @@ public class OAuth2ResourceServerController {
 }
 ```
 
-3. Specify your resource server configuration (JWT or Opaque) by extending the `WebSecurityConfigurerAdapter` class 
+3. Specify your resource server configuration (for JWT or Opaque Token validation) by extending the `WebSecurityConfigurerAdapter` class 
 and overriding the `configure` method.
 
 ```java
