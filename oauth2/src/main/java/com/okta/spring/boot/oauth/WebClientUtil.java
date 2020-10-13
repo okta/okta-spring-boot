@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 final class WebClientUtil {
 
-    static final String USER_AGENT_VALUE = ApplicationInfo.get().entrySet().stream()
+    private static final String USER_AGENT_VALUE = ApplicationInfo.get().entrySet().stream()
             .map(e -> e.getKey() + "/" + e.getValue())
             .collect(Collectors.joining(" "));
 
