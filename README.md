@@ -236,6 +236,9 @@ public class OAuth2ResourceServerSecurityConfiguration extends WebSecurityConfig
             .anyRequest().authenticated()
             .and()
             .oauth2ResourceServer().jwt(); // replace .jwt() with .opaqueToken() for Opaque Token case
+
+        // Send a 401 message to the browser (w/o this, you'll see a blank page)
+        Okta.configureResourceServer401ResponseBody(http);
     }
 }
 ```
