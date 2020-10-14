@@ -121,12 +121,22 @@ Check out a minimal example that uses the [Okta Signin Widget and JQuery](exampl
 2. Configure the URL mappings for handling `GET` and `POST` requests.
 
 ```java
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
 @SpringBootApplication
 @RestController
 public class DemoApplication {
 
     public static void main(String[] args) {
-		DemoApplication.run(DemoApplication.class, args);
+		SpringApplication.run(DemoApplication.class, args);
 	}
 
 	@GetMapping("/")
