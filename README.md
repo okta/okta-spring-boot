@@ -141,7 +141,7 @@ public class DemoApplication {
 to add custom scopes, refer to the [documentation](https://developer.okta.com/docs/guides/customize-authz-server/create-scopes/).
  
 3. Configure your Resource Server either for JWT or Opaque Token validation by extending the `WebSecurityConfigurerAdapter` class 
-and overriding the `configure` method.
+and overriding the `configure` method. If you do not specify this, JWT validation will be used by default.
 
 ```java
 import com.okta.spring.boot.oauth.Okta;
