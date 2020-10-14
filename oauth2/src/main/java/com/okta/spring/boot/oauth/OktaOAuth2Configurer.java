@@ -98,14 +98,14 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         }
     }
 
-    private Optional<OAuth2ResourceServerConfigurer.JwtConfigurer> getJwtConfigurer(OAuth2ResourceServerConfigurer oAuth2ResourceServerConfigurer) throws IllegalAccessException {
+    private Optional<OAuth2ResourceServerConfigurer<?>.JwtConfigurer> getJwtConfigurer(OAuth2ResourceServerConfigurer<?> oAuth2ResourceServerConfigurer) throws IllegalAccessException {
         if (oAuth2ResourceServerConfigurer != null) {
             return getFieldValue(oAuth2ResourceServerConfigurer, "jwtConfigurer");
         }
         return Optional.empty();
     }
 
-    private Optional<OAuth2ResourceServerConfigurer.OpaqueTokenConfigurer> getOpaqueTokenConfigurer(OAuth2ResourceServerConfigurer oAuth2ResourceServerConfigurer) throws IllegalAccessException {
+    private Optional<OAuth2ResourceServerConfigurer<?>.OpaqueTokenConfigurer> getOpaqueTokenConfigurer(OAuth2ResourceServerConfigurer<?> oAuth2ResourceServerConfigurer) throws IllegalAccessException {
         if (oAuth2ResourceServerConfigurer != null) {
             return getFieldValue(oAuth2ResourceServerConfigurer, "opaqueTokenConfigurer");
         }
@@ -113,13 +113,13 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
     }
 
     private <T> Optional<T> getFieldValue(Object source, String fieldName) throws IllegalAccessException {
-        Field field = (Field) AccessController.doPrivileged((PrivilegedAction) () -> {
+        Field field = AccessController.doPrivileged((PrivilegedAction<Field>) () -> {
             Field result = null;
             try {
                 result = OAuth2ResourceServerConfigurer.class.getDeclaredField(fieldName);
                 result.setAccessible(true);
             } catch (NoSuchFieldException e) {
-                log.warn("Could not get field 'opaqueTokenConfigurer' of {} via reflection",
+                log.warn("Could not get field '" + fieldName + "' of {} via reflection",
                     OAuth2ResourceServerConfigurer.class.getName(), e);
             }
             return result;
