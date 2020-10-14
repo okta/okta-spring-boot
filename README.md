@@ -159,7 +159,7 @@ public class DemoApplication {
 ```
 
 **NOTE**: `message:read` and `message:write` used above in `@PreAuthorize` are OAuth scopes. If you are looking
-to add custom scopes, refer to the documentation [here](https://developer.okta.com/docs/guides/customize-authz-server/create-scopes/).
+to add custom scopes, refer to the [documentation](https://developer.okta.com/docs/guides/customize-authz-server/create-scopes/).
  
 3. Configure your Resource Server either for JWT or Opaque Token validation by extending the `WebSecurityConfigurerAdapter` class 
 and overriding the `configure` method.
