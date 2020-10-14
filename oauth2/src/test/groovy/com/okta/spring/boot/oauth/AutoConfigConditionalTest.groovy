@@ -232,7 +232,7 @@ class AutoConfigConditionalTest implements HttpMock {
     }
 
     @Test
-    void webLoginConfig_withIssuer_JwtResourceServerConfig() {
+    void webLoginConfig_withIssuerClientIdSecret_JwtResourceServerConfig() {
 
         // start context for App configured to use JWT  validation for resource server
         webContextRunner(JwtResourceServerConfiguredApp).withPropertyValues(
@@ -259,7 +259,7 @@ class AutoConfigConditionalTest implements HttpMock {
     }
 
     @Test
-    void webLoginConfig_withRootIssuer() {
+    void webLoginConfig_withRootIssuerClientIdSecret() {
 
         // start context for the App with NO resource server configuration and root issuer
         // root issuer would force Opaque Token configuration of resource server.
@@ -287,7 +287,7 @@ class AutoConfigConditionalTest implements HttpMock {
     }
 
     @Test
-    void webLoginConfig_withIssuerAndClientInfo() {
+    void webLoginConfig_withIssuerAndClientIdSecret() {
 
         webContextRunner().withPropertyValues(
                 "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as",
@@ -318,7 +318,7 @@ class AutoConfigConditionalTest implements HttpMock {
     }
 
     @Test
-    void webLoginConfig_withIssuerAndClientInfo_OpaqueTokenResourceServerConfig() {
+    void webLoginConfig_withIssuerAndClientIdSecret_OpaqueTokenResourceServerConfig() {
 
         // start context for App configured to use Opaque Token validation for resource server
         webContextRunner(OpaqueTokenResourceServerConfiguredApp).withPropertyValues(
@@ -380,7 +380,7 @@ class AutoConfigConditionalTest implements HttpMock {
     }
 
     @Test
-    void webLoginConfig_withIssuerAndClientInfo_pkce() {
+    void webLoginConfig_withIssuerAndClientId_pkce() {
 
         webContextRunner().withPropertyValues(
                 "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as",
@@ -405,7 +405,7 @@ class AutoConfigConditionalTest implements HttpMock {
     }
 
     @Test
-    void webLoginConfig_withRootIssuer_JwtResourceServerConfig() {
+    void webLoginConfig_withRootIssuerClientIdSecret_JwtResourceServerConfig() {
 
         // server should NOT start as we are trying to configure JWT validation on a resource server
         // and also specifying a root issuer. Spring does NOT allow both JWT and Opaque Token
@@ -421,7 +421,7 @@ class AutoConfigConditionalTest implements HttpMock {
     }
 
     @Test
-    void webLoginConfig_withIssuer_JwtAndOpaqueTokenResourceServerConfig() {
+    void webLoginConfig_withIssuerClientIdSecret_JwtAndOpaqueTokenResourceServerConfig() {
 
         // server should NOT start as Spring does NOT allow both JWT and Opaque Token
         // configurations at the same time.
@@ -507,7 +507,7 @@ class AutoConfigConditionalTest implements HttpMock {
     }
 
     @Test
-    void reactiveLoginConfig_withIssuerAndClientInfo() {
+    void reactiveLoginConfig_withIssuerAndClientIdSecret() {
 
         reactiveContextRunner().withPropertyValues(
             "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as",
@@ -565,7 +565,7 @@ class AutoConfigConditionalTest implements HttpMock {
     }
 
     @Test
-    void reactiveLoginConfig_withIssuerAndClientInfo_pkce() {
+    void reactiveLoginConfig_withIssuerAndClientIdSecret_pkce() {
 
         reactiveContextRunner().withPropertyValues(
                 "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as",
