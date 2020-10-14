@@ -95,7 +95,7 @@ Check out a minimal example that uses the [Okta Signin Widget and JQuery](exampl
 
 ### Spring MVC
 
-1. Setup your MVC project by following [quickstart](#quickstart) section above.
+1. Setup your MVC project by following [Quickstart](https://github.com/okta/okta-spring-boot#quickstart) section above.
 
 2. Configure the URL mappings for handling `GET` and `POST` requests.
 
