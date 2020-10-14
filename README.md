@@ -114,6 +114,75 @@ Okta's Spring Security integration will [parse the JWT access token](https://dev
 
 Check out a minimal example that uses the [Okta Signin Widget and JQuery](examples/siw-jquery) or [this blog post](https://developer.okta.com/blog/2018/11/26/spring-boot-2-dot-1-oidc-oauth2-reactive-apis). 
 
+### Spring MVC
+
+1. Setup your MVC project by following [quickstart](#quickstart) section above.
+
+2. Configure the URL mappings for handling `GET` and `POST` requests.
+
+```java
+@SpringBootApplication
+@RestController
+public class DemoApplication {
+
+    public static void main(String[] args) {
+		DemoApplication.run(DemoApplication.class, args);
+	}
+
+	@GetMapping("/")
+	public String index(@AuthenticationPrincipal Jwt jwt) {
+		return String.format("Hello, %s!", jwt.getSubject());
+	}
+
+	@GetMapping("/message")
+    @PreAuthorize("hasAuthority('SCOPE_message:read')")
+	public String message() {
+		return "secret message";
+	}
+
+	@PostMapping("/message")
+    @PreAuthorize("hasAuthority('SCOPE_message:write')")
+	public String createMessage(@RequestBody String message) {
+		return String.format("Message was created. Content: %s", message);
+	}
+}
+```
+
+Note: `message:read` and `message:write` used above in `@PreAuthorize` are OAuth scopes. If you are looking
+to add custom scopes, refer to the documentation [here](https://developer.okta.com/docs/guides/customize-authz-server/create-scopes/).
+ 
+3. Configure your Resource Server either for JWT or Opaque Token validation by extending the `WebSecurityConfigurerAdapter` class 
+and overriding the `configure` method.
+
+```java
+import com.okta.spring.boot.oauth.Okta;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+
+@EnableWebSecurity
+public class OAuth2ResourceServerSecurityConfiguration extends WebSecurityConfigurerAdapter {
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+
+        http.authorizeRequests()
+            // allow anonymous access to the root page
+            .antMatchers("/").permitAll()
+            // all other requests
+            .anyRequest().authenticated()
+            .and()
+            .oauth2ResourceServer().jwt(); // replace .jwt() with .opaqueToken() for Opaque Token case
+
+        // Send a 401 message to the browser (w/o this, you'll see a blank page)
+        Okta.configureResourceServer401ResponseBody(http);
+    }
+}
+```
+
+Refer Spring Security documentation [here](https://docs.spring.io/spring-security/site/docs/current/reference/html5/#oauth2resourceserver) for more details on resource server configuration.
+
 ### Spring WebFlux
 
 To configure a resource server when using Spring WebFlux, you need to use a couple annotations, and define a `SecurityWebFilterChain` bean.
@@ -170,81 +239,6 @@ public class SecurityConfiguration {
 ```
 
 [Full Stack Reactive with Spring WebFlux, WebSockets, and React](https://developer.okta.com/blog/2018/09/25/spring-webflux-websockets-react) uses both SSO and a resource server. Its current code uses Spring Security's OIDC support. [Changing it to use the Okta Spring Starter](https://github.com/oktadeveloper/okta-spring-webflux-react-example/pull/11) reduces the lines of code quite a bit.
-
-### Spring MVC
-
-1. Annotate your application main class with `@SpringBootApplication`.
-
-```java
-@SpringBootApplication
-public class OAuth2ResourceServerApplication {
-
-	public static void main(String[] args) {
-		SpringApplication.run(OAuth2ResourceServerApplication.class, args);
-	}
-}
-```
-
-2. Create your controller class and specify the url mappings.
-
-```java
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-
-@RestController
-public class OAuth2ResourceServerController {
-
-	@GetMapping("/")
-	public String index(@AuthenticationPrincipal Jwt jwt) {
-		return String.format("Hello, %s!", jwt.getSubject());
-	}
-
-	@GetMapping("/message")
-	public String message() {
-		return "secret message";
-	}
-
-	@PostMapping("/message")
-	public String createMessage(@RequestBody String message) {
-		return String.format("Message was created. Content: %s", message);
-	}
-}
-```
-
-3. Specify your resource server configuration (for JWT or Opaque Token validation) by extending the `WebSecurityConfigurerAdapter` class 
-and overriding the `configure` method.
-
-```java
-import com.okta.spring.boot.oauth.Okta;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-
-@EnableWebSecurity
-public class OAuth2ResourceServerSecurityConfiguration extends WebSecurityConfigurerAdapter {
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-
-        http.authorizeRequests()
-            .antMatchers(HttpMethod.GET, "/message/**").hasAuthority("SCOPE_message:read")
-            .antMatchers(HttpMethod.POST, "/message/**").hasAuthority("SCOPE_message:write")
-            .anyRequest().authenticated()
-            .and()
-            .oauth2ResourceServer().jwt(); // replace .jwt() with .opaqueToken() for Opaque Token case
-
-        // Send a 401 message to the browser (w/o this, you'll see a blank page)
-        Okta.configureResourceServer401ResponseBody(http);
-    }
-}
-```
-
-Refer Spring Security documentation [here](https://docs.spring.io/spring-security/site/docs/current/reference/html5/#oauth2resourceserver) for more details on resource server configuration.
 
 ## Supporting server side applications - OAuth Code flow
 
