@@ -88,7 +88,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                     "JWT validation will be configured.");
                 configureResourceServerForJwtValidation(http, oktaOAuth2Properties);
             } else if (getOpaqueTokenConfigurer(oAuth2ResourceServerConfigurer).isPresent()) {
-                log.debug("JWT configurer is NOT set in OAuth resource server configuration. " +
+                log.debug("Opaque Token configurer is set in OAuth resource server configuration. " +
                     "Opaque Token validation/introspection will be configured.");
                 configureResourceServerForOpaqueTokenValidation(http, oktaOAuth2Properties);
             } else {
@@ -116,7 +116,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         Field field = (Field) AccessController.doPrivileged((PrivilegedAction) () -> {
             Field result = null;
             try {
-                result = OAuth2ResourceServerConfigurer.class.getDeclaredField("opaqueTokenConfigurer");
+                result = OAuth2ResourceServerConfigurer.class.getDeclaredField(fieldName);
                 result.setAccessible(true);
             } catch (NoSuchFieldException e) {
                 log.warn("Could not get field 'opaqueTokenConfigurer' of {} via reflection",
