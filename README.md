@@ -114,13 +114,13 @@ public class DemoApplication {
 	}
 
 	@GetMapping("/message")
-    @PreAuthorize("hasAuthority('SCOPE_message:read')")
+	@PreAuthorize("hasAuthority('SCOPE_message:read')")
 	public String message() {
 		return "secret message";
 	}
 
 	@PostMapping("/message")
-    @PreAuthorize("hasAuthority('SCOPE_message:write')")
+	@PreAuthorize("hasAuthority('SCOPE_message:write')")
 	public String createMessage(@RequestBody String message) {
 		return String.format("Message was created. Content: %s", message);
 	}
