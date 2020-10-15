@@ -38,6 +38,7 @@ import org.springframework.security.oauth2.server.resource.introspection.NimbusO
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -84,9 +85,11 @@ class OktaOAuth2ResourceServerAutoConfig {
         return token -> {
             OAuth2AuthenticatedPrincipal principal = delegate.introspect(token);
             Collection<GrantedAuthority> mappedAuthorities =
-                Collections.unmodifiableCollection(TokenUtil.tokenClaimsToAuthorities(principal.getAttributes(), oktaOAuth2Properties.getGroupsClaim()));
+                new ArrayList<>(TokenUtil.tokenClaimsToAuthorities(principal.getAttributes(), oktaOAuth2Properties.getGroupsClaim()));
+            mappedAuthorities.addAll(principal.getAuthorities());
+
             return new DefaultOAuth2AuthenticatedPrincipal(
-                principal.getName(), principal.getAttributes(), mappedAuthorities);
+                principal.getName(), principal.getAttributes(), Collections.unmodifiableCollection(mappedAuthorities));
         };
     }
 }
