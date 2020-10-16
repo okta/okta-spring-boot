@@ -80,6 +80,17 @@ final class TokenUtil {
         return Collections.emptySet();
     }
 
+
+    static Collection<? extends GrantedAuthority> opaqueTokenClaimsToAuthorities(Map<String, Object> attributes,
+                                                                                 String groupsClaim,
+                                                                                 Collection<? extends GrantedAuthority> authorities) {
+
+        Collection<GrantedAuthority> mappedAuthorities =
+            new ArrayList<>(tokenClaimsToAuthorities(attributes, groupsClaim));
+        mappedAuthorities.addAll(authorities);
+        return mappedAuthorities;
+    }
+
     static OAuth2TokenValidator<Jwt> jwtValidator(String issuer, String audience ) {
         List<OAuth2TokenValidator<Jwt>> validators = new ArrayList<>();
             validators.add(new JwtTimestampValidator());
