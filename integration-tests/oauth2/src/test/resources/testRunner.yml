@@ -30,12 +30,21 @@ scenarios:
     protectedPath: /oauth2/authorization/okta
 
   implicit-flow-local-validation:
-    command: com.okta.spring.tests.oauth2.implicit.BasicImplicitFlowApplication
+    command: com.okta.spring.tests.oauth2.jwt.BasicJwtResourceServerApplication
     args:
     - --server.port=${applicationPort}
     - --okta.oauth2.issuer=https://localhost:${mockHttpsPort}/oauth2/default
     - --okta.oauth2.clientId=OOICU812
     - --server.session.trackingModes=cookie
+
+  implicit-flow-remote-validation:
+    command: com.okta.spring.tests.oauth2.opaquetoken.BasicOpaqueTokenResourceServerApplication
+    args:
+      - --server.port=${applicationPort}
+      - --okta.oauth2.issuer=https://localhost:${mockHttpsPort}/oauth2/default
+      - --okta.oauth2.clientId=OOICU812
+      - --okta.oauth2.clientSecret=VERY_SECRET
+      - --server.session.trackingModes=cookie
 
   oidc-code-flow-local-validation:
     disabledTests:

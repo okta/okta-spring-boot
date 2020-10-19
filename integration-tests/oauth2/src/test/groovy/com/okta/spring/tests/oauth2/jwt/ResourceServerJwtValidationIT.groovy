@@ -26,7 +26,7 @@ import static com.okta.test.mock.scenarios.Scenario.IMPLICIT_FLOW_LOCAL_VALIDATI
 import static org.hamcrest.Matchers.startsWith
 
 @Scenario(IMPLICIT_FLOW_LOCAL_VALIDATION)
-class ImplicitLocalValidationGroupIT extends ApplicationTestRunner {
+class ResourceServerJwtValidationIT extends ApplicationTestRunner {
 
     private final static String ERROR_401 = "401 Unauthorized"
 
