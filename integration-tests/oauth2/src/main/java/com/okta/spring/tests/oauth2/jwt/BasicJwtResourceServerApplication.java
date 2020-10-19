@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.tests.oauth2.implicit;
+package com.okta.spring.tests.oauth2.jwt;
 
 import com.okta.spring.boot.oauth.Okta;
 import org.springframework.boot.SpringApplication;
@@ -37,14 +37,14 @@ import java.util.Map;
 
 @SpringBootApplication
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
-public class BasicImplicitFlowApplication {
+public class BasicJwtResourceServerApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(BasicImplicitFlowApplication.class, args);
+        SpringApplication.run(BasicJwtResourceServerApplication.class, args);
     }
 
     @Configuration
-    static class ResourceSecurityConfigurer extends WebSecurityConfigurerAdapter {
+    static class JwtResourceSecurityConfigurer extends WebSecurityConfigurerAdapter {
 
         @Override
         public void configure(HttpSecurity http) throws Exception {
