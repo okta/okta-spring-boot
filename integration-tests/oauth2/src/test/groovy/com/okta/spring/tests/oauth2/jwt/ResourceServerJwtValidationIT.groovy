@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.tests.oauth2.implicit
+package com.okta.spring.tests.oauth2.jwt
 
 import com.okta.test.mock.Scenario
 import com.okta.test.mock.application.ApplicationTestRunner
@@ -39,6 +39,7 @@ class ResourceServerJwtValidationIT extends ApplicationTestRunner {
         .when()
             .get("http://localhost:${applicationPort}/everyone")
         .then()
+            .statusCode(200)
             .body(Matchers.equalTo("Everyone has Access: joe.coder@example.com"))
     }
 
