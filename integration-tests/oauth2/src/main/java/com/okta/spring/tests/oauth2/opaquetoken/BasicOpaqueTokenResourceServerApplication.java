@@ -82,6 +82,12 @@ public class BasicOpaqueTokenResourceServerApplication {
             return result;
         }
 
+        @GetMapping("/api/invalidScope")
+        @PreAuthorize("hasAuthority('SCOPE_invalid')")
+        public String invalidScope() {
+            throw new IllegalStateException("Test exception, user should not have access to this method");
+        }
+
         @GetMapping("/")
         @PreAuthorize("hasAuthority('SCOPE_email')")
         public String getMessageOfTheDay(Principal principal) {
