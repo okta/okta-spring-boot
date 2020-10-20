@@ -33,12 +33,13 @@ class ResourceServerOpaqueTokenValidationIT extends ApplicationTestRunner {
     @Test
     void groupAccessTest() {
         given()
-            .header("Authorization", "accessTokenJwt_groups")
+            .header("Authorization", "Bearer some.random.jwt")
             .redirects()
                 .follow(false)
         .when()
             .get("http://localhost:${applicationPort}/everyone")
         .then()
+            .statusCode(200)
             .body(Matchers.equalTo("Everyone has Access: joe.coder@example.com"))
     }
 
