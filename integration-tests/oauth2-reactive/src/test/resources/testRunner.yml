@@ -43,6 +43,13 @@ scenarios:
     disabledTests:
     # Spring does remote validation of the token
     - invalidIssuerIdTokenJwtTest
+    - expiredIdTokenJwtTest
+    - inactiveTokenJwtTest
+    - invalidSignatureIdTokenJwtTest
+    - issuedInFutureIdTokenJwtTest
+    - unsignedIdTokenJwtTest
+    - wrongAudienceIdTokenJwtTest
+    - wrongKeyIdIdTokenJwtTest
     # Fix for https://github.com/spring-projects/spring-security/issues/5562 && 6484
     - noAuthCodeTest
     - wrongStateTest
