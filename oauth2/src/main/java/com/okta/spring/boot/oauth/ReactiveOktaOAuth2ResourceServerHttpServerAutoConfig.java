@@ -16,6 +16,8 @@
 package com.okta.spring.boot.oauth;
 
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -30,6 +32,10 @@ import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.security.oauth2.server.resource.BearerTokenAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter;
 
+import java.net.MalformedURLException;
+
+import static org.springframework.util.StringUtils.isEmpty;
+
 @Configuration
 @ConditionalOnOktaResourceServerProperties
 @AutoConfigureAfter(ReactiveOktaOAuth2ResourceServerAutoConfig.class)
@@ -37,6 +43,8 @@ import org.springframework.security.oauth2.server.resource.authentication.Reacti
 @ConditionalOnClass({ EnableWebFluxSecurity.class, BearerTokenAuthenticationToken.class, ReactiveJwtDecoder.class })
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
 class ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig {
+
+    private static final Logger log = LoggerFactory.getLogger(ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig.class);
 
     @Bean
     BeanPostProcessor oktaOAuth2ResourceServerBeanPostProcessor(OktaOAuth2Properties oktaOAuth2Properties) {
@@ -55,9 +63,25 @@ class ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig {
         public Object postProcessAfterInitialization(Object bean, String beanName) {
             if (bean instanceof ServerHttpSecurity) {
                 final ServerHttpSecurity http = (ServerHttpSecurity) bean;
-                http.oauth2ResourceServer().jwt()
+
+                try {
+                    if (TokenUtil.isRootOrgIssuer(oktaOAuth2Properties.getIssuer())) {
+                        log.debug("Opaque Token validation/introspection will be configured.");
+                        http.oauth2ResourceServer().opaqueToken();
+                        return http;
+                    }
+                } catch (MalformedURLException ex) {
+                    throw new IllegalArgumentException(ex.getMessage());
+                }
+
+                if (!isEmpty(oktaOAuth2Properties.getClientId()) && !isEmpty(oktaOAuth2Properties.getClientSecret())) {
+                    http.oauth2ResourceServer().opaqueToken();
+                } else {
+                    http.oauth2ResourceServer().jwt()
                         .jwtAuthenticationConverter(new ReactiveJwtAuthenticationConverterAdapter(
-                                new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim())));
+                            new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim())));
+                }
+                return http;
             }
             return bean;
         }

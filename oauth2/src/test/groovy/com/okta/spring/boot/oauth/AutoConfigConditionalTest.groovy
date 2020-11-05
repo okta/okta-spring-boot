@@ -501,8 +501,7 @@ class AutoConfigConditionalTest implements HttpMock {
         reactiveContextRunner().withPropertyValues(
             "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as",
             "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}oauth2/custom-as", // work around to not validate the https url
-            "okta.oauth2.client-id=test-client-id",
-            "okta.oauth2.client-secret=test-client-secret")
+            "okta.oauth2.client-id=test-client-id")
             .run { context ->
 
                 assertThat(context).doesNotHaveBean(OktaOAuth2ResourceServerAutoConfig)
@@ -530,7 +529,6 @@ class AutoConfigConditionalTest implements HttpMock {
             "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as",
             "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}oauth2/custom-as", // work around to not validate the https url
             "okta.oauth2.client-id=test-client-id",
-            "okta.oauth2.client-secret=test-client-secret",
             "okta.oauth2.postLogoutRedirectUri=http://logout.example.com")
             .run { context ->
 
