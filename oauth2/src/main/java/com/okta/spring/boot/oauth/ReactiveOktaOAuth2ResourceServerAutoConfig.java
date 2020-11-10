@@ -26,10 +26,20 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.core.DefaultOAuth2AuthenticatedPrincipal;
+import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.security.oauth2.server.resource.BearerTokenAuthenticationToken;
+import org.springframework.security.oauth2.server.resource.introspection.NimbusReactiveOpaqueTokenIntrospector;
+import org.springframework.security.oauth2.server.resource.introspection.ReactiveOpaqueTokenIntrospector;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 @Configuration
 @AutoConfigureBefore(ReactiveOAuth2ResourceServerAutoConfiguration.class)
@@ -53,5 +63,25 @@ class ReactiveOktaOAuth2ResourceServerAutoConfig {
 
     private WebClient webClient() {
         return WebClientUtil.createWebClient();
+    }
+
+    @Bean
+    ReactiveOpaqueTokenIntrospector opaqueTokenIntrospector(OAuth2ResourceServerProperties resourceServerProperties) {
+
+        WebClient client = WebClient.builder().defaultHeaders((h) -> {
+            h.setBasicAuth(resourceServerProperties.getOpaquetoken().getClientId(), resourceServerProperties.getOpaquetoken().getClientSecret());
+        }).build();
+
+        return new NimbusReactiveOpaqueTokenIntrospector(resourceServerProperties.getOpaquetoken().getIntrospectionUri(), client) {
+            @Override
+            public Mono<OAuth2AuthenticatedPrincipal> introspect(String token) {
+                return super.introspect(token).map(originalToken -> {
+
+                    Collection<GrantedAuthority> authorities = new ArrayList<>(originalToken.getAuthorities());
+                    authorities.add(new SimpleGrantedAuthority("Other_stuff"));
+                    return new DefaultOAuth2AuthenticatedPrincipal(originalToken.getName(), originalToken.getAttributes(), authorities);
+                });
+            }
+        };
     }
 }
