@@ -75,18 +75,18 @@ class ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig {
                 }
 
                 try {
-                    Field jwtPrivateStringField = ServerHttpSecurity.OAuth2ResourceServerSpec.class.
+                    Field jwtSpecPrivateField = ServerHttpSecurity.OAuth2ResourceServerSpec.class.
                         getDeclaredField("jwt");
-                    Field opaqueTokenPrivateStringField = ServerHttpSecurity.OAuth2ResourceServerSpec.class.
+                    Field opaqueTokenPrivateField = ServerHttpSecurity.OAuth2ResourceServerSpec.class.
                         getDeclaredField("opaqueToken");
 
-                    jwtPrivateStringField.setAccessible(true);
-                    opaqueTokenPrivateStringField.setAccessible(true);
+                    jwtSpecPrivateField.setAccessible(true);
+                    opaqueTokenPrivateField.setAccessible(true);
 
                     ServerHttpSecurity.OAuth2ResourceServerSpec.JwtSpec jwtSpecValue =
-                        (ServerHttpSecurity.OAuth2ResourceServerSpec.JwtSpec) jwtPrivateStringField.get(oAuth2ResourceServerSpec);
+                        (ServerHttpSecurity.OAuth2ResourceServerSpec.JwtSpec) jwtSpecPrivateField.get(oAuth2ResourceServerSpec);
                     ServerHttpSecurity.OAuth2ResourceServerSpec.OpaqueTokenSpec opaqueTokenSpecValue =
-                        (ServerHttpSecurity.OAuth2ResourceServerSpec.OpaqueTokenSpec) opaqueTokenPrivateStringField.get(oAuth2ResourceServerSpec);
+                        (ServerHttpSecurity.OAuth2ResourceServerSpec.OpaqueTokenSpec) opaqueTokenPrivateField.get(oAuth2ResourceServerSpec);
 
                     if (jwtSpecValue != null) {
                         log.debug("JWT Token validation/introspection will be configured.");
