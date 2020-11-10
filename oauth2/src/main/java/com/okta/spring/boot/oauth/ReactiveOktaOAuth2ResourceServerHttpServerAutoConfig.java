@@ -16,6 +16,8 @@
 package com.okta.spring.boot.oauth;
 
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -31,9 +33,7 @@ import org.springframework.security.oauth2.server.resource.BearerTokenAuthentica
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter;
 
 import java.lang.reflect.Field;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.util.Optional;
+import java.net.MalformedURLException;
 
 @Configuration
 @ConditionalOnOktaResourceServerProperties
@@ -42,6 +42,8 @@ import java.util.Optional;
 @ConditionalOnClass({ EnableWebFluxSecurity.class, BearerTokenAuthenticationToken.class, ReactiveJwtDecoder.class })
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
 class ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig {
+
+    private static final Logger log = LoggerFactory.getLogger(ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig.class);
 
     @Bean
     BeanPostProcessor oktaOAuth2ResourceServerBeanPostProcessor(OktaOAuth2Properties oktaOAuth2Properties) {
@@ -63,6 +65,16 @@ class ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig {
                 ServerHttpSecurity.OAuth2ResourceServerSpec oAuth2ResourceServerSpec = http.oauth2ResourceServer();
 
                 try {
+                    if (TokenUtil.isRootOrgIssuer(oktaOAuth2Properties.getIssuer())) {
+                        log.debug("Opaque Token validation/introspection will be configured.");
+                        http.oauth2ResourceServer().opaqueToken();
+                        return http;
+                    }
+                } catch (MalformedURLException ex) {
+                    throw new IllegalArgumentException(ex.getMessage());
+                }
+
+                try {
                     Field jwtPrivateStringField = ServerHttpSecurity.OAuth2ResourceServerSpec.class.
                         getDeclaredField("jwt");
                     Field opaqueTokenPrivateStringField = ServerHttpSecurity.OAuth2ResourceServerSpec.class.
@@ -77,50 +89,26 @@ class ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig {
                         (ServerHttpSecurity.OAuth2ResourceServerSpec.OpaqueTokenSpec) opaqueTokenPrivateStringField.get(oAuth2ResourceServerSpec);
 
                     if (jwtSpecValue != null) {
-                        // JWT is set in resource server configuration.
+                        log.debug("JWT Token validation/introspection will be configured.");
                         http.oauth2ResourceServer().jwt()
                             .jwtAuthenticationConverter(new ReactiveJwtAuthenticationConverterAdapter(
                                 new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim())));
                     } else if (opaqueTokenSpecValue != null) {
-                        // Opaque Token is set in resource server configuration.
+                        log.debug("Opaque Token validation/introspection will be configured.");
                         http.oauth2ResourceServer().opaqueToken();
                     } else {
-                        // Defaulting to JWT resource server configuration.
+                        log.debug("Defaulting to JWT Token validation/introspection configuration.");
                         http.oauth2ResourceServer().jwt()
                             .jwtAuthenticationConverter(new ReactiveJwtAuthenticationConverterAdapter(
                                 new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim())));
                     }
                 } catch (NoSuchFieldException | IllegalAccessException e) {
+                    log.error("Error occurred", e);
                     //TODO: deal with this
                 }
+                return http;
             }
             return bean;
         }
-
-        //helpers below
-
-        private <T> Optional<T> getFieldValue(Object source, String fieldName) throws IllegalAccessException {
-            Field field = AccessController.doPrivileged((PrivilegedAction<Field>) () -> {
-                Field result = null;
-                try {
-                    result = ServerHttpSecurity.class.getDeclaredField(fieldName);
-                    result.setAccessible(true);
-                } catch (NoSuchFieldException e) {
-//                    log.warn("Could not get field '" + fieldName + "' of {} via reflection",
-//                        ServerHttpSecurity.class.getName(), e);
-                }
-                return result;
-            });
-
-            if (field == null) {
-                String errMsg = "Expected field '" + fieldName + "' was not found in OAuth resource server configuration. " +
-                    "Version incompatibility with Spring Security detected." +
-                    "Check https://github.com/okta/okta-spring-boot for project updates.";
-                throw new RuntimeException(errMsg);
-            }
-
-            return Optional.ofNullable((T) field.get(source));
-        }
-
     }
 }
