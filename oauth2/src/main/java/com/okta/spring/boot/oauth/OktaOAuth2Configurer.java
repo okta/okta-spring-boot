@@ -20,7 +20,6 @@ import com.okta.spring.boot.oauth.http.UserAgentRequestInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -65,19 +64,6 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
             } else {
                 log.debug("OAuth/OIDC Login not configured due to missing issuer, client-id, or client-secret property");
             }
-
-            // resource server configuration
-            if (!context.getBeansOfType(OAuth2ResourceServerProperties.class).isEmpty()) {
-                OAuth2ResourceServerProperties resourceServerProperties = context.getBean(OAuth2ResourceServerProperties.class);
-                if (!isEmpty(resourceServerProperties.getJwt().getIssuerUri())) {
-                    // configure Okta specific auth converter (extracts authorities from `groupsClaim`
-                    configureResourceServer(http, oktaOAuth2Properties);
-                } else {
-                    log.debug("OAuth resource server not configured due to missing issuer property");
-                }
-            } else {
-                log.debug("OAuth resource server not configured due to missing OAuth2ResourceServerProperties bean");
-            }
         }
     }
 
@@ -90,12 +76,6 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         if (oktaOAuth2Properties.getRedirectUri() != null) {
             http.oauth2Login().redirectionEndpoint().baseUri(oktaOAuth2Properties.getRedirectUri());
         }
-    }
-
-    private void configureResourceServer(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {
-
-        http.oauth2ResourceServer()
-                .jwt().jwtAuthenticationConverter(new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim()));
     }
 
     private OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient() {

@@ -37,6 +37,8 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
 import java.net.URI;
@@ -69,6 +71,13 @@ class OktaOAuth2AutoConfig {
     @ConditionalOnMissingBean(name="oidcUserService")
     OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService(Collection<AuthoritiesProvider> authoritiesProviders) {
         return new OktaOidcUserService(oAuth2UserService(authoritiesProviders), authoritiesProviders);
+    }
+
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter(OktaOAuth2Properties oktaOAuth2Properties) {
+        OktaJwtAuthenticationConverter converter = new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim());
+        converter.setJwtGrantedAuthoritiesConverter(new JwtGrantedAuthoritiesConverter());
+        return converter;
     }
 
     @Configuration(proxyBeanMethods = false)
