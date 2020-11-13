@@ -15,6 +15,7 @@
  */
 package com.okta.spring.boot.oauth.env;
 
+import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
@@ -24,7 +25,10 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.PropertySource;
+
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -91,9 +95,17 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
         // convert okta.oauth2.* properties to long form spring oauth properties
         environment.getPropertySources().addLast(remappedOktaToStandardOAuthPropertySource(environment));
         environment.getPropertySources().addLast(remappedOktaOAuth2ScopesPropertySource(environment));
+        // default scopes, as of Spring Security 5.4 default scopes are no longer added, this restores that functionality
+        environment.getPropertySources().addLast(defaultOktaScopesSource(environment));
         // okta's endpoints can be resolved from an issuer
         environment.getPropertySources().addLast(oktaStaticDiscoveryPropertySource(environment));
         environment.getPropertySources().addLast(oktaRedirectUriPropertySource(environment));
+    }
+
+    private PropertySource defaultOktaScopesSource(Environment environment) {
+        Map<String, Object> props = new HashMap<>();
+        props.put("spring.security.oauth2.client.registration.okta.scope", String.join(",", OktaOAuth2Properties.DEFAULT_SCOPES));
+        return new ConditionalMapPropertySource("default-scopes", props, environment, OKTA_OAUTH_ISSUER, OKTA_OAUTH_CLIENT_ID) ;
     }
 
     private PropertySource remappedOktaToStandardOAuthPropertySource(Environment environment) {
@@ -144,12 +156,12 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
     private static class ConditionalMapPropertySource extends MapPropertySource {
 
         private final Environment environment;
-        private final String conditionalProperty;
+        private final List<String> conditionalProperties;
 
-        private ConditionalMapPropertySource(String name, Map<String, Object> source, Environment environment, String conditionalProperty) {
+        private ConditionalMapPropertySource(String name, Map<String, Object> source, Environment environment, String... conditionalProperties) {
             super(name, source);
             this.environment = environment;
-            this.conditionalProperty = conditionalProperty;
+            this.conditionalProperties = Arrays.asList(conditionalProperties);
         }
 
         @Override
@@ -162,7 +174,8 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
 
         @Override
         public boolean containsProperty(String name) {
-            return super.containsProperty(name) && environment.containsProperty(conditionalProperty);
+            return super.containsProperty(name)
+                   && conditionalProperties.stream().allMatch(environment::containsProperty);
         }
     }
     @Override
