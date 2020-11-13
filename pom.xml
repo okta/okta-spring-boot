@@ -31,11 +31,11 @@
     <packaging>pom</packaging>
 
     <properties>
-        <spring-boot.version>2.2.4.RELEASE</spring-boot.version>
-        <spring-cloud.version>2.2.4.RELEASE</spring-cloud.version>
+        <spring-boot.version>2.4.0</spring-boot.version>
+        <spring-cloud.version>2.2.6.RELEASE</spring-cloud.version>
         <github.slug>okta/okta-spring-boot</github.slug>
         <okta.sdk.version>1.6.0</okta.sdk.version>
-        <okta.commons.version>1.2.3</okta.commons.version>
+        <okta.commons.version>1.2.4</okta.commons.version>
     </properties>
 
     <modules>
@@ -118,14 +118,7 @@
             <dependency>
                 <groupId>com.okta.oidc.tck</groupId>
                 <artifactId>okta-oidc-tck</artifactId>
-                <version>0.5.5</version>
-            </dependency>
-
-            <!-- Dependency overrides for transitive dependencies with CVEs -->
-            <dependency>
-                <groupId>com.nimbusds</groupId>
-                <artifactId>nimbus-jose-jwt</artifactId>
-                <version>7.9</version>
+                <version>0.5.6</version>
             </dependency>
 
             <!-- test dependencies -->

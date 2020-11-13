@@ -22,11 +22,16 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
+import java.util.HashSet;
 
 @ConfigurationProperties("okta.oauth2")
 public final class OktaOAuth2Properties implements Validator {
+
+    public static final Set<String> DEFAULT_SCOPES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("email", "openid", "profile")));
 
     private final OAuth2ClientProperties clientProperties;
 
@@ -54,7 +59,7 @@ public final class OktaOAuth2Properties implements Validator {
     /**
      * Authorization scopes.
      */
-    private Set<String> scopes;
+    private Set<String> scopes = DEFAULT_SCOPES;
 
     /**
      * Expected access token audience claim value.

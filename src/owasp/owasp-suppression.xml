@@ -132,4 +132,12 @@
         <cve>CVE-2019-0232</cve>
     </suppress>
 
+    <!-- wrong product, invalid artifact match -->
+    <suppress>
+        <notes><![CDATA[ file name: oauth2-oidc-sdk-8.23.1.jar ]]></notes>
+        <gav regex="true">^com\.nimbusds:oauth2\-oidc\-sdk:.*$</gav>
+        <cve>CVE-2007-1651</cve>
+        <cve>CVE-2007-1652</cve>
+    </suppress>
+
 </suppressions>
