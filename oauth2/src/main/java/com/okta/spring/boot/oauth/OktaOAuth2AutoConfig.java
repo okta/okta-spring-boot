@@ -25,7 +25,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
@@ -83,12 +82,13 @@ class OktaOAuth2AutoConfig {
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnDefaultWebSecurity
     static class OAuth2SecurityFilterChainConfiguration {
+
         @Bean
         SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http) throws Exception {
             // as of Spring Security 5.4 the default chain uses oauth2Login OR a JWT resource server (NOT both)
             // this does the same as both defaults merged together (and provides the previous behavior)
             http.authorizeRequests((requests) -> requests.anyRequest().authenticated());
-            http.oauth2Login(Customizer.withDefaults());
+            http.oauth2Login();
             http.oauth2Client();
             http.oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
             return http.build();
