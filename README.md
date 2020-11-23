@@ -14,7 +14,7 @@ Okta's Spring Boot Starter will enable your Spring Boot application to work with
 
 This library uses semantic versioning and follows Okta's [library version policy](https://developer.okta.com/code/library-versions/).
 
-:heavy_check_mark: The current stable major version series is: 1.5.x
+:heavy_check_mark: The current stable major version series is: 1.x
 
 | Version | Status                    |
 | ------- | ------------------------- |
@@ -25,12 +25,10 @@ This library uses semantic versioning and follows Okta's [library version policy
 
 | Okta Spring Boot SDK Version | Compatible Spring Boot Version |
 | ------- | ------------------------- |
-| 0.6 | 1.5.x |
-| 1.0.0, 1.1.0 | 2.1 |
-| 1.2.x | 2.2.0.M3 |
-| 1.3.0, 1.4.0 | 2.2.0.RELEASE |
-| 1.5.0 | 2.4.0 |
- 
+| 1.2.1 | 2.1.2.RELEASE, 2.2.0.M1 |
+| 1.4.0 | 2.2.0.M1, 2.4.0-M1 |
+| 1.5.0 | 2.4.0-M1, 2.5.0-M1 |
+              
 The latest release can always be found on the [releases page](https://github.com/okta/okta-spring-boot/releases).
 
 ## What you need
