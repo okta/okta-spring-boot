@@ -19,9 +19,7 @@ This library uses semantic versioning and follows Okta's [library version policy
 | Version | Status                    |
 | ------- | ------------------------- |
 | 0.x.x | :warning: Retired |
-| 1.0.0 - 1.3.0 | :warning: Retired |
-| 1.4.0 | :clock9: Retiring effective August 20, 2021 |
-| 1.5.0 | :heavy_check_mark: Stable |
+| 1.x.0 | :heavy_check_mark: Stable |
 
 ## Spring Boot Compatibility
 
