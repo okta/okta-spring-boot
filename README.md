@@ -8,7 +8,7 @@ Okta Spring Boot Starter
 
 Okta's Spring Boot Starter will enable your Spring Boot application to work with Okta via OAuth 2.0/OIDC.
 
-**NOTE:** This library works with Spring Boot 2.2+. If you need support for Spring Boot 1.5.x, use version 0.6.
+**NOTE:** This library works with Spring Boot 2.4+. If you need support for Spring Boot 1.5.x, use version 0.6.
 
 ## What you need
 
