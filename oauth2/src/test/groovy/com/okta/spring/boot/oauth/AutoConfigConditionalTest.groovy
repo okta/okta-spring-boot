@@ -63,6 +63,7 @@ import org.springframework.security.oauth2.client.web.server.authentication.OAut
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.security.oauth2.jwt.JwtDecoder
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
 import org.springframework.security.oauth2.server.resource.authentication.JwtReactiveAuthenticationManager
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationFilter
 import org.springframework.security.web.FilterChainProxy
@@ -162,6 +163,7 @@ class AutoConfigConditionalTest implements HttpMock {
             .run {context ->
                 assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
                 assertThat(context).hasSingleBean(JwtDecoder)
+                assertThat(context).hasSingleBean(OktaJwtAuthenticationConverter)
                 assertThat(context).doesNotHaveBean(OktaOAuth2AutoConfig)
                 assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2AutoConfig)
                 assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerAutoConfig)
@@ -217,6 +219,7 @@ class AutoConfigConditionalTest implements HttpMock {
 
             assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
             assertThat(context).hasSingleBean(JwtDecoder)
+            assertThat(context).hasSingleBean(OktaJwtAuthenticationConverter)
             assertThat(context).hasSingleBean(OAuth2ClientProperties)
             assertThat(context).hasSingleBean(OktaOAuth2Properties)
             assertThat(context).hasSingleBean(OktaOAuth2AutoConfig)
@@ -245,6 +248,7 @@ class AutoConfigConditionalTest implements HttpMock {
 
             assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
             assertThat(context).hasSingleBean(JwtDecoder)
+            assertThat(context).hasSingleBean(OktaJwtAuthenticationConverter)
             assertThat(context).hasSingleBean(OAuth2ClientProperties)
             assertThat(context).hasSingleBean(OktaOAuth2Properties)
             assertThat(context).hasSingleBean(OktaOAuth2AutoConfig)

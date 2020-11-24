@@ -34,7 +34,7 @@ scenarios:
     args:
     - --server.port=${applicationPort}
     - --okta.oauth2.issuer=https://localhost:${mockHttpsPort}/oauth2/default
-    - --okta.oauth2.clientId=OOICU812
+    # A client ID is NOT required, #218
     - --server.session.trackingModes=cookie
 
   oidc-code-flow-local-validation:
