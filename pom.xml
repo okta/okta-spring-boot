@@ -26,7 +26,7 @@
 
     <groupId>com.okta.spring</groupId>
     <artifactId>okta-spring-boot-parent</artifactId>
-    <version>1.5.1</version>
+    <version>1.5.2-SNAPSHOT</version>
     <name>Okta Spring Boot</name>
     <packaging>pom</packaging>
 
@@ -71,23 +71,23 @@
             <dependency>
                 <groupId>com.okta.spring</groupId>
                 <artifactId>okta-spring-boot-starter</artifactId>
-                <version>1.5.1</version>
+                <version>1.5.2-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.okta.spring</groupId>
                 <artifactId>okta-spring-security-oauth2</artifactId>
-                <version>1.5.1</version>
+                <version>1.5.2-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>com.okta.spring</groupId>
                 <artifactId>okta-spring-sdk</artifactId>
-                <version>1.5.1</version>
+                <version>1.5.2-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.okta.spring</groupId>
                 <artifactId>okta-spring-boot-integration-tests-oauth2</artifactId>
-                <version>1.5.1</version>
+                <version>1.5.2-SNAPSHOT</version>
             </dependency>
 
             <dependency>
@@ -140,9 +140,5 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-  <scm>
-    <tag>okta-spring-boot-parent-1.5.1</tag>
-  </scm>
 </project>
 
