@@ -21,11 +21,11 @@ This library uses semantic versioning and follows Okta's [library version policy
 
 ## Spring Boot Version Compatibility
 
-| Okta Spring Boot SDK Version | Compatible Spring Boot Versions |
+| Okta Spring Boot SDK Versions | Compatible Spring Boot Versions |
 | ------- | ------------------------- |
 | 1.2.1 | 2.1.2.RELEASE, 2.2.0.M1 |
 | 1.4.0 | 2.2.0.M1, 2.4.0-M1 |
-| 1.5.0 | 2.4.0-M1, 2.5.0-M1 |
+| 1.5.0, 1.5.1 | 2.4.0-M1, 2.5.0-M1 |
               
 The latest release can always be found on the [releases page](https://github.com/okta/okta-spring-boot/releases).
 
