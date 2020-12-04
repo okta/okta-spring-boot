@@ -15,7 +15,7 @@
  */
 package com.okta.spring.boot.sdk
 
-import com.okta.sdk.client.Proxy
+import com.okta.commons.http.config.Proxy
 import com.okta.spring.boot.sdk.config.OktaClientProperties
 import org.testng.annotations.Test
 
