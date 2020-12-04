@@ -15,8 +15,8 @@
  */
 package com.okta.spring.boot.sdk.cache;
 
+import com.okta.commons.lang.Assert;
 import com.okta.sdk.cache.Cache;
-import com.okta.sdk.lang.Assert;
 
 /**
  * A Okta SDK {@link com.okta.sdk.cache.Cache} implementation that wraps a Spring {@link org.springframework.cache.Cache Cache} instance.

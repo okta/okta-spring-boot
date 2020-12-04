@@ -17,7 +17,7 @@ package com.okta.spring.boot.sdk.cache;
 
 import com.okta.sdk.cache.Cache;
 import com.okta.sdk.cache.CacheManager;
-import com.okta.sdk.lang.Assert;
+import com.okta.commons.lang.Assert;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
