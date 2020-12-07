@@ -15,7 +15,6 @@
  */
 package com.okta.spring.boot.oauth;
 
-import com.okta.commons.lang.Strings;
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
 import com.okta.spring.boot.oauth.http.UserAgentRequestInterceptor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -45,9 +44,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.Authenticator;
 import java.net.InetSocketAddress;
-import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.net.URI;
 import java.util.Arrays;
@@ -83,49 +80,26 @@ class OktaOAuth2AutoConfig {
     }
 
     @Bean
-    @ConditionalOnMissingBean
     RestTemplate restTemplate(OktaOAuth2Properties oktaOAuth2Properties) {
 
         Proxy proxy;
 
-        if (Strings.hasText(oktaOAuth2Properties.getProxyHost()) &&
+        if (oktaOAuth2Properties.getProxyHost() != null &&
             oktaOAuth2Properties.getProxyPort() != 0) {
             proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(oktaOAuth2Properties.getProxyHost(), oktaOAuth2Properties.getProxyPort()));
-
-            if (Strings.hasText(oktaOAuth2Properties.getProxyUser()) &&
-                Strings.hasText(oktaOAuth2Properties.getProxyPassword())) {
-
-                Authenticator.setDefault(new ProxyPasswordAuthentication(oktaOAuth2Properties.getProxyUser(),
-                    oktaOAuth2Properties.getProxyPassword().toCharArray()));
-            }
         } else {
             proxy = Proxy.NO_PROXY;
         }
+
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setProxy(proxy);
 
         RestTemplate restTemplate = new RestTemplate(Arrays.asList(new FormHttpMessageConverter(),
             new OAuth2AccessTokenResponseHttpMessageConverter()));
         restTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
         restTemplate.getInterceptors().add(new UserAgentRequestInterceptor());
-        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-        requestFactory.setProxy(proxy);
         restTemplate.setRequestFactory(requestFactory);
         return restTemplate;
-    }
-
-    static class ProxyPasswordAuthentication extends Authenticator {
-
-        private final String proxyUser;
-        private final char[] proxyPassword;
-
-        ProxyPasswordAuthentication(String proxyUser, char[] proxyPassword) {
-            this.proxyUser = proxyUser;
-            this.proxyPassword = proxyPassword;
-        }
-
-        @Override
-        protected PasswordAuthentication getPasswordAuthentication() {
-            return new PasswordAuthentication(this.proxyUser, this.proxyPassword);
-        }
     }
 
     @Configuration(proxyBeanMethods = false)
