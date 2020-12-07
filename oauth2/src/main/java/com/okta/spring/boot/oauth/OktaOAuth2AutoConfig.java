@@ -95,12 +95,8 @@ class OktaOAuth2AutoConfig {
             if (Strings.hasText(oktaOAuth2Properties.getProxyUser()) &&
                 Strings.hasText(oktaOAuth2Properties.getProxyPassword())) {
 
-                Authenticator.setDefault(new Authenticator() {
-                    @Override
-                    protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(oktaOAuth2Properties.getProxyUser(), oktaOAuth2Properties.getProxyPassword().toCharArray());
-                    }
-                });
+                Authenticator.setDefault(new ProxyPasswordAuthentication(oktaOAuth2Properties.getProxyUser(),
+                    oktaOAuth2Properties.getProxyPassword().toCharArray()));
             }
         } else {
             proxy = Proxy.NO_PROXY;
@@ -114,6 +110,22 @@ class OktaOAuth2AutoConfig {
         requestFactory.setProxy(proxy);
         restTemplate.setRequestFactory(requestFactory);
         return restTemplate;
+    }
+
+    static class ProxyPasswordAuthentication extends Authenticator {
+
+        private final String proxyUser;
+        private final char[] proxyPassword;
+
+        ProxyPasswordAuthentication(String proxyUser, char[] proxyPassword) {
+            this.proxyUser = proxyUser;
+            this.proxyPassword = proxyPassword;
+        }
+
+        @Override
+        protected PasswordAuthentication getPasswordAuthentication() {
+            return new PasswordAuthentication(this.proxyUser, this.proxyPassword);
+        }
     }
 
     @Configuration(proxyBeanMethods = false)
