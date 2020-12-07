@@ -137,9 +137,12 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
 
     private void configureLogin(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {
 
+        ApplicationContext context = http.getSharedObject(ApplicationContext.class);
+        RestTemplate restTemplate = context.getBean(RestTemplate.class);
+
         http.oauth2Login()
             .tokenEndpoint()
-            .accessTokenResponseClient(accessTokenResponseClient());
+            .accessTokenResponseClient(accessTokenResponseClient(restTemplate));
 
         if (oktaOAuth2Properties.getRedirectUri() != null) {
             http.oauth2Login().redirectionEndpoint().baseUri(oktaOAuth2Properties.getRedirectUri());
@@ -158,12 +161,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         }
     }
 
-    private OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient() {
-
-        RestTemplate restTemplate = new RestTemplate(Arrays.asList(new FormHttpMessageConverter(),
-            new OAuth2AccessTokenResponseHttpMessageConverter()));
-        restTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
-        restTemplate.getInterceptors().add(new UserAgentRequestInterceptor());
+    private OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient(RestTemplate restTemplate) {
 
         DefaultAuthorizationCodeTokenResponseClient accessTokenResponseClient = new DefaultAuthorizationCodeTokenResponseClient();
         accessTokenResponseClient.setRestOperations(restTemplate);
