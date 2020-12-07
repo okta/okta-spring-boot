@@ -83,6 +83,7 @@ class OktaOAuth2AutoConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     RestTemplate restTemplate(OktaOAuth2Properties oktaOAuth2Properties) {
 
         Proxy proxy;
