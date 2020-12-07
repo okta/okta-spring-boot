@@ -15,6 +15,7 @@
  */
 package com.okta.spring.boot.oauth;
 
+import com.okta.commons.lang.Strings;
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
 import com.okta.spring.boot.oauth.http.UserAgentRequestInterceptor;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -31,6 +32,7 @@ import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.DefaultOAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
@@ -42,6 +44,10 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Collection;
 import java.util.Collections;
+
+import java.net.Authenticator;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 
 @Configuration
 @AutoConfigureBefore(OAuth2ResourceServerAutoConfiguration.class)
@@ -64,15 +70,35 @@ class OktaOAuth2ResourceServerAutoConfig {
                           OktaOAuth2Properties oktaOAuth2Properties) {
 
         NimbusJwtDecoder.JwkSetUriJwtDecoderBuilder builder = NimbusJwtDecoder.withJwkSetUri(oAuth2ResourceServerProperties.getJwt().getJwkSetUri());
-        builder.restOperations(restTemplate());
+        builder.restOperations(restTemplate(oktaOAuth2Properties));
         NimbusJwtDecoder decoder = builder.build();
         decoder.setJwtValidator(TokenUtil.jwtValidator(oktaOAuth2Properties.getIssuer(), oktaOAuth2Properties.getAudience()));
         return decoder;
     }
 
-    private RestTemplate restTemplate() {
+    private RestTemplate restTemplate(OktaOAuth2Properties oktaOAuth2Properties) {
+
+        Proxy proxy;
+
+        if (Strings.hasText(oktaOAuth2Properties.getProxyHost()) &&
+            oktaOAuth2Properties.getProxyPort() != 0) {
+            proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(oktaOAuth2Properties.getProxyHost(), oktaOAuth2Properties.getProxyPort()));
+
+            if (Strings.hasText(oktaOAuth2Properties.getProxyUser()) &&
+                Strings.hasText(oktaOAuth2Properties.getProxyPassword())) {
+
+                Authenticator.setDefault(new OktaOAuth2AutoConfig.ProxyPasswordAuthentication(oktaOAuth2Properties.getProxyUser(),
+                    oktaOAuth2Properties.getProxyPassword().toCharArray()));
+            }
+        } else {
+            proxy = Proxy.NO_PROXY;
+        }
+
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.getInterceptors().add(new UserAgentRequestInterceptor());
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setProxy(proxy);
+        restTemplate.setRequestFactory(requestFactory);
         return restTemplate;
     }
 
