@@ -71,6 +71,13 @@ public final class OktaOAuth2Properties implements Validator {
      */
     private String postLogoutRedirectUri;
 
+    /**
+     * Proxy Properties
+     */
+    private String proxyHost;
+
+    private int proxyPort;
+
     // work around for https://github.com/spring-projects/spring-boot/issues/17035
     private OktaOAuth2Properties() {
         this(null);
@@ -152,6 +159,22 @@ public final class OktaOAuth2Properties implements Validator {
 
     public void setPostLogoutRedirectUri(String postLogoutRedirectUri) {
         this.postLogoutRedirectUri = postLogoutRedirectUri;
+    }
+
+    public String getProxyHost() {
+        return proxyHost;
+    }
+
+    public void setProxyHost(String proxyHost) {
+        this.proxyHost = proxyHost;
+    }
+
+    public int getProxyPort() {
+        return proxyPort;
+    }
+
+    public void setProxyPort(int proxyPort) {
+        this.proxyPort = proxyPort;
     }
 
     @Override
