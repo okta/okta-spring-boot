@@ -78,10 +78,6 @@ public final class OktaOAuth2Properties implements Validator {
 
     private int proxyPort;
 
-    private String proxyUser;
-
-    private String proxyPassword;
-
     // work around for https://github.com/spring-projects/spring-boot/issues/17035
     private OktaOAuth2Properties() {
         this(null);
@@ -179,22 +175,6 @@ public final class OktaOAuth2Properties implements Validator {
 
     public void setProxyPort(int proxyPort) {
         this.proxyPort = proxyPort;
-    }
-
-    public String getProxyUser() {
-        return proxyUser;
-    }
-
-    public void setProxyUser(String proxyUser) {
-        this.proxyUser = proxyUser;
-    }
-
-    public String getProxyPassword() {
-        return proxyPassword;
-    }
-
-    public void setProxyPassword(String proxyPassword) {
-        this.proxyPassword = proxyPassword;
     }
 
     @Override
