@@ -106,10 +106,32 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
         // convert okta.oauth2.* properties to long form spring oauth properties
         environment.getPropertySources().addLast(remappedOktaToStandardOAuthPropertySource(environment));
         environment.getPropertySources().addLast(remappedOktaOAuth2ScopesPropertySource(environment));
+        // default scopes, as of Spring Security 5.4 default scopes are no longer added, this restores that functionality
+        environment.getPropertySources().addLast(defaultOktaScopesSource(environment));
         // okta's endpoints can be resolved from an issuer
         environment.getPropertySources().addLast(oktaStaticDiscoveryPropertySource(environment));
         environment.getPropertySources().addLast(oktaOpaqueTokenPropertySource(environment));
         environment.getPropertySources().addLast(oktaRedirectUriPropertySource(environment));
+        environment.getPropertySources().addLast(otkaForcePkcePropertySource(environment));
+    }
+
+    private PropertySource<?> otkaForcePkcePropertySource(ConfigurableEnvironment environment) {
+        Map<String, Object> props = new HashMap<>();
+        props.put("spring.security.oauth2.client.registration.okta.client-authentication-method", "none");
+
+        return new ConditionalMapPropertySource("okta-pkce-for-public-clients", props, environment, OKTA_OAUTH_ISSUER, OKTA_OAUTH_CLIENT_ID) {
+            @Override
+            public boolean containsProperty(String name) {
+                return super.containsProperty(name)
+                       && !environment.containsProperty("spring.security.oauth2.client.registration.okta.client-secret");
+            }
+        };
+    }
+
+    private PropertySource defaultOktaScopesSource(Environment environment) {
+        Map<String, Object> props = new HashMap<>();
+        props.put("spring.security.oauth2.client.registration.okta.scope", "profile,email,openid");
+        return new ConditionalMapPropertySource("default-scopes", props, environment, OKTA_OAUTH_ISSUER, OKTA_OAUTH_CLIENT_ID) ;
     }
 
     private PropertySource remappedOktaToStandardOAuthPropertySource(Environment environment) {
@@ -125,16 +147,7 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("spring.security.oauth2.client.registration.okta.scope", "${" + OKTA_OAUTH_SCOPES + "}");
-        return new MapPropertySource("okta-scope-remaper", properties) {
-            @Override
-            public Object getProperty(String name) {
-
-                if (containsProperty(name)) {
-                    return Binder.get(environment).bind(OKTA_OAUTH_SCOPES, Bindable.setOf(String.class)).orElse(null);
-                }
-                return null;
-            }
-        };
+        return new OktaScopesPropertySource("okta-scope-remaper", properties, environment);
     }
 
     private PropertySource oktaRedirectUriPropertySource(Environment environment) {
@@ -166,6 +179,11 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
 
         return new ConditionalMapPropertySource("okta-opaque-token", properties, environment, OKTA_OAUTH_ISSUER, OKTA_OAUTH_CLIENT_SECRET);
     }
+  
+    @Override
+    public int getOrder() {
+        return LOWEST_PRECEDENCE - 1;
+    }
 
     private static class ConditionalMapPropertySource extends MapPropertySource {
 
@@ -192,8 +210,23 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
                    && conditionalProperties.stream().allMatch(environment::containsProperty);
         }
     }
-    @Override
-    public int getOrder() {
-        return LOWEST_PRECEDENCE - 1;
+
+    private static class OktaScopesPropertySource extends MapPropertySource {
+
+        private final Environment environment;
+
+        private OktaScopesPropertySource(String name, Map<String, Object> source, Environment environment) {
+            super(name, source);
+            this.environment = environment;
+        }
+
+        @Override
+        public Object getProperty(String name) {
+
+            if (containsProperty(name)) {
+                return Binder.get(environment).bind(OKTA_OAUTH_SCOPES, Bindable.setOf(String.class)).orElse(null);
+            }
+            return null;
+        }
     }
 }

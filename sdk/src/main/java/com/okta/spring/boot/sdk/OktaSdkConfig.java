@@ -23,6 +23,7 @@ import com.okta.sdk.client.AuthorizationMode;
 import com.okta.sdk.client.Client;
 import com.okta.sdk.client.ClientBuilder;
 import com.okta.sdk.client.Clients;
+import com.okta.commons.http.config.Proxy;
 import com.okta.commons.lang.Strings;
 import com.okta.spring.boot.sdk.config.OktaClientProperties;
 import com.okta.spring.boot.sdk.cache.SpringCacheManager;
@@ -65,7 +66,7 @@ public class OktaSdkConfig {
     protected Client oktaSdkClient() {
         ClientBuilder builder = Clients.builder()
                 .setCacheManager(oktaSdkCacheManager())
-                .setAuthorizationMode(oktaSdkAuthenticationMode())
+                .setAuthorizationMode(AuthorizationMode.SSWS)
                 .setConnectionTimeout(oktaClientProperties.getConnectionTimeout())
                 .setClientCredentials(oktaSdkClientCredentials())
                 .setOrgUrl(oktaClientProperties.getOrgUrl());
@@ -76,10 +77,6 @@ public class OktaSdkConfig {
         }
 
         return builder.build();
-    }
-
-    private AuthorizationMode oktaSdkAuthenticationMode() {
-        return AuthorizationMode.SSWS;
     }
 
     private Proxy oktaSdkProxy() {

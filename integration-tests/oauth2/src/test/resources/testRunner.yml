@@ -34,7 +34,7 @@ scenarios:
     args:
     - --server.port=${applicationPort}
     - --okta.oauth2.issuer=https://localhost:${mockHttpsPort}/oauth2/default
-    - --okta.oauth2.clientId=OOICU812
+    # A client ID is NOT required, #218
     - --server.session.trackingModes=cookie
 
   implicit-flow-remote-validation:
@@ -56,7 +56,6 @@ scenarios:
     - --okta.oauth2.issuer=https://localhost:${mockHttpsPort}/oauth2/default
     - --okta.oauth2.clientId=OOICU812
     - --okta.oauth2.clientSecret=VERY_SECRET
-    - --okta.oauth2.scopes=profile,email,openid
     - --okta.oauth2.redirectUri=/authorization-code/callback
     - --okta.oauth2.postLogoutRedirectUri=/you-are-logged-out
     - --server.servlet.session.tracking-modes=cookie

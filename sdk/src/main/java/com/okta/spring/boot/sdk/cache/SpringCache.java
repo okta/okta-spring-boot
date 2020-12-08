@@ -15,6 +15,7 @@
  */
 package com.okta.spring.boot.sdk.cache;
 
+import com.okta.commons.lang.Assert;
 import com.okta.sdk.cache.Cache;
 import com.okta.commons.lang.Assert;
 

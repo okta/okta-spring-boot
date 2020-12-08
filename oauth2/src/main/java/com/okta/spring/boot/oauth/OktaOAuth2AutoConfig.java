@@ -20,11 +20,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.autoconfigure.security.ConditionalOnDefaultWebSecurity;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -33,6 +36,7 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.web.SecurityFilterChain;
 
 import java.net.URI;
 import java.util.Collection;
@@ -64,5 +68,21 @@ class OktaOAuth2AutoConfig {
     @ConditionalOnMissingBean(name="oidcUserService")
     OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService(Collection<AuthoritiesProvider> authoritiesProviders) {
         return new OktaOidcUserService(oAuth2UserService(authoritiesProviders), authoritiesProviders);
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnDefaultWebSecurity
+    static class OAuth2SecurityFilterChainConfiguration {
+
+        @Bean
+        SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http) throws Exception {
+            // as of Spring Security 5.4 the default chain uses oauth2Login OR a JWT resource server (NOT both)
+            // this does the same as both defaults merged together (and provides the previous behavior)
+            http.authorizeRequests((requests) -> requests.anyRequest().authenticated());
+            http.oauth2Login();
+            http.oauth2Client();
+            http.oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
+            return http.build();
+        }
     }
 }
