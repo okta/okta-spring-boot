@@ -15,6 +15,7 @@
  */
 package com.okta.spring.boot.oauth.env;
 
+import com.okta.commons.lang.Assert;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
@@ -97,6 +98,7 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
         // default scopes, as of Spring Security 5.4 default scopes are no longer added, this restores that functionality
         environment.getPropertySources().addLast(defaultOktaScopesSource(environment));
         // okta's endpoints can be resolved from an issuer
+        Assert.isTrue(environment.containsProperty(OKTA_OAUTH_ISSUER), OKTA_OAUTH_ISSUER + " cannot be empty");
         environment.getPropertySources().addLast(oktaStaticDiscoveryPropertySource(environment));
         environment.getPropertySources().addLast(oktaRedirectUriPropertySource(environment));
         environment.getPropertySources().addLast(otkaForcePkcePropertySource(environment));
