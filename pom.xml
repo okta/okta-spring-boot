@@ -142,15 +142,3 @@
     </dependencyManagement>
 </project>
 
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.owasp</groupId>
-                    <artifactId>dependency-check-maven</artifactId>
-                    <version>5.2.2</version> <!-- TODO: bump the version in the parent pom -->
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
-</project>
