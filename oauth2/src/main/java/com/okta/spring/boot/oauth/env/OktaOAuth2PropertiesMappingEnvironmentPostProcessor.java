@@ -99,6 +99,8 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
     private static final String OKTA_OAUTH_CLIENT_ID = OKTA_OAUTH_PREFIX + "client-id";
     private static final String OKTA_OAUTH_CLIENT_SECRET = OKTA_OAUTH_PREFIX + "client-secret";
     private static final String OKTA_OAUTH_SCOPES = OKTA_OAUTH_PREFIX + "scopes"; // array vs string
+    private static final String OKTA_STATIC_DISCOVERY = "okta-static-discovery";
+    private static final String OKTA_ISSUER_URI = "spring.security.oauth2.client.provider.okta.issuer-uri";
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
@@ -165,9 +167,9 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
         properties.put("spring.security.oauth2.client.provider.okta.token-uri", "${okta.oauth2.issuer}/v1/token");
         properties.put("spring.security.oauth2.client.provider.okta.user-info-uri", "${okta.oauth2.issuer}/v1/userinfo");
         properties.put("spring.security.oauth2.client.provider.okta.jwk-set-uri", "${okta.oauth2.issuer}/v1/keys");
-        properties.put("spring.security.oauth2.client.provider.okta.issuer-uri", "${okta.oauth2.issuer}"); // required for OIDC logout
+        properties.put(OKTA_ISSUER_URI, "${okta.oauth2.issuer}"); // required for OIDC logout
 
-        return new ConditionalMapPropertySource("okta-static-discovery", properties, environment, OKTA_OAUTH_ISSUER);
+        return new ConditionalMapPropertySource(OKTA_STATIC_DISCOVERY, properties, environment, OKTA_OAUTH_ISSUER);
     }
 
     private PropertySource oktaOpaqueTokenPropertySource(Environment environment) {
@@ -198,6 +200,9 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
 
         @Override
         public Object getProperty(String name) {
+            if (OKTA_ISSUER_URI.equals(name) && OKTA_STATIC_DISCOVERY.equals(this.getName()) && !containsProperty(name)) {
+                throw new IllegalArgumentException("Mandatory property `" + OKTA_OAUTH_ISSUER + "` is missing");
+            }
 
             return containsProperty(name)
                 ? super.getProperty(name)
