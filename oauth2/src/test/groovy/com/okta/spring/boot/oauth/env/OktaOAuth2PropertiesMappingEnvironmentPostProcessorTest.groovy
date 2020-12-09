@@ -18,9 +18,11 @@ package com.okta.spring.boot.oauth.env
 import org.springframework.core.env.Environment
 import org.springframework.core.env.MapPropertySource
 import org.springframework.mock.env.MockEnvironment
+import org.testng.Assert
 import org.testng.annotations.Test
 
 import static org.hamcrest.MatcherAssert.assertThat
+import static org.hamcrest.Matchers.containsString
 import static org.hamcrest.Matchers.is
 import static org.hamcrest.Matchers.nullValue
 
@@ -63,12 +65,21 @@ class OktaOAuth2PropertiesMappingEnvironmentPostProcessorTest {
         assertThat environment.getProperty(CLIENT_ID), nullValue()
         assertThat environment.getProperty(CLIENT_SECRET), nullValue()
         assertThat environment.getProperty(SCOPE, Set), nullValue()
-        assertThat environment.getProperty(ISSUER), nullValue()
-        assertThat environment.getProperty(RS_KEYS_URI), nullValue()
-        assertThat environment.getProperty(AUTHZ_URI), nullValue()
-        assertThat environment.getProperty(TOKEN_URI), nullValue()
-        assertThat environment.getProperty(USER_INFO_URI), nullValue()
-        assertThat environment.getProperty(PROVIDER_KEYS_URI), nullValue()
+
+        try {
+            environment.getProperty(ISSUER)
+            environment.getProperty(RS_KEYS_URI)
+            environment.getProperty(AUTHZ_URI)
+            environment.getProperty(TOKEN_URI)
+            environment.getProperty(USER_INFO_URI)
+            environment.getProperty(PROVIDER_KEYS_URI)
+
+            Assert.fail("Expected IllegalArgumentException")
+        } catch (IllegalArgumentException e) {
+            assertThat(e.message, containsString("Could not resolve placeholder 'okta.oauth2.issuer'"))
+        }
+
+
     }
 
     private Environment buildAndProcessEnvironment(Map<String, Object> properties) {
