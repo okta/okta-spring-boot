@@ -43,6 +43,7 @@ import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.ConfigurableEnvironment
+import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.authentication.ReactiveAuthenticationManagerResolver
 import org.springframework.security.config.BeanIds
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
@@ -63,15 +64,14 @@ import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
 import org.springframework.security.oauth2.server.resource.authentication.JwtReactiveAuthenticationManager
+import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationFilter
 import org.springframework.security.web.FilterChainProxy
 import org.springframework.security.web.server.MatcherSecurityWebFilterChain
 import org.springframework.security.web.server.WebFilterChainProxy
-import org.springframework.security.web.server.MatcherSecurityWebFilterChain
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter
 import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.web.server.WebFilter
-import org.springframework.test.util.ReflectionTestUtils
 import org.testng.TestException
 import org.testng.annotations.AfterClass
 import org.testng.annotations.BeforeClass
@@ -305,6 +305,7 @@ class AutoConfigConditionalTest implements HttpMock {
 
             assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
             assertThat(context).hasSingleBean(JwtDecoder)
+            assertThat(context).hasSingleBean(OktaJwtAuthenticationConverter)
             assertThat(context).hasSingleBean(OAuth2ClientProperties)
             assertThat(context).hasSingleBean(OktaOAuth2Properties)
             assertThat(context).hasSingleBean(OktaOAuth2AutoConfig)
@@ -312,6 +313,8 @@ class AutoConfigConditionalTest implements HttpMock {
             assertThat(context).hasSingleBean(OktaOidcUserService)
             assertThat(context).getBeans(AuthoritiesProvider).containsOnlyKeys("tokenScopesAuthoritiesProvider", "groupClaimsAuthoritiesProvider")
             assertThat(context).doesNotHaveBean(OidcClientInitiatedLogoutSuccessHandler)
+
+            assertThat(context.getEnvironment().getProperty("spring.security.oauth2.resourceserver.jwt.issuer-uri")).isEqualTo("https://test.example.com/oauth2/custom-as")
 
             assertFiltersEnabled(context, OAuth2LoginAuthenticationFilter, BearerTokenAuthenticationFilter)
         }
@@ -362,21 +365,18 @@ class AutoConfigConditionalTest implements HttpMock {
                 assertThat(context).doesNotHaveBean(ReactiveOktaOidcUserService)
                 assertThat(context).doesNotHaveBean(OidcClientInitiatedServerLogoutSuccessHandler)
 
-            assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
-            assertThat(context).hasSingleBean(JwtDecoder)
-            assertThat(context).hasSingleBean(OktaJwtAuthenticationConverter)
-            assertThat(context).hasSingleBean(OAuth2ClientProperties)
-            assertThat(context).hasSingleBean(OktaOAuth2Properties)
-            assertThat(context).hasSingleBean(OktaOAuth2AutoConfig)
-            assertThat(context).hasSingleBean(OktaOAuth2UserService)
-            assertThat(context).hasSingleBean(OktaOidcUserService)
-            assertThat(context).hasSingleBean(OidcClientInitiatedLogoutSuccessHandler)
-            assertThat(context).getBeans(AuthoritiesProvider).containsOnlyKeys("tokenScopesAuthoritiesProvider", "groupClaimsAuthoritiesProvider")
+                assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).hasSingleBean(JwtDecoder)
+                assertThat(context).hasSingleBean(OAuth2ClientProperties)
+                assertThat(context).hasSingleBean(OktaOAuth2Properties)
+                assertThat(context).hasSingleBean(OktaOAuth2AutoConfig)
+                assertThat(context).hasSingleBean(OktaOAuth2UserService)
+                assertThat(context).hasSingleBean(OktaOidcUserService)
+                assertThat(context).hasSingleBean(OidcClientInitiatedLogoutSuccessHandler)
+                assertThat(context).getBeans(AuthoritiesProvider).containsOnlyKeys("tokenScopesAuthoritiesProvider", "groupClaimsAuthoritiesProvider")
 
-            assertThat(context.getEnvironment().getProperty("spring.security.oauth2.resourceserver.jwt.issuer-uri")).isEqualTo("https://test.example.com/")
-
-            assertFiltersEnabled(context, OAuth2LoginAuthenticationFilter, BearerTokenAuthenticationFilter)
-        }
+                assertFiltersEnabled(context, OAuth2LoginAuthenticationFilter, BearerTokenAuthenticationFilter)
+            }
     }
 
     @Test
@@ -672,6 +672,19 @@ class AutoConfigConditionalTest implements HttpMock {
 
     private static void assertJwtBearerWebFilterEnabled(ApplicationContext context) {
         assertFilterConfiguredWithJwtAuthenticationManager(context)
+    }
+
+    private static Stream<WebFilter> activeJwtAuthenticationWebFilters(ApplicationContext context) {
+        return activeWebFilters(context).stream()
+                        .filter { it.getClass() == ServerHttpSecurity.OAuth2ResourceServerSpec.BearerTokenAuthenticationWebFilter }
+                        .map {(AuthenticationWebFilter) it}
+                        .filter {
+                            // here be dragons
+                            // TODO: there must be a better way to validate we have a JWT reactive auth manager
+                            def field = it.class.superclass.getDeclaredField("authenticationManagerResolver")
+                            field.setAccessible(true)
+                            field.get(it).arg$1.getClass() == JwtReactiveAuthenticationManager
+                        }
     }
 
     // see: https://github.com/spring-projects/spring-boot/blob/v2.3.6.RELEASE/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/security/oauth2/resource/reactive/ReactiveOAuth2ResourceServerAutoConfigurationTests.java#L361
