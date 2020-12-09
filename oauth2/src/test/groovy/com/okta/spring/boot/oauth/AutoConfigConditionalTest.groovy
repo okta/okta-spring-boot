@@ -314,7 +314,7 @@ class AutoConfigConditionalTest implements HttpMock {
             assertThat(context).getBeans(AuthoritiesProvider).containsOnlyKeys("tokenScopesAuthoritiesProvider", "groupClaimsAuthoritiesProvider")
             assertThat(context).doesNotHaveBean(OidcClientInitiatedLogoutSuccessHandler)
 
-            assertThat(context.getEnvironment().getProperty("spring.security.oauth2.resourceserver.jwt.issuer-uri")).isEqualTo("https://test.example.com/")
+            assertThat(context.getEnvironment().getProperty("spring.security.oauth2.resourceserver.jwt.issuer-uri")).isEqualTo("https://test.example.com/oauth2/custom-as")
 
             assertFiltersEnabled(context, OAuth2LoginAuthenticationFilter, BearerTokenAuthenticationFilter)
         }
