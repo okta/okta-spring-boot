@@ -15,6 +15,8 @@
  */
 package com.okta.spring.boot.oauth.env;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
@@ -94,6 +96,7 @@ import java.util.Map;
  */
 final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(OktaOAuth2PropertiesMappingEnvironmentPostProcessor.class);
     private static final String OKTA_OAUTH_PREFIX = "okta.oauth2.";
     private static final String OKTA_OAUTH_ISSUER = OKTA_OAUTH_PREFIX + "issuer";
     private static final String OKTA_OAUTH_CLIENT_ID = OKTA_OAUTH_PREFIX + "client-id";
@@ -201,7 +204,7 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
         @Override
         public Object getProperty(String name) {
             if (OKTA_ISSUER_URI.equals(name) && OKTA_STATIC_DISCOVERY.equals(this.getName()) && !containsProperty(name)) {
-                throw new IllegalArgumentException("Mandatory property `" + OKTA_OAUTH_ISSUER + "` is missing");
+                LOGGER.warn("Mandatory property `" + OKTA_OAUTH_ISSUER + "` is missing");
             }
 
             return containsProperty(name)

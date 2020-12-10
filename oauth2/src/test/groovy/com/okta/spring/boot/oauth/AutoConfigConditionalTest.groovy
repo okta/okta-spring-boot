@@ -441,8 +441,19 @@ class AutoConfigConditionalTest implements HttpMock {
         // missing properties, component does not load
         reactiveContextRunner()
             .run { context ->
-                assertThat(context).hasFailed()
-        }
+                assertThat(context).doesNotHaveBean(OktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).doesNotHaveBean(JwtDecoder)
+                assertThat(context).doesNotHaveBean(OktaOAuth2AutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2AutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ServerHttpServerAutoConfig)
+                assertThat(context).doesNotHaveBean(OAuth2AuthorizedClientService)
+                assertThat(context).doesNotHaveBean(AuthoritiesProvider)
+
+                assertWebFiltersDisabled(context, OAuth2LoginAuthenticationWebFilter)
+                assertWebFiltersDisabled(context, ServerHttpSecurity.OAuth2ResourceServerSpec.BearerTokenAuthenticationWebFilter)
+            }
     }
 
     @Test
