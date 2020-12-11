@@ -15,8 +15,6 @@
  */
 package com.okta.spring.boot.oauth.env;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
@@ -96,14 +94,11 @@ import java.util.Map;
  */
 final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
-    private static final Logger log = LoggerFactory.getLogger(OktaOAuth2PropertiesMappingEnvironmentPostProcessor.class);
     private static final String OKTA_OAUTH_PREFIX = "okta.oauth2.";
     private static final String OKTA_OAUTH_ISSUER = OKTA_OAUTH_PREFIX + "issuer";
     private static final String OKTA_OAUTH_CLIENT_ID = OKTA_OAUTH_PREFIX + "client-id";
     private static final String OKTA_OAUTH_CLIENT_SECRET = OKTA_OAUTH_PREFIX + "client-secret";
     private static final String OKTA_OAUTH_SCOPES = OKTA_OAUTH_PREFIX + "scopes"; // array vs string
-    private static final String OKTA_STATIC_DISCOVERY = "okta-static-discovery";
-    private static final String OKTA_ISSUER_URI = "spring.security.oauth2.client.provider.okta.issuer-uri";
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
@@ -170,9 +165,9 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
         properties.put("spring.security.oauth2.client.provider.okta.token-uri", "${okta.oauth2.issuer}/v1/token");
         properties.put("spring.security.oauth2.client.provider.okta.user-info-uri", "${okta.oauth2.issuer}/v1/userinfo");
         properties.put("spring.security.oauth2.client.provider.okta.jwk-set-uri", "${okta.oauth2.issuer}/v1/keys");
-        properties.put(OKTA_ISSUER_URI, "${okta.oauth2.issuer}"); // required for OIDC logout
+        properties.put("spring.security.oauth2.client.provider.okta.issuer-uri", "${okta.oauth2.issuer}"); // required for OIDC logout
 
-        return new ConditionalMapPropertySource(OKTA_STATIC_DISCOVERY, properties, environment, OKTA_OAUTH_ISSUER);
+        return new ConditionalMapPropertySource("okta-static-discovery", properties, environment, OKTA_OAUTH_ISSUER);
     }
 
     private PropertySource oktaOpaqueTokenPropertySource(Environment environment) {
@@ -203,9 +198,6 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
 
         @Override
         public Object getProperty(String name) {
-            if (OKTA_ISSUER_URI.equals(name) && OKTA_STATIC_DISCOVERY.equals(this.getName()) && !containsProperty(name)) {
-                log.warn("Mandatory property `" + OKTA_OAUTH_ISSUER + "` is missing");
-            }
 
             return containsProperty(name)
                 ? super.getProperty(name)
