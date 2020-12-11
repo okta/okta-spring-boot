@@ -96,7 +96,7 @@ import java.util.Map;
  */
 final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OktaOAuth2PropertiesMappingEnvironmentPostProcessor.class);
+    private static final Logger log = LoggerFactory.getLogger(OktaOAuth2PropertiesMappingEnvironmentPostProcessor.class);
     private static final String OKTA_OAUTH_PREFIX = "okta.oauth2.";
     private static final String OKTA_OAUTH_ISSUER = OKTA_OAUTH_PREFIX + "issuer";
     private static final String OKTA_OAUTH_CLIENT_ID = OKTA_OAUTH_PREFIX + "client-id";
@@ -204,7 +204,7 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
         @Override
         public Object getProperty(String name) {
             if (OKTA_ISSUER_URI.equals(name) && OKTA_STATIC_DISCOVERY.equals(this.getName()) && !containsProperty(name)) {
-                LOGGER.warn("Mandatory property `" + OKTA_OAUTH_ISSUER + "` is missing");
+                log.warn("Mandatory property `" + OKTA_OAUTH_ISSUER + "` is missing");
             }
 
             return containsProperty(name)
