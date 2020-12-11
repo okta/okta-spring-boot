@@ -1,5 +1,7 @@
 package com.okta.spring.boot.oauth.env;
 
+import com.okta.commons.configcheck.ConfigurationValidator;
+import com.okta.commons.configcheck.ValidationResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationPreparedEvent;
@@ -11,15 +13,14 @@ import org.springframework.core.env.ConfigurableEnvironment;
 public class OktaEnvironmentPostProcessorApplicationListener implements SmartApplicationListener, Ordered {
 
     private static final Logger log = LoggerFactory.getLogger(OktaEnvironmentPostProcessorApplicationListener.class);
-    public static final String OKTA_OAUTH2_ISSUER = "okta.oauth2.issuer";
 
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
         if (event instanceof ApplicationPreparedEvent) {
             ConfigurableEnvironment environment = ((ApplicationPreparedEvent) event).getApplicationContext().getEnvironment();
-            String oktaOauth2Issuer = environment.getProperty(OKTA_OAUTH2_ISSUER);
-            if (oktaOauth2Issuer == null || oktaOauth2Issuer.isEmpty()) {
-                log.warn("Mandatory property `" + OKTA_OAUTH2_ISSUER + "` is missing.");
+            ValidationResponse validationResponse = ConfigurationValidator.validateIssuer(environment.getProperty("okta.oauth2.issuer"));
+            if (!validationResponse.isValid()) {
+                log.warn(validationResponse.getMessage());
             }
         }
     }
