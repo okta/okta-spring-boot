@@ -390,6 +390,8 @@ To integrate the [Okta Java SDK](https://github.com/okta/okta-sdk-java) into you
 </dependency>
 ```
 
+**NOTE:** Currently only the 1.x version of the Okta SDK us supported. Updates comming soon!
+
 Then define the following properties:
 
 | Key | Description |
