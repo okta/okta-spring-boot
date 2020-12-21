@@ -35,7 +35,8 @@ public class OktaEnvironmentPostProcessorApplicationListener implements SmartApp
             ConfigurableEnvironment environment = ((ApplicationPreparedEvent) event).getApplicationContext().getEnvironment();
             ValidationResponse validationResponse = ConfigurationValidator.validateIssuer(environment.getProperty("okta.oauth2.issuer"));
             if (!validationResponse.isValid()) {
-                log.warn(validationResponse.getMessage());
+                log.warn(validationResponse.getMessage() + System.lineSeparator() +
+                    "To fix this add the `okta.oauth2.issuer` property to your application environments.");
             }
         }
     }
