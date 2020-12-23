@@ -107,7 +107,7 @@ class OktaOAuth2ResourceServerAutoConfig {
     OpaqueTokenIntrospector opaqueTokenIntrospector(OktaOAuth2Properties oktaOAuth2Properties,
                                                     OAuth2ResourceServerProperties oAuth2ResourceServerProperties) {
 
-        RestTemplate restTemplate = restTemplate();
+        RestTemplate restTemplate = restTemplate(oktaOAuth2Properties);
         restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(
             oAuth2ResourceServerProperties.getOpaquetoken().getClientId(),
             oAuth2ResourceServerProperties.getOpaquetoken().getClientSecret()));
