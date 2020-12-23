@@ -110,6 +110,11 @@
             <version>2.25.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.mock-server</groupId>
+            <artifactId>mockserver-netty</artifactId>
+            <version>5.11.2</version>
+        </dependency>
     </dependencies>
 
     <build>
