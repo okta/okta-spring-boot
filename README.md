@@ -17,7 +17,8 @@ This library uses semantic versioning and follows Okta's [library version policy
 | Version | Status                    |
 | ------- | ------------------------- |
 | 0.x.x | :warning: Retired |
-| 1.x.0 | :heavy_check_mark: Stable |
+| 1.x.0 | :clock9: Retiring effective September 28, 2021 |
+| 2.x.0 | :heavy_check_mark: Stable |
 
 ## Spring Boot Version Compatibility
 
@@ -26,6 +27,7 @@ This library uses semantic versioning and follows Okta's [library version policy
 | 1.2.1 | 2.1.2.RELEASE, 2.2.0.M1 |
 | 1.4.0 | 2.2.0.M1, 2.4.0-M1 |
 | 1.5.0, 1.5.1 | 2.4.0-M1, 2.5.0-M1 |
+| 2.0.0 | 2.4.1 |
               
 The latest release can always be found on the [releases page](https://github.com/okta/okta-spring-boot/releases).
 
