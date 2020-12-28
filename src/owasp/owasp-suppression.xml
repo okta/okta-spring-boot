@@ -130,4 +130,12 @@
         <cve>CVE-2007-1652</cve>
     </suppress>
 
+    <!-- brought in by Management SDK's impl module (jackson-databind-2.10.0 jar),
+         need to upgrade jackson-databind jar in management SDK -->
+    <suppress>
+        <notes><![CDATA[ file name: bcprov-jdk15on-1.66.jar ]]></notes>
+        <gav regex="true">^org\.bouncycastle:.*$</gav>
+        <cve>CVE-2020-28052</cve>
+    </suppress>
+
 </suppressions>
