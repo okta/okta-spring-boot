@@ -61,11 +61,13 @@ class OktaOAuth2AutoConfigRestTemplateTest {
     @Test
     void testRestTemplateWithProxy() {
         String sessionId = UUID.randomUUID().toString()
+        OktaOAuth2Properties.Proxy proxy = new OktaOAuth2Properties.Proxy()
+        proxy.setHost(LOCALHOST)
+        proxy.setPort(PORT)
+        proxy.setUsername("foo")
+        proxy.setPassword("bar")
         OktaOAuth2Properties properties = new OktaOAuth2Properties(null)
-        properties.setProxyHost(LOCALHOST)
-        properties.setProxyPort(PORT)
-        properties.setProxyUser("foo")
-        properties.setProxyPassword("bar")
+        properties.setProxy(proxy)
 
         RestTemplate restTemplate = new OktaOAuth2AutoConfig().restTemplate(properties)
         def headers = new HttpHeaders(singletonMap("Cookie", "sessionId=" + sessionId))

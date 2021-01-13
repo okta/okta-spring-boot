@@ -361,20 +361,29 @@ This module integrates with Spring Security's OAuth support, all you need is the
 
 ## Proxy
 
-If you're running your application (with this okta-spring-boot dependency) from behind a network proxy, you could add JVM args to your application like:
+If you're running your application (with this okta-spring-boot dependency) from behind a network proxy, you could setup properties for it in application.yml:
+```yaml
+okta:
+  oauth2:
+    proxy:
+      host: "example-proxy.com"
+      port: 7000
+      username: "user"              # optional
+      password: "password"          # optional
+```
+
+or, add JVM args to your application like:
 
 ```bash
--Dokta.oauth2.proxyHost=host
--Dokta.oauth2.proxyPort=port
--Dokta.oauth2.proxyUser="user"          # optional
--Dokta.oauth2.proxyPassword="password". # optional 
+-Dokta.oauth2.proxy.host=host
+-Dokta.oauth2.proxy.port=port
 ```
 
 or, you could set it programmatically like:
 
 ```java
-System.setProperty("okta.oauth2.proxyHost", "https://example-proxy.com");
-System.setProperty("okta.oauth2.proxyPort", "443");
+System.setProperty("okta.oauth2.proxy.host", "example-proxy.com");
+System.setProperty("okta.oauth2.proxy.port", "7000");
 ```
 
 See [here](https://docs.oracle.com/javase/8/docs/api/java/net/doc-files/net-properties.html) for the complete list of properties.
