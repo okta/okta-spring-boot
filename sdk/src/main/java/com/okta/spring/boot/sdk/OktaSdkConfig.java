@@ -46,7 +46,7 @@ import org.springframework.util.StringUtils;
  * @since 0.3.0
  */
 @Configuration
-@Conditional(OktaSdkConfig.OktaApiTokenCondition.class)
+@Conditional(OktaSdkConfig.OktaApiConditions.class)
 @ConditionalOnClass(Client.class)
 @EnableConfigurationProperties(OktaClientProperties.class)
 public class OktaSdkConfig {
@@ -108,19 +108,35 @@ public class OktaSdkConfig {
     }
 
     /**
-     * Spring Boot conditional based on the existance of the {code}okta.client.token{code} property.
+     * Spring Boot conditional based on the existence of the properties:
+     * <pre>{@code
+     *  - okta.client.token
+     *  - okta.client.orgUrl
+     * }</pre>
+     *
+     * <p> If <code>'okta.client.orgUrl'</code> is absent, try to resolve it from <code>'okta.oauth2.issuer'</code>.
      */
-    static class OktaApiTokenCondition extends SpringBootCondition {
+    static class OktaApiConditions extends SpringBootCondition {
 
         @Override
         public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
+            ConditionMessage.Builder message = ConditionMessage.forCondition("Okta Api Condition");
 
-            ConditionMessage.Builder message = ConditionMessage.forCondition("Okta Api Token Condition");
             String tokenValue = context.getEnvironment().getProperty("okta.client.token");
-            if (StringUtils.hasText(tokenValue)) {
-                return ConditionOutcome.match(message.foundExactly("provided API token"));
+            if (!StringUtils.hasText(tokenValue)) {
+                return ConditionOutcome.noMatch(message.didNotFind("provided API token").atAll());
             }
-            return ConditionOutcome.noMatch(message.didNotFind("provided API token").atAll());
+
+            String orgUrlValue = context.getEnvironment().getProperty("okta.client.orgUrl");
+            if (!StringUtils.hasText(orgUrlValue)) {
+                String issuerValue = context.getEnvironment().getProperty("okta.oauth2.issuer");
+                if (!StringUtils.hasText(issuerValue)) {
+                    return ConditionOutcome.noMatch(message.didNotFind("provided API orgUrl").atAll());
+                }
+                System.setProperty("okta.client.orgUrl", issuerValue.substring(0, issuerValue.indexOf(".com") + 4));
+            }
+
+            return ConditionOutcome.match(message.foundExactly("provided API token and orgUrl"));
         }
     }
 }
