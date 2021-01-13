@@ -74,13 +74,7 @@ public final class OktaOAuth2Properties implements Validator {
     /**
      * Proxy Properties
      */
-    private String proxyHost;
-
-    private int proxyPort;
-
-    private String proxyUser;
-
-    private String proxyPassword;
+    private Proxy proxy;
 
     // work around for https://github.com/spring-projects/spring-boot/issues/17035
     private OktaOAuth2Properties() {
@@ -165,36 +159,12 @@ public final class OktaOAuth2Properties implements Validator {
         this.postLogoutRedirectUri = postLogoutRedirectUri;
     }
 
-    public String getProxyHost() {
-        return proxyHost;
+    public Proxy getProxy() {
+        return proxy;
     }
 
-    public void setProxyHost(String proxyHost) {
-        this.proxyHost = proxyHost;
-    }
-
-    public int getProxyPort() {
-        return proxyPort;
-    }
-
-    public void setProxyPort(int proxyPort) {
-        this.proxyPort = proxyPort;
-    }
-
-    public String getProxyUser() {
-        return proxyUser;
-    }
-
-    public void setProxyUser(String proxyUser) {
-        this.proxyUser = proxyUser;
-    }
-
-    public String getProxyPassword() {
-        return proxyPassword;
-    }
-
-    public void setProxyPassword(String proxyPassword) {
-        this.proxyPassword = proxyPassword;
+    public void setProxy(Proxy proxy) {
+        this.proxy = proxy;
     }
 
     @Override
@@ -220,6 +190,49 @@ public final class OktaOAuth2Properties implements Validator {
         if (properties.getIssuer() != null) {
             ConfigurationValidator.validateIssuer(properties.getIssuer()).ifInvalid(res ->
                     errors.rejectValue("issuer", res.getMessage()));
+        }
+    }
+
+    public static class Proxy {
+
+        private String host;
+
+        private int port;
+
+        private String username;
+
+        private String password;
+
+        public String getHost() {
+            return host;
+        }
+
+        public void setHost(String host) {
+            this.host = host;
+        }
+
+        public int getPort() {
+            return port;
+        }
+
+        public void setPort(int port) {
+            this.port = port;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
         }
     }
 }

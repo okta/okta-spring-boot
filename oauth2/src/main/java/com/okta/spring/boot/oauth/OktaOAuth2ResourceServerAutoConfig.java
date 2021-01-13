@@ -80,15 +80,15 @@ class OktaOAuth2ResourceServerAutoConfig {
 
         Proxy proxy;
 
-        if (Strings.hasText(oktaOAuth2Properties.getProxyHost()) &&
-            oktaOAuth2Properties.getProxyPort() != 0) {
-            proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(oktaOAuth2Properties.getProxyHost(), oktaOAuth2Properties.getProxyPort()));
+        OktaOAuth2Properties.Proxy proxyProperties = oktaOAuth2Properties.getProxy();
+        if (proxyProperties != null && Strings.hasText(proxyProperties.getHost()) && proxyProperties.getPort() != 0) {
+            proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyProperties.getHost(), proxyProperties.getPort()));
 
-            if (Strings.hasText(oktaOAuth2Properties.getProxyUser()) &&
-                Strings.hasText(oktaOAuth2Properties.getProxyPassword())) {
+            if (Strings.hasText(proxyProperties.getUsername()) &&
+                Strings.hasText(proxyProperties.getPassword())) {
 
-                Authenticator.setDefault(new OktaOAuth2AutoConfig.ProxyPasswordAuthentication(oktaOAuth2Properties.getProxyUser(),
-                    oktaOAuth2Properties.getProxyPassword().toCharArray()));
+                Authenticator.setDefault(new OktaOAuth2AutoConfig.ProxyPasswordAuthentication(proxyProperties.getUsername(),
+                    proxyProperties.getPassword().toCharArray()));
             }
         } else {
             proxy = Proxy.NO_PROXY;
