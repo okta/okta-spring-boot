@@ -40,6 +40,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.util.StringUtils;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Configure Okta's management SDK, and expose it as a Bean.
  *
@@ -118,6 +121,8 @@ public class OktaSdkConfig {
      */
     static class OktaApiConditions extends SpringBootCondition {
 
+        private static final Pattern ORG_URL_PATTERN = Pattern.compile("^(?<orgUrl>http(s)?://[^/]+)/?.*$");
+
         @Override
         public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
             ConditionMessage.Builder message = ConditionMessage.forCondition("Okta Api Condition");
@@ -133,7 +138,10 @@ public class OktaSdkConfig {
                 if (!StringUtils.hasText(issuerValue)) {
                     return ConditionOutcome.noMatch(message.didNotFind("provided API orgUrl").atAll());
                 }
-                System.setProperty("okta.client.orgUrl", issuerValue.substring(0, issuerValue.indexOf(".com") + 4));
+                Matcher matcher = ORG_URL_PATTERN.matcher(issuerValue);
+                if (matcher.find()) {
+                    System.setProperty("okta.client.orgUrl", matcher.group("orgUrl"));
+                }
             }
 
             return ConditionOutcome.match(message.foundExactly("provided API token and orgUrl"));
