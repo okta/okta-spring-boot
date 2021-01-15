@@ -53,17 +53,7 @@ class OktaApiConditionsTest {
         assertThat conditionOutcome.getMessage(), equalTo("Okta Api Condition did not find provided API orgUrl")
     }
 
-    @Test
-    void testOktaApiConditionWithIssuer() {
-        def properties = ["okta.client.token" : "my-secret-api-token",
-                          "okta.oauth2.issuer": "https://okta.example.com/oauth2/default"]
-        def conditionOutcome = new OktaApiConditions().getMatchOutcome(buildContext(properties), null)
-        assertThat conditionOutcome.isMatch(), equalTo(true)
-        assertThat conditionOutcome.getMessage(), equalTo("Okta Api Condition found provided API token and orgUrl")
-        assertThat System.getProperty("okta.client.orgUrl"), equalTo("https://okta.example.com")
-    }
-
-    private ConditionContext buildContext(LinkedHashMap<String, String> properties) {
+    private static ConditionContext buildContext(LinkedHashMap<String, String> properties) {
         def environment = new MockEnvironment()
         def context = mock(ConditionContext)
         environment.getPropertySources().addFirst(new MapPropertySource("test", properties))
