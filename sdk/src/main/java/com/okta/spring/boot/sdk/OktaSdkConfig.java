@@ -16,6 +16,7 @@
 package com.okta.spring.boot.sdk;
 
 import com.okta.commons.http.config.Proxy;
+import com.okta.commons.lang.Strings;
 import com.okta.sdk.authc.credentials.ClientCredentials;
 import com.okta.sdk.authc.credentials.TokenClientCredentials;
 import com.okta.sdk.cache.CacheManager;
@@ -23,9 +24,8 @@ import com.okta.sdk.client.AuthorizationMode;
 import com.okta.sdk.client.Client;
 import com.okta.sdk.client.ClientBuilder;
 import com.okta.sdk.client.Clients;
-import com.okta.commons.lang.Strings;
-import com.okta.spring.boot.sdk.config.OktaClientProperties;
 import com.okta.spring.boot.sdk.cache.SpringCacheManager;
+import com.okta.spring.boot.sdk.config.OktaClientProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionMessage;
 import org.springframework.boot.autoconfigure.condition.ConditionOutcome;
@@ -39,9 +39,6 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.util.StringUtils;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Configure Okta's management SDK, and expose it as a Bean.
@@ -116,32 +113,20 @@ public class OktaSdkConfig {
      *  - okta.client.token
      *  - okta.client.orgUrl
      * }</pre>
-     *
-     * <p> If <code>'okta.client.orgUrl'</code> is absent, try to resolve it from <code>'okta.oauth2.issuer'</code>.
      */
     static class OktaApiConditions extends SpringBootCondition {
-
-        private static final Pattern ORG_URL_PATTERN = Pattern.compile("^(?<orgUrl>http(s)?://[^/]+)/?.*$");
 
         @Override
         public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
             ConditionMessage.Builder message = ConditionMessage.forCondition("Okta Api Condition");
 
-            String tokenValue = context.getEnvironment().getProperty("okta.client.token");
-            if (!StringUtils.hasText(tokenValue)) {
+            if (!StringUtils.hasText(context.getEnvironment().getProperty("okta.client.token"))) {
                 return ConditionOutcome.noMatch(message.didNotFind("provided API token").atAll());
             }
 
-            String orgUrlValue = context.getEnvironment().getProperty("okta.client.orgUrl");
-            if (!StringUtils.hasText(orgUrlValue)) {
-                String issuerValue = context.getEnvironment().getProperty("okta.oauth2.issuer");
-                if (!StringUtils.hasText(issuerValue)) {
-                    return ConditionOutcome.noMatch(message.didNotFind("provided API orgUrl").atAll());
-                }
-                Matcher matcher = ORG_URL_PATTERN.matcher(issuerValue);
-                if (matcher.find()) {
-                    System.setProperty("okta.client.orgUrl", matcher.group("orgUrl"));
-                }
+            if (!StringUtils.hasText(context.getEnvironment().getProperty("okta.client.orgUrl")) &&
+                !StringUtils.hasText(context.getEnvironment().getProperty("okta.oauth2.issuer"))) {
+                return ConditionOutcome.noMatch(message.didNotFind("provided API orgUrl").atAll());
             }
 
             return ConditionOutcome.match(message.foundExactly("provided API token and orgUrl"));

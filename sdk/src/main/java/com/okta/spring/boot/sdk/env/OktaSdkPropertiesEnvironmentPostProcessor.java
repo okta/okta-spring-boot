@@ -24,22 +24,49 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This {@link EnvironmentPostProcessor} configures additional {@link PropertySource}s for {code ~/.okta/okta.yaml} and {code ~/.okta/okta.yml}.
  */
 final class OktaSdkPropertiesEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
+    private static final String OKTA_CLIENT_ORG_URL = "okta.client.orgUrl";
+    private static final String OKTA_OAUTH2_ISSUER = "okta.oauth2.issuer";
+
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
 
         environment.getPropertySources().addLast(loadYaml(new FileSystemResource(new File(System.getProperty("user.home"), ".okta/okta.yml")), false));
         environment.getPropertySources().addLast(loadYaml(new FileSystemResource(new File(System.getProperty("user.home"), ".okta/okta.yaml")), false));
+        resolveEmptyOrgUrl(environment);
+    }
+
+    /**
+     * If <code>'okta.client.orgUrl'</code> property is absent, try to resolve it from <code>'okta.oauth2.issuer'</code>.
+     */
+    private void resolveEmptyOrgUrl(ConfigurableEnvironment environment) {
+        if (!StringUtils.hasText(environment.getProperty(OKTA_CLIENT_ORG_URL))) {
+            String issuerValue = environment.getProperty(OKTA_OAUTH2_ISSUER);
+            if (StringUtils.hasText(issuerValue)) {
+                Map<String, Object> map = new HashMap<>();
+                try {
+                    map.put(OKTA_CLIENT_ORG_URL, new URL(new URL(issuerValue), "/").toString());
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                }
+                environment.getPropertySources().addLast(new MapPropertySource("issuer-to-orgUrl", map));
+            }
+        }
     }
 
     private PropertySource<?> loadYaml(Resource resource, boolean required) {
