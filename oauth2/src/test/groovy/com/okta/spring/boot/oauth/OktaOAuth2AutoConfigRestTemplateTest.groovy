@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-Present Okta, Inc.
+ * Copyright 2021-Present Okta, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package com.okta.spring.boot.oauth
 
+import org.apache.commons.codec.binary.Base64
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.model.Cookie
@@ -39,8 +40,8 @@ import static org.hamcrest.Matchers.is
 
 class OktaOAuth2AutoConfigRestTemplateTest {
     private static final String LOCALHOST = "localhost"
-    private static final int PORT = 7000
-    private static final ClientAndServer SERVER_MOCK = buildServerMock(PORT)
+    private static final String AUTH_HEADER = "Basic " + new String(Base64.encodeBase64("user:pass".getBytes()))
+    private static final ClientAndServer SERVER_MOCK = buildServerMock()
 
     @AfterClass
     static void stop() {
@@ -51,9 +52,11 @@ class OktaOAuth2AutoConfigRestTemplateTest {
     void testRestTemplate() {
         String sessionId = UUID.randomUUID().toString()
         RestTemplate restTemplate = new OktaOAuth2AutoConfig().restTemplate(new OktaOAuth2Properties(null))
-        def headers = new HttpHeaders(singletonMap("Cookie", "sessionId=" + sessionId))
+        def headers = new HttpHeaders()
+        headers.add("Cookie", "sessionId=" + sessionId)
+        headers.add("Authorization", AUTH_HEADER)
         ResponseEntity<OAuth2AccessTokenResponse> response = restTemplate
-            .exchange("http://${LOCALHOST}:${PORT}", HttpMethod.GET, new HttpEntity<String>(headers), OAuth2AccessTokenResponse)
+            .exchange("http://${LOCALHOST}:${SERVER_MOCK.getPort()}", HttpMethod.GET, new HttpEntity<String>(headers), OAuth2AccessTokenResponse)
 
         verify(response, sessionId)
     }
@@ -63,20 +66,17 @@ class OktaOAuth2AutoConfigRestTemplateTest {
         String sessionId = UUID.randomUUID().toString()
         OktaOAuth2Properties.Proxy proxy = new OktaOAuth2Properties.Proxy()
         proxy.setHost(LOCALHOST)
-        proxy.setPort(PORT)
-        proxy.setUsername("foo")
-        proxy.setPassword("bar")
+        proxy.setPort(SERVER_MOCK.getPort())
+        proxy.setUsername("user")
+        proxy.setPassword("pass")
         OktaOAuth2Properties properties = new OktaOAuth2Properties(null)
         properties.setProxy(proxy)
 
         RestTemplate restTemplate = new OktaOAuth2AutoConfig().restTemplate(properties)
         def headers = new HttpHeaders(singletonMap("Cookie", "sessionId=" + sessionId))
         ResponseEntity<OAuth2AccessTokenResponse> response = restTemplate
-            .exchange("http://base_url.com", HttpMethod.GET, new HttpEntity<String>(headers), OAuth2AccessTokenResponse)
+            .exchange("http://example.com", HttpMethod.GET, new HttpEntity<String>(headers), OAuth2AccessTokenResponse)
         verify(response, sessionId)
-        assertThat "Wrong user", Authenticator.theAuthenticator.getAt("proxyUser"), is("foo")
-        assertThat "Wrong password", Authenticator.theAuthenticator.getAt("proxyPassword").toString(), is("bar")
-
     }
 
     private static void verify(ResponseEntity<OAuth2AccessTokenResponse> response, String sessionId) {
@@ -90,12 +90,13 @@ class OktaOAuth2AutoConfigRestTemplateTest {
         )
     }
 
-    private static ClientAndServer buildServerMock(int port) {
-        ClientAndServer serverMock = ClientAndServer.startClientAndServer(port)
+    private static ClientAndServer buildServerMock() {
+        ClientAndServer serverMock = ClientAndServer.startClientAndServer()
         serverMock
             .when(
                 HttpRequest.request()
                     .withMethod("GET")
+                    .withHeader("Authorization", AUTH_HEADER)
             )
             .respond(
                 HttpResponse.response()

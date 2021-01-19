@@ -28,6 +28,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -45,13 +46,12 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.Authenticator;
 import java.net.InetSocketAddress;
-import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Optional;
 
 @Configuration
 @ConditionalOnOktaClientProperties
@@ -89,14 +89,15 @@ class OktaOAuth2AutoConfig {
         Proxy proxy;
 
         OktaOAuth2Properties.Proxy proxyProperties = oktaOAuth2Properties.getProxy();
+        Optional<BasicAuthenticationInterceptor> basicAuthenticationInterceptor = Optional.empty();
         if (proxyProperties != null && Strings.hasText(proxyProperties.getHost()) && proxyProperties.getPort() != 0) {
             proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyProperties.getHost(), proxyProperties.getPort()));
 
             if (Strings.hasText(proxyProperties.getUsername()) &&
                 Strings.hasText(proxyProperties.getPassword())) {
 
-                Authenticator.setDefault(new ProxyPasswordAuthentication(proxyProperties.getUsername(),
-                    proxyProperties.getPassword().toCharArray()));
+                basicAuthenticationInterceptor = Optional.of(new BasicAuthenticationInterceptor(proxyProperties.getUsername(),
+                    proxyProperties.getPassword()));
             }
         } else {
             proxy = Proxy.NO_PROXY;
@@ -106,26 +107,11 @@ class OktaOAuth2AutoConfig {
             new OAuth2AccessTokenResponseHttpMessageConverter()));
         restTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
         restTemplate.getInterceptors().add(new UserAgentRequestInterceptor());
+        basicAuthenticationInterceptor.ifPresent(restTemplate.getInterceptors()::add);
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setProxy(proxy);
         restTemplate.setRequestFactory(requestFactory);
         return restTemplate;
-    }
-
-    static class ProxyPasswordAuthentication extends Authenticator {
-
-        private final String proxyUser;
-        private final char[] proxyPassword;
-
-        ProxyPasswordAuthentication(String proxyUser, char[] proxyPassword) {
-            this.proxyUser = proxyUser;
-            this.proxyPassword = proxyPassword;
-        }
-
-        @Override
-        protected PasswordAuthentication getPasswordAuthentication() {
-            return new PasswordAuthentication(this.proxyUser, this.proxyPassword);
-        }
     }
 
     @Configuration(proxyBeanMethods = false)
