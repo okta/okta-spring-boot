@@ -366,24 +366,28 @@ If you're running your application (with this okta-spring-boot dependency) from 
 okta:
   oauth2:
     proxy:
-      host: "example-proxy.com"
+      host: "proxy.example.com"
       port: 7000
-      username: "user"              # optional
-      password: "password"          # optional
+      username: "your-username"             # optional
+      password: "your-secret-password"      # optional
 ```
 
 or, add JVM args to your application like:
 
 ```bash
--Dokta.oauth2.proxy.host=host
+-Dokta.oauth2.proxy.host=proxy.example.com
 -Dokta.oauth2.proxy.port=port
+-Dokta.oauth2.proxy.username=your-username
+-Dokta.oauth2.proxy.password=your-secret-password
 ```
 
 or, you could set it programmatically like:
 
 ```java
-System.setProperty("okta.oauth2.proxy.host", "example-proxy.com");
+System.setProperty("okta.oauth2.proxy.host", "proxy.example.com");
 System.setProperty("okta.oauth2.proxy.port", "7000");
+System.setProperty("okta.oauth2.proxy.username", "your-username");
+System.setProperty("okta.oauth2.proxy.password", "your-secret-password");
 ```
 
 See [here](https://docs.oracle.com/javase/8/docs/api/java/net/doc-files/net-properties.html) for the complete list of properties.
