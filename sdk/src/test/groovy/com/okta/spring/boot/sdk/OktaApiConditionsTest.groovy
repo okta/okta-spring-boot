@@ -34,7 +34,7 @@ class OktaApiConditionsTest {
                           "okta.client.orgUrl": "https://okta.example.com"]
         def conditionOutcome = new OktaApiConditions().getMatchOutcome(buildContext(properties), null)
         assertThat conditionOutcome.isMatch(), equalTo(true)
-        assertThat conditionOutcome.getMessage(), equalTo("Okta Api Condition found provided API token and orgUrl")
+        assertThat conditionOutcome.getMessage(), equalTo("Okta API token and orgUrl found")
     }
 
     @Test
@@ -42,7 +42,8 @@ class OktaApiConditionsTest {
         def properties = ["okta.client.orgUrl": "https://okta.example.com"]
         def conditionOutcome = new OktaApiConditions().getMatchOutcome(buildContext(properties), null)
         assertThat conditionOutcome.isMatch(), equalTo(false)
-        assertThat conditionOutcome.getMessage(), equalTo("Okta Api Condition did not find provided API token")
+        assertThat conditionOutcome.getMessage(), equalTo("Your Okta API token is missing. You can generate one " +
+            "in the Okta Developer Console. Follow these instructions: https://bit.ly/get-okta-api-token")
     }
 
     @Test
@@ -50,7 +51,8 @@ class OktaApiConditionsTest {
         def properties = ["okta.client.token": "my-secret-api-token"]
         def conditionOutcome = new OktaApiConditions().getMatchOutcome(buildContext(properties), null)
         assertThat conditionOutcome.isMatch(), equalTo(false)
-        assertThat conditionOutcome.getMessage(), equalTo("Okta Api Condition did not find provided API orgUrl")
+        assertThat conditionOutcome.getMessage(), equalTo("Your Okta URL is missing. You can copy your domain " +
+            "from the Okta Developer Console. Follow these instructions to find it: https://bit.ly/finding-okta-domain")
     }
 
     private static ConditionContext buildContext(LinkedHashMap<String, String> properties) {

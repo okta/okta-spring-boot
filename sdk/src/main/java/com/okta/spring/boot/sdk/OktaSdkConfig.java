@@ -15,6 +15,7 @@
  */
 package com.okta.spring.boot.sdk;
 
+import com.okta.commons.configcheck.ValidationResponse;
 import com.okta.commons.http.config.Proxy;
 import com.okta.commons.lang.Strings;
 import com.okta.sdk.authc.credentials.ClientCredentials;
@@ -27,7 +28,6 @@ import com.okta.sdk.client.Clients;
 import com.okta.spring.boot.sdk.cache.SpringCacheManager;
 import com.okta.spring.boot.sdk.config.OktaClientProperties;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionMessage;
 import org.springframework.boot.autoconfigure.condition.ConditionOutcome;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -38,7 +38,9 @@ import org.springframework.context.annotation.ConditionContext;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.type.AnnotatedTypeMetadata;
-import org.springframework.util.StringUtils;
+
+import static com.okta.commons.configcheck.ConfigurationValidator.validateApiToken;
+import static com.okta.commons.configcheck.ConfigurationValidator.validateOrgUrl;
 
 /**
  * Configure Okta's management SDK, and expose it as a Bean.
@@ -118,18 +120,18 @@ public class OktaSdkConfig {
 
         @Override
         public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
-            ConditionMessage.Builder message = ConditionMessage.forCondition("Okta Api Condition");
-
-            if (!StringUtils.hasText(context.getEnvironment().getProperty("okta.client.token"))) {
-                return ConditionOutcome.noMatch(message.didNotFind("provided API token").atAll());
+            ValidationResponse tokenValidation = validateApiToken(context.getEnvironment().getProperty("okta.client.token"));
+            if (!tokenValidation.isValid()) {
+                return ConditionOutcome.noMatch(tokenValidation.getMessage());
             }
 
-            if (!StringUtils.hasText(context.getEnvironment().getProperty("okta.client.orgUrl")) &&
-                !StringUtils.hasText(context.getEnvironment().getProperty("okta.oauth2.issuer"))) {
-                return ConditionOutcome.noMatch(message.didNotFind("provided API orgUrl").atAll());
+            ValidationResponse orgUrlValidation = validateOrgUrl(context.getEnvironment().getProperty("okta.client.orgUrl"));
+            if (!orgUrlValidation.isValid() &&
+                !validateOrgUrl(context.getEnvironment().getProperty("okta.oauth2.issuer")).isValid()) {
+                return ConditionOutcome.noMatch(orgUrlValidation.getMessage());
             }
 
-            return ConditionOutcome.match(message.foundExactly("provided API token and orgUrl"));
+            return ConditionOutcome.match("Okta API token and orgUrl found");
         }
     }
 }
