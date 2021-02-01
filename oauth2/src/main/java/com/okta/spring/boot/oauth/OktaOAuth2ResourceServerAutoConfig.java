@@ -76,13 +76,13 @@ class OktaOAuth2ResourceServerAutoConfig {
         return decoder;
     }
 
-    private RestTemplate restTemplate(OktaOAuth2Properties oktaOAuth2Properties) {
+    static RestTemplate restTemplate(OktaOAuth2Properties oktaOAuth2Properties) {
 
         Proxy proxy;
 
         OktaOAuth2Properties.Proxy proxyProperties = oktaOAuth2Properties.getProxy();
         Optional<BasicAuthenticationInterceptor> basicAuthenticationInterceptor = Optional.empty();
-        if (proxyProperties != null && Strings.hasText(proxyProperties.getHost()) && proxyProperties.getPort() != 0) {
+        if (proxyProperties != null && Strings.hasText(proxyProperties.getHost()) && proxyProperties.getPort() > 0) {
             proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyProperties.getHost(), proxyProperties.getPort()));
 
             if (Strings.hasText(proxyProperties.getUsername()) &&

@@ -15,9 +15,7 @@
  */
 package com.okta.spring.boot.oauth;
 
-import com.okta.commons.lang.Strings;
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
-import com.okta.spring.boot.oauth.http.UserAgentRequestInterceptor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -27,8 +25,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -46,12 +42,9 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Optional;
 
 @Configuration
 @ConditionalOnOktaClientProperties
@@ -85,32 +78,10 @@ class OktaOAuth2AutoConfig {
     @Bean
     @ConditionalOnMissingBean
     RestTemplate restTemplate(OktaOAuth2Properties oktaOAuth2Properties) {
-
-        Proxy proxy;
-
-        OktaOAuth2Properties.Proxy proxyProperties = oktaOAuth2Properties.getProxy();
-        Optional<BasicAuthenticationInterceptor> basicAuthenticationInterceptor = Optional.empty();
-        if (proxyProperties != null && Strings.hasText(proxyProperties.getHost()) && proxyProperties.getPort() != 0) {
-            proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyProperties.getHost(), proxyProperties.getPort()));
-
-            if (Strings.hasText(proxyProperties.getUsername()) &&
-                Strings.hasText(proxyProperties.getPassword())) {
-
-                basicAuthenticationInterceptor = Optional.of(new BasicAuthenticationInterceptor(proxyProperties.getUsername(),
-                    proxyProperties.getPassword()));
-            }
-        } else {
-            proxy = Proxy.NO_PROXY;
-        }
-
-        RestTemplate restTemplate = new RestTemplate(Arrays.asList(new FormHttpMessageConverter(),
-            new OAuth2AccessTokenResponseHttpMessageConverter()));
+        RestTemplate restTemplate = OktaOAuth2ResourceServerAutoConfig.restTemplate(oktaOAuth2Properties);
         restTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
-        restTemplate.getInterceptors().add(new UserAgentRequestInterceptor());
-        basicAuthenticationInterceptor.ifPresent(restTemplate.getInterceptors()::add);
-        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-        requestFactory.setProxy(proxy);
-        restTemplate.setRequestFactory(requestFactory);
+        restTemplate.setMessageConverters(
+            Arrays.asList(new FormHttpMessageConverter(), new OAuth2AccessTokenResponseHttpMessageConverter()));
         return restTemplate;
     }
 
