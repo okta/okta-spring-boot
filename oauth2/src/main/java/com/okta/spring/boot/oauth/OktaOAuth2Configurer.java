@@ -132,8 +132,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
 
     private void configureLogin(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {
 
-        ApplicationContext context = http.getSharedObject(ApplicationContext.class);
-        RestTemplate restTemplate = context.getBean(RestTemplate.class);
+        RestTemplate restTemplate = OktaOAuth2ResourceServerAutoConfig.restTemplate(oktaOAuth2Properties);
 
         http.oauth2Login()
             .tokenEndpoint()

@@ -38,7 +38,7 @@ import static java.util.Collections.singletonMap
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.is
 
-class OktaOAuth2AutoConfigRestTemplateTest {
+class OktaOAuth2RestTemplateTest {
     private static final String LOCALHOST = "localhost"
     private static final String AUTH_HEADER = "Basic " + new String(Base64.encodeBase64("user:pass".getBytes()))
     private static final ClientAndServer SERVER_MOCK = buildServerMock()
@@ -51,7 +51,7 @@ class OktaOAuth2AutoConfigRestTemplateTest {
     @Test
     void testRestTemplate() {
         String sessionId = UUID.randomUUID().toString()
-        RestTemplate restTemplate = new OktaOAuth2AutoConfig().restTemplate(new OktaOAuth2Properties(null))
+        RestTemplate restTemplate = OktaOAuth2ResourceServerAutoConfig.restTemplate(new OktaOAuth2Properties(null))
         def headers = new HttpHeaders()
         headers.add("Cookie", "sessionId=" + sessionId)
         headers.add("Authorization", AUTH_HEADER)
@@ -72,7 +72,7 @@ class OktaOAuth2AutoConfigRestTemplateTest {
         OktaOAuth2Properties properties = new OktaOAuth2Properties(null)
         properties.setProxy(proxy)
 
-        RestTemplate restTemplate = new OktaOAuth2AutoConfig().restTemplate(properties)
+        RestTemplate restTemplate = OktaOAuth2ResourceServerAutoConfig.restTemplate(properties)
         def headers = new HttpHeaders(singletonMap("Cookie", "sessionId=" + sessionId))
         ResponseEntity<OAuth2AccessTokenResponse> response = restTemplate
             .exchange("http://example.com", HttpMethod.GET, new HttpEntity<String>(headers), OAuth2AccessTokenResponse)
