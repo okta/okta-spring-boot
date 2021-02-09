@@ -394,6 +394,8 @@ See [here](https://docs.oracle.com/javase/8/docs/api/java/net/doc-files/net-prop
 
 **Note:**  Spring WebFlux (and `WebClient`) do not support these properties. (See [spring-projects/spring-security#8882](https://github.com/spring-projects/spring-security/issues/8882)).
 
+If you are running your Spring Boot App behind a reverse proxy, be sure to read [this](https://docs.spring.io/spring-boot/docs/current/reference/html/howto.html#howto-use-behind-a-proxy-server) guide.
+
 # Inject the Okta Java SDK
 
 To integrate the [Okta Java SDK](https://github.com/okta/okta-sdk-java) into your Spring Boot application you just need to add a dependency:
