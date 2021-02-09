@@ -138,14 +138,10 @@
         <cve>CVE-2020-28052</cve>
     </suppress>
 
-   <!-- false positive; see https://github.com/jeremylong/DependencyCheck/issues/1665 -->
+   <!-- false positive, see https://github.com/jeremylong/DependencyCheck/issues/1665 -->
     <suppress>
-        <notes><![CDATA[ file name: spring-security-rsa-1.0.8.RELEASE.jar ]]></notes>
-        <gav regex="true">.*</gav>
-        <cpe>cpe:/a:vmware:springsource_spring_security:1.0.8</cpe>
-        <cpe>cpe:/a:pivotal_software:spring_security:1.0.8,</cpe>
-        <cpe>cpe:/a:pivotal_software:spring_security_oauth:1.0.8</cpe>
-        <cpe>cpe:/a:pivotal:spring_security_oauth:1.0.8</cpe>
+        <notes><![CDATA[ file name: spring-security-rsa-1.0.9.RELEASE.jar ]]></notes>
+        <gav regex="true">^org\.springframework\.security:spring-security-rsa:.*$</gav>
         <cve>CVE-2011-2731</cve>
         <cve>CVE-2011-2732</cve>
         <cve>CVE-2012-5055</cve>
