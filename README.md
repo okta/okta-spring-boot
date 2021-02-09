@@ -392,7 +392,7 @@ System.setProperty("okta.oauth2.proxy.password", "your-secret-password");
 
 See [here](https://docs.oracle.com/javase/8/docs/api/java/net/doc-files/net-properties.html) for the complete list of properties.
 
-**Note:**  Spring WebFlux (and `WebClient`) do not support these properties. (See [spring-projects/spring-security#8882](https://github.com/spring-projects/spring-security/issues/8882)).
+**Note:**  Spring WebFlux (and `WebClient`) does not support these properties. (See [spring-projects/spring-security#8882](https://github.com/spring-projects/spring-security/issues/8882)).
 
 If you are running your Spring Boot App behind a reverse proxy, be sure to read [this](https://docs.spring.io/spring-boot/docs/current/reference/html/howto.html#howto-use-behind-a-proxy-server) guide.
 
