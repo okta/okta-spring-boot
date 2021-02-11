@@ -407,7 +407,7 @@ To integrate the [Okta Java SDK](https://github.com/okta/okta-sdk-java) into you
 </dependency>
 ```
 
-**NOTE:** Currently only the 1.x version of the Okta SDK us supported. Updates comming soon!
+**NOTE:** Currently, only the 1.x version of the Okta SDK is supported. Updates coming soon!
 
 Then define the `okta.client.token` property. See [creating an API token](https://developer.okta.com/docs/api/getting_started/getting_a_token) for more info.
 
