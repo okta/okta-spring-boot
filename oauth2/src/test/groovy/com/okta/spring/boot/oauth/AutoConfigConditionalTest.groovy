@@ -43,6 +43,7 @@ import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.ConfigurableEnvironment
+import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.authentication.ReactiveAuthenticationManagerResolver
 import org.springframework.security.config.BeanIds
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
@@ -53,11 +54,9 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcReactiveOAuth2UserService
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService
-import org.springframework.security.oauth2.client.userinfo.DefaultReactiveOAuth2UserService
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserService
-import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserService
+import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler
+import org.springframework.security.oauth2.client.oidc.web.server.logout.OidcClientInitiatedServerLogoutSuccessHandler
+import org.springframework.security.oauth2.client.userinfo.*
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter
 import org.springframework.security.oauth2.client.web.server.authentication.OAuth2LoginAuthenticationWebFilter
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
@@ -65,6 +64,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
 import org.springframework.security.oauth2.server.resource.authentication.JwtReactiveAuthenticationManager
+import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationFilter
 import org.springframework.security.web.FilterChainProxy
 import org.springframework.security.web.server.MatcherSecurityWebFilterChain
@@ -105,20 +105,38 @@ class AutoConfigConditionalTest implements HttpMock {
 
     @Override
     void configureHttpMock(WireMockServer wireMockServer) {
-        String issuer = mockBaseUrl()
+        String orgIssuer = mockBaseUrl()
+        String customAsIssuer = "${mockBaseUrl()}oauth2/custom-as"
+        wireMockServer.stubFor(
+            WireMock.get("/oauth2/custom-as/.well-known/openid-configuration")
+                .willReturn(WireMock.aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(""" {
+                        "issuer": "${customAsIssuer}",
+                        "subject_types_supported": ["public"],
+                        "end_session_endpoint":"${customAsIssuer}v1/logout",
+                        "authorization_endpoint":"${customAsIssuer}v1/authorize",
+                        "token_endpoint":"${customAsIssuer}v1/token",
+                        "userinfo_endpoint":"${customAsIssuer}v1/userinfo",
+                        "registration_endpoint":"${customAsIssuer}v1/clients",
+                        "jwks_uri":"${customAsIssuer}v1/keys",
+                        "introspection_endpoint":"${customAsIssuer}v1/introspect"
+                    }
+                    """)))
         wireMockServer.stubFor(
             WireMock.get("/.well-known/openid-configuration")
                 .willReturn(WireMock.aResponse()
                     .withHeader("Content-Type", "application/json")
                     .withBody(""" {
-                        "issuer": "${issuer}",
-                        "end_session_endpoint":"${issuer}oauth2/v1/logout",
-                        "authorization_endpoint":"${issuer}oauth2/v1/authorize",
-                        "token_endpoint":"${issuer}oauth2/v1/token",
-                        "userinfo_endpoint":"${issuer}oauth2/v1/userinfo",
-                        "registration_endpoint":"${issuer}oauth2/v1/clients",
-                        "jwks_uri":"${issuer}oauth2/v1/keys",
-                        "subject_types_supported":["public"]
+                        "issuer": "${orgIssuer}",
+                        "subject_types_supported": ["public"],
+                        "end_session_endpoint":"${orgIssuer}oauth2/v1/logout",
+                        "authorization_endpoint":"${orgIssuer}oauth2/v1/authorize",
+                        "token_endpoint":"${orgIssuer}oauth2/v1/token",
+                        "userinfo_endpoint":"${orgIssuer}oauth2/v1/userinfo",
+                        "registration_endpoint":"${orgIssuer}oauth2/v1/clients",
+                        "jwks_uri":"${orgIssuer}oauth2/v1/keys",
+                        "introspection_endpoint":"${orgIssuer}oauth2/v1/introspect"
                     }
                     """)))
     }
@@ -159,8 +177,8 @@ class AutoConfigConditionalTest implements HttpMock {
 
         // with properties it loads correctly
         webContextRunner().withPropertyValues(
-                "okta.oauth2.issuer=https://test.example.com/")
-            .run {context ->
+            "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as")
+            .run { context ->
                 assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
                 assertThat(context).hasSingleBean(JwtDecoder)
                 assertThat(context).hasSingleBean(OktaJwtAuthenticationConverter)
@@ -174,39 +192,106 @@ class AutoConfigConditionalTest implements HttpMock {
 
                 assertFiltersEnabled(context, BearerTokenAuthenticationFilter)
                 assertFiltersDisabled(context, OAuth2LoginAuthenticationFilter)
-        }
+            }
     }
 
     @Test
     void webLoginConfig_withIssuer() {
 
         webContextRunner().withPropertyValues(
-                "okta.oauth2.issuer=https://test.example.com/")
+            "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as")
             .run { context ->
 
-            assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2AutoConfig)
-            assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerAutoConfig)
-            assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig)
-            assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ServerHttpServerAutoConfig)
-            assertThat(context).doesNotHaveBean(OAuth2ClientProperties)
-            assertThat(context).doesNotHaveBean(OktaOAuth2AutoConfig)
-            assertThat(context).doesNotHaveBean(AuthoritiesProvider)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2AutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ServerHttpServerAutoConfig)
+                assertThat(context).doesNotHaveBean(OAuth2ClientProperties)
+                assertThat(context).doesNotHaveBean(OktaOAuth2AutoConfig)
+                assertThat(context).doesNotHaveBean(AuthoritiesProvider)
 
-            assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
-            assertThat(context).hasSingleBean(JwtDecoder)
-            assertThat(context).hasSingleBean(OktaOAuth2Properties)
+                assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).hasSingleBean(JwtDecoder)
+                assertThat(context).hasSingleBean(OktaOAuth2Properties)
 
-            assertFiltersEnabled(context, BearerTokenAuthenticationFilter)
-            assertFiltersDisabled(context, OAuth2LoginAuthenticationFilter)
-        }
+                assertFiltersEnabled(context, BearerTokenAuthenticationFilter)
+                assertFiltersDisabled(context, OAuth2LoginAuthenticationFilter)
+            }
     }
 
     @Test
-    void webLoginConfig_withIssuerAndClientInfo() {
+    void webLoginConfig_withIssuer_OpaqueTokenResourceServerConfig() {
+
+        // server should NOT start due to missing client-id and client-secret which
+        // are required for creation of OpaqueTokenIntrospector bean.
+        webContextRunner(OpaqueTokenResourceServerConfiguredApp).withPropertyValues(
+            "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as")
+            .run { context ->
+                assertThat(context).hasFailed()
+            }
+    }
+
+    @Test
+    void webLoginConfig_withIssuerClientIdSecret_JwtResourceServerConfig() {
+
+        // start context for App configured to use JWT  validation for resource server
+        webContextRunner(JwtResourceServerConfiguredApp).withPropertyValues(
+            "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as",
+            "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}oauth2/custom-as", // work around to not validate the https url
+            "okta.oauth2.client-id=test-client-id",
+            "okta.oauth2.client-secret=test-client-secret")
+            .run { context ->
+
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2AutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ServerHttpServerAutoConfig)
+
+                assertThat(context).getBeans(AuthoritiesProvider).containsOnlyKeys("tokenScopesAuthoritiesProvider", "groupClaimsAuthoritiesProvider")
+                assertThat(context).hasSingleBean(OktaOAuth2AutoConfig)
+                assertThat(context).hasSingleBean(OAuth2ClientProperties)
+                assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).hasSingleBean(JwtDecoder)
+                assertThat(context).hasSingleBean(OktaOAuth2Properties)
+
+                assertFiltersEnabled(context, OAuth2LoginAuthenticationFilter, BearerTokenAuthenticationFilter)
+            }
+    }
+
+    @Test
+    void webLoginConfig_withRootIssuerClientIdSecret() {
+
+        // start context for the App with NO resource server configuration and root issuer
+        // root issuer would force Opaque Token configuration of resource server.
+        webContextRunner().withPropertyValues(
+            "okta.oauth2.issuer=https://test.example.com",
+            "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}", // work around to not validate the https url
+            "okta.oauth2.client-id=test-client-id",
+            "okta.oauth2.client-secret=test-client-secret")
+            .run { context ->
+
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2AutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ServerHttpServerAutoConfig)
+
+                assertThat(context).getBeans(AuthoritiesProvider).containsOnlyKeys("tokenScopesAuthoritiesProvider", "groupClaimsAuthoritiesProvider")
+                assertThat(context).hasSingleBean(OktaOAuth2AutoConfig)
+                assertThat(context).hasSingleBean(OAuth2ClientProperties)
+                assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).hasSingleBean(OpaqueTokenIntrospector)
+                assertThat(context).hasSingleBean(OktaOAuth2Properties)
+
+                assertFiltersEnabled(context, OAuth2LoginAuthenticationFilter, BearerTokenAuthenticationFilter)
+            }
+    }
+
+    @Test
+    void webLoginConfig_withIssuerAndClientIdSecret() {
 
         webContextRunner().withPropertyValues(
-                "okta.oauth2.issuer=https://test.example.com/",
-                "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}", // work around to not validate the https url
+                "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as",
+                "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}oauth2/custom-as", // work around to not validate the https url
                 "okta.oauth2.client-id=test-client-id",
                 "okta.oauth2.client-secret=test-client-secret")
             .run { context ->
@@ -216,6 +301,7 @@ class AutoConfigConditionalTest implements HttpMock {
             assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ServerHttpServerAutoConfig)
             assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2UserService)
             assertThat(context).doesNotHaveBean(ReactiveOktaOidcUserService)
+            assertThat(context).doesNotHaveBean(OidcClientInitiatedServerLogoutSuccessHandler)
 
             assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
             assertThat(context).hasSingleBean(JwtDecoder)
@@ -226,19 +312,79 @@ class AutoConfigConditionalTest implements HttpMock {
             assertThat(context).hasSingleBean(OktaOAuth2UserService)
             assertThat(context).hasSingleBean(OktaOidcUserService)
             assertThat(context).getBeans(AuthoritiesProvider).containsOnlyKeys("tokenScopesAuthoritiesProvider", "groupClaimsAuthoritiesProvider")
+            assertThat(context).doesNotHaveBean(OidcClientInitiatedLogoutSuccessHandler)
 
-            assertThat(context.getEnvironment().getProperty("spring.security.oauth2.resourceserver.jwt.issuer-uri")).isEqualTo("https://test.example.com/")
+            assertThat(context.getEnvironment().getProperty("spring.security.oauth2.resourceserver.jwt.issuer-uri")).isEqualTo("https://test.example.com/oauth2/custom-as")
 
             assertFiltersEnabled(context, OAuth2LoginAuthenticationFilter, BearerTokenAuthenticationFilter)
         }
     }
 
     @Test
-    void webLoginConfig_withIssuerAndClientInfo_pkce() {
+    void webLoginConfig_withIssuerAndClientIdSecret_OpaqueTokenResourceServerConfig() {
+
+        // start context for App configured to use Opaque Token validation for resource server
+        webContextRunner(OpaqueTokenResourceServerConfiguredApp).withPropertyValues(
+            "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as",
+            "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}oauth2/custom-as", // work around to not validate the https url
+            "okta.oauth2.client-id=test-client-id",
+            "okta.oauth2.client-secret=test-client-secret")
+            .run { context ->
+
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2AutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ServerHttpServerAutoConfig)
+
+                assertThat(context).getBeans(AuthoritiesProvider).containsOnlyKeys("tokenScopesAuthoritiesProvider", "groupClaimsAuthoritiesProvider")
+                assertThat(context).hasSingleBean(OktaOAuth2AutoConfig)
+                assertThat(context).hasSingleBean(OAuth2ClientProperties)
+                assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).hasSingleBean(OpaqueTokenIntrospector)
+                assertThat(context).hasSingleBean(OktaOAuth2Properties)
+
+                assertFiltersEnabled(context, OAuth2LoginAuthenticationFilter, BearerTokenAuthenticationFilter)
+            }
+    }
+
+    @Test
+    void webLoginConfig_withLogoutUri() {
 
         webContextRunner().withPropertyValues(
-                "okta.oauth2.issuer=https://test.example.com/",
-                "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}", // work around to not validate the https url
+            "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as",
+            "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}oauth2/custom-as", // work around to not validate the https url
+            "okta.oauth2.client-id=test-client-id",
+            "okta.oauth2.client-secret=test-client-secret",
+            "okta.oauth2.postLogoutRedirectUri=http://logout.example.com")
+            .run { context ->
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2AutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ServerHttpServerAutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2UserService)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOidcUserService)
+                assertThat(context).doesNotHaveBean(OidcClientInitiatedServerLogoutSuccessHandler)
+
+                assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).hasSingleBean(JwtDecoder)
+                assertThat(context).hasSingleBean(OAuth2ClientProperties)
+                assertThat(context).hasSingleBean(OktaOAuth2Properties)
+                assertThat(context).hasSingleBean(OktaOAuth2AutoConfig)
+                assertThat(context).hasSingleBean(OktaOAuth2UserService)
+                assertThat(context).hasSingleBean(OktaOidcUserService)
+                assertThat(context).hasSingleBean(OidcClientInitiatedLogoutSuccessHandler)
+                assertThat(context).getBeans(AuthoritiesProvider).containsOnlyKeys("tokenScopesAuthoritiesProvider", "groupClaimsAuthoritiesProvider")
+
+                assertFiltersEnabled(context, OAuth2LoginAuthenticationFilter, BearerTokenAuthenticationFilter)
+            }
+    }
+
+    @Test
+    void webLoginConfig_withIssuerAndClientId_pkce() {
+
+        webContextRunner().withPropertyValues(
+                "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as",
+                "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}oauth2/custom-as", // work around to not validate the https url
                 "okta.oauth2.client-id=test-client-id")
             .run { context ->
             assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2AutoConfig)
@@ -259,6 +405,37 @@ class AutoConfigConditionalTest implements HttpMock {
     }
 
     @Test
+    void webLoginConfig_withRootIssuerClientIdSecret_JwtResourceServerConfig() {
+
+        // server should NOT start as we are trying to configure JWT validation on a resource server
+        // and also specifying a root issuer. Spring does NOT allow both JWT and Opaque Token
+        // configurations at the same time.
+        webContextRunner(JwtResourceServerConfiguredApp).withPropertyValues(
+            "okta.oauth2.issuer=https://test.example.com",
+            "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}", // work around to not validate the https url
+            "okta.oauth2.client-id=test-client-id",
+            "okta.oauth2.client-secret=test-client-secret")
+            .run { context ->
+                assertThat(context).hasFailed()
+            }
+    }
+
+    @Test
+    void webLoginConfig_withIssuerClientIdSecret_JwtAndOpaqueTokenResourceServerConfig() {
+
+        // server should NOT start as Spring does NOT allow both JWT and Opaque Token
+        // configurations at the same time.
+        webContextRunner(JwtAndOpaqueTokenResourceServerConfiguredApp).withPropertyValues(
+            "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as",
+            "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}oauth2/custom-as", // work around to not validate the https url
+            "okta.oauth2.client-id=test-client-id",
+            "okta.oauth2.client-secret=test-client-secret")
+            .run { context ->
+                assertThat(context).hasFailed()
+            }
+    }
+
+    @Test
     void reactiveResourceServerTest_emptyProperties() {
 
         // missing properties, component does not load
@@ -276,7 +453,7 @@ class AutoConfigConditionalTest implements HttpMock {
 
                 assertWebFiltersDisabled(context, OAuth2LoginAuthenticationWebFilter)
                 assertWebFiltersDisabled(context, ServerHttpSecurity.OAuth2ResourceServerSpec.BearerTokenAuthenticationWebFilter)
-        }
+            }
     }
 
     @Test
@@ -284,7 +461,7 @@ class AutoConfigConditionalTest implements HttpMock {
 
         // with properties it loads correctly
         reactiveContextRunner().withPropertyValues(
-                    "okta.oauth2.issuer=https://test.example.com")
+                    "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as")
             .run {context ->
                 assertThat(context).doesNotHaveBean(OktaOAuth2ResourceServerAutoConfig)
                 assertThat(context).doesNotHaveBean(JwtDecoder)
@@ -301,7 +478,7 @@ class AutoConfigConditionalTest implements HttpMock {
                 assertWebFiltersDisabled(context, OAuth2LoginAuthenticationWebFilter)
                 assertWebFiltersEnabled(context, ServerHttpSecurity.OAuth2ResourceServerSpec.BearerTokenAuthenticationWebFilter)
                 assertJwtBearerWebFilterEnabled(context)
-        }
+            }
     }
 
     @Test
@@ -309,7 +486,7 @@ class AutoConfigConditionalTest implements HttpMock {
 
         reactiveContextRunner()
                 .withPropertyValues(
-                    "okta.oauth2.issuer=https://test.example.com")
+                    "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as")
                 .run { context ->
             assertThat(context).doesNotHaveBean(OktaOAuth2ResourceServerAutoConfig)
             assertThat(context).doesNotHaveBean(JwtDecoder)
@@ -330,39 +507,69 @@ class AutoConfigConditionalTest implements HttpMock {
     }
 
     @Test
-    void reactiveLoginConfig_withIssuerAndClientInfo() {
+    void reactiveLoginConfig_withIssuerAndClientIdSecret() {
 
         reactiveContextRunner().withPropertyValues(
-                "okta.oauth2.issuer=https://test.example.com/",
-                "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}", // work around to not validate the https url
-                "okta.oauth2.client-id=test-client-id",
-                "okta.oauth2.client-secret=test-client-secret")
+            "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as",
+            "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}oauth2/custom-as", // work around to not validate the https url
+            "okta.oauth2.client-id=test-client-id",
+            "okta.oauth2.client-secret=test-client-secret")
             .run { context ->
 
-            assertThat(context).doesNotHaveBean(OktaOAuth2ResourceServerAutoConfig)
-            assertThat(context).doesNotHaveBean(JwtDecoder)
-            assertThat(context).doesNotHaveBean(OktaOAuth2AutoConfig)
+                assertThat(context).doesNotHaveBean(OktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).doesNotHaveBean(JwtDecoder)
+                assertThat(context).doesNotHaveBean(OktaOAuth2AutoConfig)
 
-            assertThat(context).hasSingleBean(ReactiveOktaOAuth2AutoConfig)
-            assertThat(context).hasSingleBean(ReactiveOktaOAuth2ResourceServerAutoConfig)
-            assertThat(context).hasSingleBean(ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig)
-            assertThat(context).hasSingleBean(ReactiveOktaOAuth2ServerHttpServerAutoConfig)
+                assertThat(context).hasSingleBean(ReactiveOktaOAuth2AutoConfig)
+                assertThat(context).hasSingleBean(ReactiveOktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).hasSingleBean(ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig)
+                assertThat(context).hasSingleBean(ReactiveOktaOAuth2ServerHttpServerAutoConfig)
 
-            assertThat(context).hasSingleBean(OAuth2ClientProperties)
-            assertThat(context).hasSingleBean(OktaOAuth2Properties)
-            assertThat(context).getBeans(AuthoritiesProvider).containsOnlyKeys("tokenScopesAuthoritiesProvider", "groupClaimsAuthoritiesProvider")
+                assertThat(context).hasSingleBean(OAuth2ClientProperties)
+                assertThat(context).hasSingleBean(OktaOAuth2Properties)
+                assertThat(context).getBeans(AuthoritiesProvider).containsOnlyKeys("tokenScopesAuthoritiesProvider", "groupClaimsAuthoritiesProvider")
 
-            assertWebFiltersEnabled(context, OAuth2LoginAuthenticationWebFilter, ServerHttpSecurity.OAuth2ResourceServerSpec.BearerTokenAuthenticationWebFilter)
-            assertJwtBearerWebFilterEnabled(context)
+                assertWebFiltersEnabled(context, OAuth2LoginAuthenticationWebFilter, ServerHttpSecurity.OAuth2ResourceServerSpec.BearerTokenAuthenticationWebFilter)
+                assertJwtBearerWebFilterEnabled(context)
+            }
+    }
+
+    @Test
+    void reactiveLoginConfig_withLogoutUri() {
+
+        reactiveContextRunner().withPropertyValues(
+            "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as",
+            "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}oauth2/custom-as", // work around to not validate the https url
+            "okta.oauth2.client-id=test-client-id",
+            "okta.oauth2.client-secret=test-client-secret",
+            "okta.oauth2.postLogoutRedirectUri=http://logout.example.com")
+            .run { context ->
+
+                assertThat(context).doesNotHaveBean(OktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).doesNotHaveBean(JwtDecoder)
+                assertThat(context).doesNotHaveBean(OktaOAuth2AutoConfig)
+
+                assertThat(context).hasSingleBean(ReactiveOktaOAuth2AutoConfig)
+                assertThat(context).hasSingleBean(ReactiveOktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).hasSingleBean(ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig)
+                assertThat(context).hasSingleBean(ReactiveOktaOAuth2ServerHttpServerAutoConfig)
+                assertThat(context).hasSingleBean(OidcClientInitiatedServerLogoutSuccessHandler)
+
+                assertThat(context).hasSingleBean(OAuth2ClientProperties)
+                assertThat(context).hasSingleBean(OktaOAuth2Properties)
+                assertThat(context).getBeans(AuthoritiesProvider).containsOnlyKeys("tokenScopesAuthoritiesProvider", "groupClaimsAuthoritiesProvider")
+
+                assertWebFiltersEnabled(context, OAuth2LoginAuthenticationWebFilter, ServerHttpSecurity.OAuth2ResourceServerSpec.BearerTokenAuthenticationWebFilter)
+                assertJwtBearerWebFilterEnabled(context)
         }
     }
 
     @Test
-    void reactiveLoginConfig_withIssuerAndClientInfo_pkce() {
+    void reactiveLoginConfig_withIssuerAndClientIdSecret_pkce() {
 
         reactiveContextRunner().withPropertyValues(
-                "okta.oauth2.issuer=https://test.example.com/",
-                "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}", // work around to not validate the https url
+                "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as",
+                "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}oauth2/custom-as", // work around to not validate the https url
                 "okta.oauth2.client-id=test-client-id")
             .run { context ->
 
@@ -389,8 +596,8 @@ class AutoConfigConditionalTest implements HttpMock {
     @Test
     void webOverrideOidcUserService() {
         webContextRunner(OverrideWebOidcComponents).withPropertyValues(
-            "okta.oauth2.issuer=https://test.example.com/",
-            "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}", // work around to not validate the https url
+            "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as",
+            "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}oauth2/custom-as", // work around to not validate the https url
             "okta.oauth2.client-id=test-client-id",
             "okta.oauth2.client-secret=test-client-secret")
             .run { context ->
@@ -420,8 +627,8 @@ class AutoConfigConditionalTest implements HttpMock {
     @Test
     void reactiveOverrideOidcUserService() {
         reactiveContextRunner(OverrideReactiveOidcComponents).withPropertyValues(
-            "okta.oauth2.issuer=https://test.example.com/",
-            "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}", // work around to not validate the https url
+            "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as",
+            "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}oauth2/custom-as", // work around to not validate the https url
             "okta.oauth2.client-id=test-client-id")
             .run { context ->
 
@@ -465,6 +672,19 @@ class AutoConfigConditionalTest implements HttpMock {
 
     private static void assertJwtBearerWebFilterEnabled(ApplicationContext context) {
         assertFilterConfiguredWithJwtAuthenticationManager(context)
+    }
+
+    private static Stream<WebFilter> activeJwtAuthenticationWebFilters(ApplicationContext context) {
+        return activeWebFilters(context).stream()
+                        .filter { it.getClass() == ServerHttpSecurity.OAuth2ResourceServerSpec.BearerTokenAuthenticationWebFilter }
+                        .map {(AuthenticationWebFilter) it}
+                        .filter {
+                            // here be dragons
+                            // TODO: there must be a better way to validate we have a JWT reactive auth manager
+                            def field = it.class.superclass.getDeclaredField("authenticationManagerResolver")
+                            field.setAccessible(true)
+                            field.get(it).arg$1.getClass() == JwtReactiveAuthenticationManager
+                        }
     }
 
     // see: https://github.com/spring-projects/spring-boot/blob/v2.3.6.RELEASE/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/security/oauth2/resource/reactive/ReactiveOAuth2ResourceServerAutoConfigurationTests.java#L361
@@ -548,6 +768,36 @@ class AutoConfigConditionalTest implements HttpMock {
     @Configuration
     @EnableWebSecurity
     static class SimpleWebApp {}
+
+    @Configuration
+    @EnableWebSecurity
+    static class JwtResourceServerConfiguredApp extends WebSecurityConfigurerAdapter {
+
+        @Override
+        protected void configure(HttpSecurity http) throws Exception {
+            http.oauth2ResourceServer().jwt()
+        }
+    }
+
+    @Configuration
+    @EnableWebSecurity
+    static class OpaqueTokenResourceServerConfiguredApp extends WebSecurityConfigurerAdapter {
+
+        @Override
+        protected void configure(HttpSecurity http) throws Exception {
+            http.oauth2ResourceServer().opaqueToken()
+        }
+    }
+
+    @Configuration
+    @EnableWebSecurity
+    static class JwtAndOpaqueTokenResourceServerConfiguredApp extends WebSecurityConfigurerAdapter {
+
+        @Override
+        protected void configure(HttpSecurity http) throws Exception {
+            http.oauth2ResourceServer().jwt().and().opaqueToken()
+        }
+    }
 
     @Configuration
     @EnableWebFluxSecurity

@@ -31,6 +31,9 @@ class OktaOAuth2PropertiesMappingEnvironmentPostProcessorTest {
     final static String SCOPE = "spring.security.oauth2.client.registration.okta.scope"
     final static String ISSUER = "spring.security.oauth2.resourceserver.jwt.issuer-uri"
     final static String RS_KEYS_URI = "spring.security.oauth2.resourceserver.jwt.jwk-set-uri"
+    final static String RS_CLIENT_ID = "spring.security.oauth2.resourceserver.opaque-token.client-id"
+    final static String RS_CLIENT_SECRET = "spring.security.oauth2.resourceserver.opaque-token.client-secret"
+    final static String RS_INTROSPECTION_URI = "spring.security.oauth2.resourceserver.opaque-token.introspection-uri"
     final static String AUTHZ_URI = "spring.security.oauth2.client.provider.okta.authorization-uri"
     final static String TOKEN_URI = "spring.security.oauth2.client.provider.okta.token-uri"
     final static String USER_INFO_URI = "spring.security.oauth2.client.provider.okta.user-info-uri"
@@ -54,6 +57,9 @@ class OktaOAuth2PropertiesMappingEnvironmentPostProcessorTest {
         assertThat environment.getProperty(TOKEN_URI), is("https://issuer.example.com/foobar/v1/token")
         assertThat environment.getProperty(USER_INFO_URI), is("https://issuer.example.com/foobar/v1/userinfo")
         assertThat environment.getProperty(PROVIDER_KEYS_URI), is("https://issuer.example.com/foobar/v1/keys")
+        assertThat environment.getProperty(RS_CLIENT_ID), is("test-client-id")
+        assertThat environment.getProperty(RS_CLIENT_SECRET), is("test-client-secret")
+        assertThat environment.getProperty(RS_INTROSPECTION_URI), is("https://issuer.example.com/foobar/v1/introspect")
     }
 
     @Test
@@ -69,6 +75,31 @@ class OktaOAuth2PropertiesMappingEnvironmentPostProcessorTest {
         assertThat environment.getProperty(TOKEN_URI), nullValue()
         assertThat environment.getProperty(USER_INFO_URI), nullValue()
         assertThat environment.getProperty(PROVIDER_KEYS_URI), nullValue()
+        assertThat environment.getProperty(RS_CLIENT_ID), nullValue()
+        assertThat environment.getProperty(RS_CLIENT_SECRET), nullValue()
+        assertThat environment.getProperty(RS_INTROSPECTION_URI), nullValue()
+    }
+
+    @Test
+    void missingClientSecret() {
+        def environment = buildAndProcessEnvironment([
+            "okta.oauth2.client-id": "test-client-id",
+            "okta.oauth2.issuer": "https://issuer.example.com/foobar",
+            "okta.oauth2.scopes": ["one", "two", "three"],
+        ])
+
+        assertThat environment.getProperty(CLIENT_ID), is("test-client-id")
+        assertThat environment.getProperty(CLIENT_SECRET), nullValue()
+        assertThat environment.getProperty(SCOPE, Set), is(["one", "two", "three"] as Set)
+        assertThat environment.getProperty(ISSUER), is("https://issuer.example.com/foobar")
+        assertThat environment.getProperty(RS_KEYS_URI),is("https://issuer.example.com/foobar/v1/keys")
+        assertThat environment.getProperty(AUTHZ_URI), is("https://issuer.example.com/foobar/v1/authorize")
+        assertThat environment.getProperty(TOKEN_URI), is("https://issuer.example.com/foobar/v1/token")
+        assertThat environment.getProperty(USER_INFO_URI), is("https://issuer.example.com/foobar/v1/userinfo")
+        assertThat environment.getProperty(PROVIDER_KEYS_URI), is("https://issuer.example.com/foobar/v1/keys")
+        assertThat environment.getProperty(RS_CLIENT_ID), nullValue()
+        assertThat environment.getProperty(RS_INTROSPECTION_URI), nullValue()
+        assertThat environment.getProperty(RS_CLIENT_SECRET), nullValue()
     }
 
     private Environment buildAndProcessEnvironment(Map<String, Object> properties) {

@@ -76,6 +76,18 @@ import java.util.Map;
  *             <td>${okta.oauth2.issuer}/v1/keys</td>
  *             <td>spring.security.oauth2.resourceserver.jwt.jwk-set-uri</td></td>
  *         </tr>
+ *         <tr>
+ *             <td>${okta.oauth2.clientId}</td>
+ *             <td>spring.security.oauth2.resourceserver.opaquetoken.client-id</td></td>
+ *         </tr>
+ *         <tr>
+ *             <td>${okta.oauth2.clientSecret}</td>
+ *             <td>spring.security.oauth2.resourceserver.opaquetoken.client-secret</td></td>
+ *         </tr>
+ *         <tr>
+ *             <td>${okta.oauth2.introspectionUri}</td>
+ *             <td>spring.security.oauth2.resourceserver.opaquetoken.introspection-uri</td></td>
+ *         </tr>
  *     </table>
  *
  * @since 0.2.0
@@ -98,6 +110,7 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
         environment.getPropertySources().addLast(defaultOktaScopesSource(environment));
         // okta's endpoints can be resolved from an issuer
         environment.getPropertySources().addLast(oktaStaticDiscoveryPropertySource(environment));
+        environment.getPropertySources().addLast(oktaOpaqueTokenPropertySource(environment));
         environment.getPropertySources().addLast(oktaRedirectUriPropertySource(environment));
         environment.getPropertySources().addLast(otkaForcePkcePropertySource(environment));
     }
@@ -155,6 +168,16 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
         properties.put("spring.security.oauth2.client.provider.okta.issuer-uri", "${okta.oauth2.issuer}"); // required for OIDC logout
 
         return new ConditionalMapPropertySource("okta-static-discovery", properties, environment, OKTA_OAUTH_ISSUER);
+    }
+
+    private PropertySource oktaOpaqueTokenPropertySource(Environment environment) {
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("spring.security.oauth2.resourceserver.opaque-token.client-id", "${okta.oauth2.client-id}");
+        properties.put("spring.security.oauth2.resourceserver.opaque-token.client-secret", "${okta.oauth2.client-secret}");
+        properties.put("spring.security.oauth2.resourceserver.opaque-token.introspection-uri", "${okta.oauth2.issuer}/v1/introspect");
+
+        return new ConditionalMapPropertySource("okta-opaque-token", properties, environment, OKTA_OAUTH_ISSUER, OKTA_OAUTH_CLIENT_SECRET);
     }
 
     @Override

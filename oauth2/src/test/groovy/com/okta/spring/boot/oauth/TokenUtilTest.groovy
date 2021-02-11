@@ -106,4 +106,31 @@ class TokenUtilTest {
                                                                                                     new SimpleGrantedAuthority("sEa"))).and(
                                                                                                 hasSize(3))
     }
+
+    @Test
+    void opaqueTokenClaimsToAuthorities_multipleValuesTest() {
+        Collection<? extends GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("SCOPE_base"))
+
+        def attributes = [rolesHere: ["a", "B", "sEa"]]
+        assertThat TokenUtil.opaqueTokenClaimsToAuthorities(attributes, "rolesHere", authorities), both(
+            hasItems(
+                new SimpleGrantedAuthority("SCOPE_base"),
+                new SimpleGrantedAuthority("a"),
+                new SimpleGrantedAuthority("B"),
+                new SimpleGrantedAuthority("sEa"))).and(
+            hasSize(4))
+    }
+
+    @Test
+    void issuerUri_rootOrgTest() {
+        assertThat "issuer uri expected to be root/org)", TokenUtil.isRootOrgIssuer("https://sample.okta.com")
+        assertThat "issuer uri expected to be root/org)", TokenUtil.isRootOrgIssuer("https://dev-12345.oktapreview.com/")
+        assertThat "issuer uri expected to be root/org)", TokenUtil.isRootOrgIssuer("https://example.io")
+    }
+
+    @Test
+    void issuerUri_nonRootOrgTest() {
+        assertThat "issuer uri expected to be non-root/org)", !TokenUtil.isRootOrgIssuer("https://sample.okta.com/oauth2/default")
+        assertThat "issuer uri expected to be non-root/org)", !TokenUtil.isRootOrgIssuer("https://example.io/oauth2/ausvd5ple5TRRsbcJ0h7")
+    }
 }

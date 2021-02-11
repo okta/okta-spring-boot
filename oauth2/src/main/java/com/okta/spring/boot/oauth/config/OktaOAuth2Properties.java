@@ -71,6 +71,11 @@ public final class OktaOAuth2Properties implements Validator {
      */
     private String postLogoutRedirectUri;
 
+    /**
+     * Proxy Properties
+     */
+    private Proxy proxy;
+
     // work around for https://github.com/spring-projects/spring-boot/issues/17035
     private OktaOAuth2Properties() {
         this(null);
@@ -154,6 +159,14 @@ public final class OktaOAuth2Properties implements Validator {
         this.postLogoutRedirectUri = postLogoutRedirectUri;
     }
 
+    public Proxy getProxy() {
+        return proxy;
+    }
+
+    public void setProxy(Proxy proxy) {
+        this.proxy = proxy;
+    }
+
     @Override
     public boolean supports(Class<?> clazz) {
         return OktaOAuth2Properties.class.isAssignableFrom(clazz);
@@ -177,6 +190,49 @@ public final class OktaOAuth2Properties implements Validator {
         if (properties.getIssuer() != null) {
             ConfigurationValidator.validateIssuer(properties.getIssuer()).ifInvalid(res ->
                     errors.rejectValue("issuer", res.getMessage()));
+        }
+    }
+
+    public static class Proxy {
+
+        private String host;
+
+        private int port;
+
+        private String username;
+
+        private String password;
+
+        public String getHost() {
+            return host;
+        }
+
+        public void setHost(String host) {
+            this.host = host;
+        }
+
+        public int getPort() {
+            return port;
+        }
+
+        public void setPort(int port) {
+            this.port = port;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
         }
     }
 }

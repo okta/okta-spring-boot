@@ -18,6 +18,7 @@ package com.okta.spring.boot.oauth;
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.reactive.ReactiveOAuth2ResourceServerAutoConfiguration;
@@ -28,6 +29,7 @@ import org.springframework.security.config.annotation.web.reactive.EnableWebFlux
 import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.security.oauth2.server.resource.BearerTokenAuthenticationToken;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 @AutoConfigureBefore(ReactiveOAuth2ResourceServerAutoConfiguration.class)
@@ -38,10 +40,18 @@ import org.springframework.security.oauth2.server.resource.BearerTokenAuthentica
 class ReactiveOktaOAuth2ResourceServerAutoConfig {
 
     @Bean
+    @ConditionalOnMissingBean
     ReactiveJwtDecoder jwtDecoder(OAuth2ResourceServerProperties oAuth2ResourceServerProperties, OktaOAuth2Properties oktaOAuth2Properties) {
 
-        NimbusReactiveJwtDecoder jwtDecoder = new NimbusReactiveJwtDecoder(oAuth2ResourceServerProperties.getJwt().getJwkSetUri());
-        jwtDecoder.setJwtValidator(TokenUtil.jwtValidator(oAuth2ResourceServerProperties.getJwt().getIssuerUri(), oktaOAuth2Properties.getAudience()));
-        return jwtDecoder;
+        NimbusReactiveJwtDecoder.JwkSetUriReactiveJwtDecoderBuilder builder =
+            NimbusReactiveJwtDecoder.withJwkSetUri(oAuth2ResourceServerProperties.getJwt().getJwkSetUri());
+        builder.webClient(webClient());
+        NimbusReactiveJwtDecoder decoder = builder.build();
+        decoder.setJwtValidator(TokenUtil.jwtValidator(oAuth2ResourceServerProperties.getJwt().getIssuerUri(), oktaOAuth2Properties.getAudience()));
+        return decoder;
+    }
+
+    private WebClient webClient() {
+        return WebClientUtil.createWebClient();
     }
 }

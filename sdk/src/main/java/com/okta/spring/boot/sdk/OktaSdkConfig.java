@@ -15,6 +15,9 @@
  */
 package com.okta.spring.boot.sdk;
 
+import com.okta.commons.configcheck.ValidationResponse;
+import com.okta.commons.http.config.Proxy;
+import com.okta.commons.lang.Strings;
 import com.okta.sdk.authc.credentials.ClientCredentials;
 import com.okta.sdk.authc.credentials.TokenClientCredentials;
 import com.okta.sdk.cache.CacheManager;
@@ -22,12 +25,9 @@ import com.okta.sdk.client.AuthorizationMode;
 import com.okta.sdk.client.Client;
 import com.okta.sdk.client.ClientBuilder;
 import com.okta.sdk.client.Clients;
-import com.okta.commons.http.config.Proxy;
-import com.okta.commons.lang.Strings;
-import com.okta.spring.boot.sdk.config.OktaClientProperties;
 import com.okta.spring.boot.sdk.cache.SpringCacheManager;
+import com.okta.spring.boot.sdk.config.OktaClientProperties;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionMessage;
 import org.springframework.boot.autoconfigure.condition.ConditionOutcome;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -38,7 +38,9 @@ import org.springframework.context.annotation.ConditionContext;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.type.AnnotatedTypeMetadata;
-import org.springframework.util.StringUtils;
+
+import static com.okta.commons.configcheck.ConfigurationValidator.validateApiToken;
+import static com.okta.commons.configcheck.ConfigurationValidator.validateOrgUrl;
 
 /**
  * Configure Okta's management SDK, and expose it as a Bean.
@@ -46,7 +48,7 @@ import org.springframework.util.StringUtils;
  * @since 0.3.0
  */
 @Configuration
-@Conditional(OktaSdkConfig.OktaApiTokenCondition.class)
+@Conditional(OktaSdkConfig.OktaApiConditions.class)
 @ConditionalOnClass(Client.class)
 @EnableConfigurationProperties(OktaClientProperties.class)
 public class OktaSdkConfig {
@@ -108,19 +110,28 @@ public class OktaSdkConfig {
     }
 
     /**
-     * Spring Boot conditional based on the existance of the {code}okta.client.token{code} property.
+     * Spring Boot conditional based on the existence of the properties:
+     * <pre>{@code
+     *  - okta.client.token
+     *  - okta.client.orgUrl
+     * }</pre>
      */
-    static class OktaApiTokenCondition extends SpringBootCondition {
+    static class OktaApiConditions extends SpringBootCondition {
 
         @Override
         public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
-
-            ConditionMessage.Builder message = ConditionMessage.forCondition("Okta Api Token Condition");
-            String tokenValue = context.getEnvironment().getProperty("okta.client.token");
-            if (StringUtils.hasText(tokenValue)) {
-                return ConditionOutcome.match(message.foundExactly("provided API token"));
+            ValidationResponse tokenValidation = validateApiToken(context.getEnvironment().getProperty("okta.client.token"));
+            if (!tokenValidation.isValid()) {
+                return ConditionOutcome.noMatch(tokenValidation.getMessage());
             }
-            return ConditionOutcome.noMatch(message.didNotFind("provided API token").atAll());
+
+            ValidationResponse orgUrlValidation = validateOrgUrl(context.getEnvironment().getProperty("okta.client.orgUrl"));
+            if (!orgUrlValidation.isValid() &&
+                !validateOrgUrl(context.getEnvironment().getProperty("okta.oauth2.issuer")).isValid()) {
+                return ConditionOutcome.noMatch(orgUrlValidation.getMessage());
+            }
+
+            return ConditionOutcome.match("Okta API token and orgUrl found");
         }
     }
 }

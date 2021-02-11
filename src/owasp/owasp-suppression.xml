@@ -122,22 +122,29 @@
         <cve>CVE-2018-1258</cve>
     </suppress>
 
-    <!-- https://nvd.nist.gov/vuln/detail/CVE-2019-0232
-         https://tomcat.apache.org/security-9.html#Apache_Tomcat_9.x_vulnerabilities
-         Windows + CGI issue, CGI is disabled by default, and we are only using tomcat in our ITs.
-    -->
-    <suppress>
-        <notes><![CDATA[ file name: tomcat-embed-core-9.0.17.jar ]]></notes>
-        <gav regex="true">^org\.apache\.tomcat\.embed:tomcat-embed-.*:.*$</gav>
-        <cve>CVE-2019-0232</cve>
-    </suppress>
-
     <!-- wrong product, invalid artifact match -->
     <suppress>
         <notes><![CDATA[ file name: oauth2-oidc-sdk-8.23.1.jar ]]></notes>
         <gav regex="true">^com\.nimbusds:oauth2\-oidc\-sdk:.*$</gav>
         <cve>CVE-2007-1651</cve>
         <cve>CVE-2007-1652</cve>
+    </suppress>
+
+    <!-- brought in by Management SDK's impl module (jackson-databind-2.10.0 jar),
+         need to upgrade jackson-databind jar in management SDK -->
+    <suppress>
+        <notes><![CDATA[ file name: bcprov-jdk15on-1.66.jar ]]></notes>
+        <gav regex="true">^org\.bouncycastle:.*$</gav>
+        <cve>CVE-2020-28052</cve>
+    </suppress>
+
+   <!-- false positive, see https://github.com/jeremylong/DependencyCheck/issues/1665 -->
+    <suppress>
+        <notes><![CDATA[ file name: spring-security-rsa-1.0.9.RELEASE.jar ]]></notes>
+        <gav regex="true">^org\.springframework\.security:spring-security-rsa:.*$</gav>
+        <cve>CVE-2011-2731</cve>
+        <cve>CVE-2011-2732</cve>
+        <cve>CVE-2012-5055</cve>
     </suppress>
 
 </suppressions>

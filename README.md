@@ -12,20 +12,22 @@ Okta's Spring Boot Starter will enable your Spring Boot application to work with
 
 This library uses semantic versioning and follows Okta's [library version policy](https://developer.okta.com/code/library-versions/).
 
-:heavy_check_mark: The current stable major version series is: 1.x
+:heavy_check_mark: The current stable major version series is: 2.x
 
 | Version | Status                    |
 | ------- | ------------------------- |
 | 0.x.x | :warning: Retired |
-| 1.x.0 | :heavy_check_mark: Stable |
+| 1.x.0 | :clock9: Retiring effective September 28, 2021 |
+| 2.x.0 | :heavy_check_mark: Stable |
 
 ## Spring Boot Version Compatibility
 
 | Okta Spring Boot SDK Versions | Compatible Spring Boot Versions |
 | ------- | ------------------------- |
-| 1.2.1 | 2.1.2.RELEASE, 2.2.0.M1 |
-| 1.4.0 | 2.2.0.M1, 2.4.0-M1 |
-| 1.5.0, 1.5.1 | 2.4.0-M1, 2.5.0-M1 |
+| 1.2.x | 2.1.x |
+| 1.4.x | 2.2.x |
+| 1.5.x | 2.4.x |
+| 2.0.x | 2.4.x |
               
 The latest release can always be found on the [releases page](https://github.com/okta/okta-spring-boot/releases).
 
@@ -359,25 +361,40 @@ This module integrates with Spring Security's OAuth support, all you need is the
 
 ## Proxy
 
-If you're running your application (with this okta-spring-boot dependency) from behind a network proxy, you could add JVM args to your application like:
+If you're running your application (with this okta-spring-boot dependency) from behind a network proxy, you could setup properties for it in application.yml:
+```yaml
+okta:
+  oauth2:
+    proxy:
+      host: "proxy.example.com"
+      port: 7000
+      username: "your-username"             # optional
+      password: "your-secret-password"      # optional
+```
+
+or, add JVM args to your application like:
 
 ```bash
--Dhttps.proxyHost=host
--Dhttps.proxyPort=port
--Dhttps.proxyUser="user"          # optional
--Dhttps.proxyPassword="password". # optional 
+-Dokta.oauth2.proxy.host=proxy.example.com
+-Dokta.oauth2.proxy.port=port
+-Dokta.oauth2.proxy.username=your-username
+-Dokta.oauth2.proxy.password=your-secret-password
 ```
 
 or, you could set it programmatically like:
 
 ```java
-System.setProperty("https.proxyHost", "https://example-proxy.com");
-System.setProperty("https.proxyPort", "443");
+System.setProperty("okta.oauth2.proxy.host", "proxy.example.com");
+System.setProperty("okta.oauth2.proxy.port", "7000");
+System.setProperty("okta.oauth2.proxy.username", "your-username");
+System.setProperty("okta.oauth2.proxy.password", "your-secret-password");
 ```
 
 See [here](https://docs.oracle.com/javase/8/docs/api/java/net/doc-files/net-properties.html) for the complete list of properties.
 
-**Note:**  Spring WebFlux (and `WebClient`) do not support these properties. (See [spring-projects/spring-security#8882](https://github.com/spring-projects/spring-security/issues/8882)).
+**Note:**  Spring WebFlux (and `WebClient`) does not support these properties. (See [spring-projects/spring-security#8882](https://github.com/spring-projects/spring-security/issues/8882)).
+
+If you are running your Spring Boot App behind a reverse proxy, be sure to read [this](https://docs.spring.io/spring-boot/docs/current/reference/html/howto.html#howto-use-behind-a-proxy-server) guide.
 
 # Inject the Okta Java SDK
 
@@ -392,13 +409,7 @@ To integrate the [Okta Java SDK](https://github.com/okta/okta-sdk-java) into you
 
 **NOTE:** Currently only the 1.x version of the Okta SDK us supported. Updates comming soon!
 
-Then define the following properties:
-
-| Key | Description |
-------|--------------
-| `okta.client.orgUrl` | Your Okta Url: `https://{yourOktaDomain}`, i.e. `https://dev-123456.okta.com` |
-| `okta.client.token` | An Okta API token, see [creating an API token](https://developer.okta.com/docs/api/getting_started/getting_a_token) for more info. |
-
+Then define the `okta.client.token` property. See [creating an API token](https://developer.okta.com/docs/api/getting_started/getting_a_token) for more info.
 
 All that is left is to inject the client (`com.okta.sdk.client.Client`)! Take a look at [this post](https://spring.io/blog/2007/07/11/setter-injection-versus-constructor-injection-and-the-use-of-required/) for more info on the best way to inject your beans.
 

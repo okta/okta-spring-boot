@@ -15,6 +15,7 @@
  */
 package com.okta.spring.boot.oauth;
 
+import com.okta.commons.lang.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
@@ -31,6 +32,8 @@ import org.springframework.security.oauth2.jwt.JwtTimestampValidator;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -77,6 +80,17 @@ final class TokenUtil {
         return Collections.emptySet();
     }
 
+
+    static Collection<? extends GrantedAuthority> opaqueTokenClaimsToAuthorities(Map<String, Object> attributes,
+                                                                                 String groupsClaim,
+                                                                                 Collection<? extends GrantedAuthority> authorities) {
+
+        Collection<GrantedAuthority> mappedAuthorities =
+            new ArrayList<>(tokenClaimsToAuthorities(attributes, groupsClaim));
+        mappedAuthorities.addAll(authorities);
+        return mappedAuthorities;
+    }
+
     static OAuth2TokenValidator<Jwt> jwtValidator(String issuer, String audience ) {
         List<OAuth2TokenValidator<Jwt>> validators = new ArrayList<>();
             validators.add(new JwtTimestampValidator());
@@ -89,5 +103,36 @@ final class TokenUtil {
                         : OAuth2TokenValidatorResult.failure(INVALID_AUDIENCE);
             });
         return new DelegatingOAuth2TokenValidator<>(validators);
+    }
+
+    /**
+     * Check if the issuer is root/org URI.
+     *
+     * Issuer URL that does not follow the pattern '/oauth2/default' (or) '/oauth2/some_id_string' is
+     * considered root/org issuer.
+     *
+     * e.g. https://sample.okta.com (root/org url)
+     *      https://sample.okta.com/oauth2/default (non-root issuer/org url)
+     *      https://sample.okta.com/oauth2/ausar5cbq5TRRsbcJ0h7 (non-root issuer/org url)
+     *
+     * @param issuerUri
+     * @return true if root/org, false otherwise
+     */
+    static boolean isRootOrgIssuer(String issuerUri) throws MalformedURLException {
+        String uriPath = new URL(issuerUri).getPath();
+
+        if (Strings.hasText(uriPath)) {
+            String[] tokenizedUri = uriPath.substring(uriPath.indexOf("/")+1).split("/");
+
+            if (tokenizedUri.length >= 2 &&
+                "oauth2".equals(tokenizedUri[0]) &&
+                Strings.hasText(tokenizedUri[1])) {
+                log.debug("The issuer URL: '{}' is an Okta custom authorization server", issuerUri);
+                return false;
+            }
+        }
+
+        log.debug("The issuer URL: '{}' is an Okta root/org authorization server", issuerUri);
+        return true;
     }
 }
