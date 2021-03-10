@@ -110,7 +110,7 @@ public class DemoApplication {
 		SpringApplication.run(DemoApplication.class, args);
 	}
 
-	@GetMapping("/hello-auth")
+	@GetMapping("/hello-oauth")
 	public String hello(@AuthenticationPrincipal OidcUser user) {
 	    return "Hello, " + user.getFullName();
 	}
