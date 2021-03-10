@@ -2,6 +2,7 @@
 [![Maven Central](https://img.shields.io/maven-central/v/com.okta.spring/okta-spring-boot-starter.svg)](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.okta.spring%22%20a%3A%22okta-spring-boot-starter%22)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Support](https://img.shields.io/badge/support-Developer%20Forum-blue.svg)](https://devforum.okta.com/)
+[![Build Status](https://travis-ci.com/okta/okta-spring-boot.svg?branch=master)](https://travis-ci.com/okta/okta-spring-boot)
 
 Okta Spring Boot Starter
 ========================
