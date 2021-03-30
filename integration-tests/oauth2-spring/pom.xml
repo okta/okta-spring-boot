@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2019-Present Okta, Inc.
+  ~ Copyright 2021-Present Okta, Inc.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@
         <relativePath>../..</relativePath>
     </parent>
 
-    <artifactId>okta-spring-boot-integration-tests-oauth2-reactive</artifactId>
-    <name>Okta Spring Boot :: ITs :: OAuth2-Reactive</name>
+    <artifactId>okta-spring-boot-integration-tests-oauth2-spring</artifactId>
+    <name>Okta Spring Boot :: ITs :: OAuth2-Spring</name>
 
     <properties>
-        <test.mainClass>com.okta.spring.tests.oauth2.reactive.code.ReactiveRedirectCodeFlowApplication</test.mainClass>
+        <test.mainClass>com.okta.spring.tests.oauth2.spring.code.BasicRedirectCodeFlowApplication</test.mainClass>
     </properties>
 
     <dependencies>
@@ -38,7 +38,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

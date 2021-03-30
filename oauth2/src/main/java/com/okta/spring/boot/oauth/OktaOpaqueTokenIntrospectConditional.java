@@ -24,12 +24,12 @@ class OktaOpaqueTokenIntrospectConditional extends AllNestedConditions {
         super(ConfigurationPhase.REGISTER_BEAN);
     }
 
-    @ConditionalOnProperty(name="okta.oauth2.client-id")
+    @ConditionalOnProperty(name="spring.security.oauth2.resourceserver.opaque-token.client-id")
     static class ClientIdCondition { }
 
-    @ConditionalOnProperty(name="okta.oauth2.client-secret")
+    @ConditionalOnProperty(name="spring.security.oauth2.resourceserver.opaque-token.client-secret")
     static class ClientSecretCondition { }
 
-    @ConditionalOnProperty(name="okta.oauth2.issuer")
-    static class IssuerCondition { }
+    @ConditionalOnProperty(name="spring.security.oauth2.resourceserver.opaque-token.introspection-uri")
+    static class IntrospectionUriCondition { }
 }

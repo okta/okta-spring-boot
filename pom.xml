@@ -44,6 +44,7 @@
         <module>okta-spring-boot-starter</module>
         <module>integration-tests/oauth2</module>
         <module>integration-tests/oauth2-reactive</module>
+        <module>integration-tests/oauth2-spring</module>
         <module>examples</module>
         <module>coverage</module>
     </modules>
@@ -141,4 +142,3 @@
         </dependencies>
     </dependencyManagement>
 </project>
-
