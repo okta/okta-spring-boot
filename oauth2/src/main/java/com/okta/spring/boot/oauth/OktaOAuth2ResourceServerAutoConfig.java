@@ -75,7 +75,7 @@ class OktaOAuth2ResourceServerAutoConfig {
         NimbusJwtDecoder.JwkSetUriJwtDecoderBuilder builder = NimbusJwtDecoder.withJwkSetUri(oAuth2ResourceServerProperties.getJwt().getJwkSetUri());
         builder.restOperations(restTemplate(oktaOAuth2Properties));
         NimbusJwtDecoder decoder = builder.build();
-        decoder.setJwtValidator(TokenUtil.jwtValidator(oktaOAuth2Properties.getIssuer(), oktaOAuth2Properties.getAudience()));
+        decoder.setJwtValidator(TokenUtil.jwtValidator(oAuth2ResourceServerProperties.getJwt().getIssuerUri(), oktaOAuth2Properties.getAudience()));
         return decoder;
     }
 
