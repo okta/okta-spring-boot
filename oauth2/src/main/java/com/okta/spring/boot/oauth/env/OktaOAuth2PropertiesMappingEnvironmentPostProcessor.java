@@ -159,9 +159,9 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
 
     private PropertySource oktaStaticDiscoveryPropertySource(Environment environment) {
         String oauth2Suffix = Optional.ofNullable(environment.getProperty("okta.oauth2.issuer"))
-            .filter(issuer -> issuer.contains("/oauth2"))
-            .map(s -> "")
-            .orElse("/oauth2");
+            .filter(issuer -> issuer.contains("/oauth2")) // Check if URL is a Custom Authorization Server
+            .map(s -> "") // if so, leave URL as is
+            .orElse("/oauth2"); // for the Okta Org Authorization Server, /oauth2 needs to be appended
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("spring.security.oauth2.resourceserver.jwt.issuer-uri", "${okta.oauth2.issuer}");
