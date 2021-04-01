@@ -52,11 +52,11 @@ class OktaOAuth2PropertiesMappingEnvironmentPostProcessorTest {
         assertThat environment.getProperty(CLIENT_SECRET), is("test-client-secret")
         assertThat environment.getProperty(SCOPE, Set), is(["one", "two", "three"] as Set)
         assertThat environment.getProperty(ISSUER), is("https://issuer.example.com/foobar")
-        assertThat environment.getProperty(RS_KEYS_URI),is("https://issuer.example.com/foobar/v1/keys")
-        assertThat environment.getProperty(AUTHZ_URI), is("https://issuer.example.com/foobar/v1/authorize")
-        assertThat environment.getProperty(TOKEN_URI), is("https://issuer.example.com/foobar/v1/token")
-        assertThat environment.getProperty(USER_INFO_URI), is("https://issuer.example.com/foobar/v1/userinfo")
-        assertThat environment.getProperty(PROVIDER_KEYS_URI), is("https://issuer.example.com/foobar/v1/keys")
+        assertThat environment.getProperty(RS_KEYS_URI),is("https://issuer.example.com/foobar/oauth2/v1/keys")
+        assertThat environment.getProperty(AUTHZ_URI), is("https://issuer.example.com/foobar/oauth2/v1/authorize")
+        assertThat environment.getProperty(TOKEN_URI), is("https://issuer.example.com/foobar/oauth2/v1/token")
+        assertThat environment.getProperty(USER_INFO_URI), is("https://issuer.example.com/foobar/oauth2/v1/userinfo")
+        assertThat environment.getProperty(PROVIDER_KEYS_URI), is("https://issuer.example.com/foobar/oauth2/v1/keys")
         assertThat environment.getProperty(RS_CLIENT_ID), is("test-client-id")
         assertThat environment.getProperty(RS_CLIENT_SECRET), is("test-client-secret")
         assertThat environment.getProperty(RS_INTROSPECTION_URI), is("https://issuer.example.com/foobar/v1/introspect")
@@ -92,17 +92,39 @@ class OktaOAuth2PropertiesMappingEnvironmentPostProcessorTest {
         assertThat environment.getProperty(CLIENT_SECRET), nullValue()
         assertThat environment.getProperty(SCOPE, Set), is(["one", "two", "three"] as Set)
         assertThat environment.getProperty(ISSUER), is("https://issuer.example.com/foobar")
-        assertThat environment.getProperty(RS_KEYS_URI),is("https://issuer.example.com/foobar/v1/keys")
-        assertThat environment.getProperty(AUTHZ_URI), is("https://issuer.example.com/foobar/v1/authorize")
-        assertThat environment.getProperty(TOKEN_URI), is("https://issuer.example.com/foobar/v1/token")
-        assertThat environment.getProperty(USER_INFO_URI), is("https://issuer.example.com/foobar/v1/userinfo")
-        assertThat environment.getProperty(PROVIDER_KEYS_URI), is("https://issuer.example.com/foobar/v1/keys")
+        assertThat environment.getProperty(RS_KEYS_URI),is("https://issuer.example.com/foobar/oauth2/v1/keys")
+        assertThat environment.getProperty(AUTHZ_URI), is("https://issuer.example.com/foobar/oauth2/v1/authorize")
+        assertThat environment.getProperty(TOKEN_URI), is("https://issuer.example.com/foobar/oauth2/v1/token")
+        assertThat environment.getProperty(USER_INFO_URI), is("https://issuer.example.com/foobar/oauth2/v1/userinfo")
+        assertThat environment.getProperty(PROVIDER_KEYS_URI), is("https://issuer.example.com/foobar/oauth2/v1/keys")
         assertThat environment.getProperty(RS_CLIENT_ID), nullValue()
         assertThat environment.getProperty(RS_INTROSPECTION_URI), nullValue()
         assertThat environment.getProperty(RS_CLIENT_SECRET), nullValue()
     }
 
-    private Environment buildAndProcessEnvironment(Map<String, Object> properties) {
+    @Test
+    void testOauth2Path() {
+        def environment = buildAndProcessEnvironment([
+            "okta.oauth2.client-id": "test-client-id",
+            "okta.oauth2.issuer"   : "https://issuer.example.com/oauth2/default",
+            "okta.oauth2.scopes"   : ["one", "two", "three"],
+        ])
+
+        assertThat environment.getProperty(CLIENT_ID), is("test-client-id")
+        assertThat environment.getProperty(CLIENT_SECRET), nullValue()
+        assertThat environment.getProperty(SCOPE, Set), is(["one", "two", "three"] as Set)
+        assertThat environment.getProperty(ISSUER), is("https://issuer.example.com/oauth2/default")
+        assertThat environment.getProperty(RS_KEYS_URI), is("https://issuer.example.com/oauth2/default/v1/keys")
+        assertThat environment.getProperty(AUTHZ_URI), is("https://issuer.example.com/oauth2/default/v1/authorize")
+        assertThat environment.getProperty(TOKEN_URI), is("https://issuer.example.com/oauth2/default/v1/token")
+        assertThat environment.getProperty(USER_INFO_URI), is("https://issuer.example.com/oauth2/default/v1/userinfo")
+        assertThat environment.getProperty(PROVIDER_KEYS_URI), is("https://issuer.example.com/oauth2/default/v1/keys")
+        assertThat environment.getProperty(RS_CLIENT_ID), nullValue()
+        assertThat environment.getProperty(RS_INTROSPECTION_URI), nullValue()
+        assertThat environment.getProperty(RS_CLIENT_SECRET), nullValue()
+    }
+
+    private static Environment buildAndProcessEnvironment(Map<String, Object> properties) {
         def environment = new MockEnvironment()
         environment.getPropertySources().addFirst(new MapPropertySource("test", properties))
 

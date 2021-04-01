@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * This {@link EnvironmentPostProcessor} configures additional {@link PropertySource}s that map OIDC discovery metadata
@@ -157,14 +158,18 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
     }
 
     private PropertySource oktaStaticDiscoveryPropertySource(Environment environment) {
+        String oauth2Suffix = Optional.ofNullable(environment.getProperty("okta.oauth2.issuer"))
+            .filter(issuer -> issuer.contains("/oauth2"))
+            .map(s -> "")
+            .orElse("/oauth2");
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("spring.security.oauth2.resourceserver.jwt.issuer-uri", "${okta.oauth2.issuer}");
-        properties.put("spring.security.oauth2.resourceserver.jwt.jwk-set-uri", "${okta.oauth2.issuer}/v1/keys");
-        properties.put("spring.security.oauth2.client.provider.okta.authorization-uri", "${okta.oauth2.issuer}/v1/authorize");
-        properties.put("spring.security.oauth2.client.provider.okta.token-uri", "${okta.oauth2.issuer}/v1/token");
-        properties.put("spring.security.oauth2.client.provider.okta.user-info-uri", "${okta.oauth2.issuer}/v1/userinfo");
-        properties.put("spring.security.oauth2.client.provider.okta.jwk-set-uri", "${okta.oauth2.issuer}/v1/keys");
+        properties.put("spring.security.oauth2.resourceserver.jwt.jwk-set-uri", "${okta.oauth2.issuer}" + oauth2Suffix + "/v1/keys");
+        properties.put("spring.security.oauth2.client.provider.okta.authorization-uri", "${okta.oauth2.issuer}" + oauth2Suffix + "/v1/authorize");
+        properties.put("spring.security.oauth2.client.provider.okta.token-uri", "${okta.oauth2.issuer}" + oauth2Suffix + "/v1/token");
+        properties.put("spring.security.oauth2.client.provider.okta.user-info-uri", "${okta.oauth2.issuer}" + oauth2Suffix + "/v1/userinfo");
+        properties.put("spring.security.oauth2.client.provider.okta.jwk-set-uri", "${okta.oauth2.issuer}" + oauth2Suffix + "/v1/keys");
         properties.put("spring.security.oauth2.client.provider.okta.issuer-uri", "${okta.oauth2.issuer}"); // required for OIDC logout
 
         return new ConditionalMapPropertySource("okta-static-discovery", properties, environment, OKTA_OAUTH_ISSUER);
