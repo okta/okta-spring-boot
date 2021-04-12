@@ -28,13 +28,13 @@
     <name>Okta Spring Boot :: ITs :: OAuth2</name>
 
     <properties>
-        <test.mainClass>com.okta.spring.tests.common.code.BasicRedirectCodeFlowApplication</test.mainClass>
+        <test.mainClass>com.okta.spring.tests.common.basic.code.BasicRedirectCodeFlowApplication</test.mainClass>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>com.okta.spring</groupId>
-            <artifactId>okta-spring-boot-integration-tests-common</artifactId>
+            <artifactId>okta-spring-boot-integration-tests-common-basic</artifactId>
         </dependency>
         <dependency>
             <groupId>com.okta.spring</groupId>

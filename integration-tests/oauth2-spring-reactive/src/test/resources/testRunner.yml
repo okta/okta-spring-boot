@@ -1,0 +1,47 @@
+#
+# Copyright 2019-Present Okta, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+implementation: com.okta.spring.tests.oauth2.SpringApplicationUnderTest
+scenarios:
+
+  code-flow-remote-validation:
+    command: com.okta.spring.tests.common.reactive.code.ReactiveRedirectCodeFlowApplication
+    args:
+    - --server.port=${applicationPort}
+    - --spring.security.oauth2.resourceserver.jwt.issuer-uri=https://localhost:${mockHttpsPort}/oauth2/default
+    - --spring.security.oauth2.resourceserver.jwt.jwk-set-uri=https://localhost:${mockHttpsPort}/oauth2/default/v1/keys
+    - --spring.security.oauth2.client.provider.okta.authorization-uri=https://localhost:${mockHttpsPort}/oauth2/default/v1/authorize
+    - --spring.security.oauth2.client.provider.okta.token-uri=https://localhost:${mockHttpsPort}/oauth2/default/v1/token
+    - --spring.security.oauth2.client.provider.okta.user-info-uri=https://localhost:${mockHttpsPort}/oauth2/default/v1/userinfo
+    - --spring.security.oauth2.client.provider.okta.jwk-set-uri=https://localhost:${mockHttpsPort}/oauth2/default/v1/keys
+    - --spring.security.oauth2.client.provider.okta.issuer-uri=https://localhost:${mockHttpsPort}/oauth2/default
+    - --spring.security.oauth2.client.registration.okta.client-id=OOICU812
+    - --spring.security.oauth2.client.registration.okta.client-secret=VERY_SECRET
+    - --spring.security.oauth2.client.registration.okta.scope=offline_access
+#    - --okta.oauth2.redirectUri=/authorization-code/callback # not implemented until Spring Sec 5.2
+    - --server.servlet.session.tracking-modes=cookie
+    - --debug
+    protectedPath: /oauth2/authorization/okta
+
+  implicit-flow-local-validation:
+    command: com.okta.spring.tests.common.reactive.implicit.ReactiveImplicitFlowApplication
+    args:
+    - --server.port=${applicationPort}
+    - --spring.security.oauth2.resourceserver.jwt.issuer-uri=https://localhost:${mockHttpsPort}/oauth2/default
+    - --spring.security.oauth2.resourceserver.jwt.jwk-set-uri=https://localhost:${mockHttpsPort}/oauth2/default/v1/keys
+    # A client ID is NOT required, #218
+    - --server.session.trackingModes=cookie
+    - --debug

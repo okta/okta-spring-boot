@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2021-Present Okta, Inc.
+  ~ Copyright 2019-Present Okta, Inc.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -24,17 +24,17 @@
         <relativePath>../..</relativePath>
     </parent>
 
-    <artifactId>okta-spring-boot-integration-tests-oauth2-spring</artifactId>
-    <name>Okta Spring Boot :: ITs :: OAuth2-Spring</name>
+    <artifactId>okta-spring-boot-integration-tests-oauth2-spring-reactive</artifactId>
+    <name>Okta Spring Boot :: ITs :: OAuth2-Spring-Reactive</name>
 
     <properties>
-        <test.mainClass>com.okta.spring.tests.common.basic.code.BasicRedirectCodeFlowApplication</test.mainClass>
+        <test.mainClass>com.okta.spring.tests.common.reactive.code.ReactiveRedirectCodeFlowApplication</test.mainClass>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>com.okta.spring</groupId>
-            <artifactId>okta-spring-boot-integration-tests-common-basic</artifactId>
+            <artifactId>okta-spring-boot-integration-tests-common-reactive</artifactId>
         </dependency>
         <dependency>
             <groupId>com.okta.spring</groupId>
@@ -42,7 +42,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

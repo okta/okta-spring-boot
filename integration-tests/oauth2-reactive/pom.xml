@@ -28,10 +28,14 @@
     <name>Okta Spring Boot :: ITs :: OAuth2-Reactive</name>
 
     <properties>
-        <test.mainClass>com.okta.spring.tests.oauth2.reactive.code.ReactiveRedirectCodeFlowApplication</test.mainClass>
+        <test.mainClass>com.okta.spring.tests.common.reactive.code.ReactiveRedirectCodeFlowApplication</test.mainClass>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>com.okta.spring</groupId>
+            <artifactId>okta-spring-boot-integration-tests-common-reactive</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.okta.spring</groupId>
             <artifactId>okta-spring-boot-starter</artifactId>
