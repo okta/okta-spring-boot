@@ -18,7 +18,7 @@ implementation: com.okta.spring.tests.oauth2.SpringApplicationUnderTest
 scenarios:
 
   code-flow-remote-validation:
-    command: com.okta.spring.tests.oauth2.reactive.code.ReactiveRedirectCodeFlowApplication
+    command: com.okta.spring.tests.common.reactive.code.ReactiveRedirectCodeFlowApplication
     args:
     - --server.port=${applicationPort}
     - --okta.oauth2.issuer=https://localhost:${mockHttpsPort}/oauth2/default
@@ -31,7 +31,7 @@ scenarios:
     protectedPath: /oauth2/authorization/okta
 
   implicit-flow-local-validation:
-    command: com.okta.spring.tests.oauth2.reactive.implicit.ReactiveImplicitFlowApplication
+    command: com.okta.spring.tests.common.reactive.implicit.ReactiveImplicitFlowApplication
     args:
     - --server.port=${applicationPort}
     - --okta.oauth2.issuer=https://localhost:${mockHttpsPort}/oauth2/default
@@ -46,7 +46,7 @@ scenarios:
     # Fix for https://github.com/spring-projects/spring-security/issues/5562 && 6484
     - noAuthCodeTest
     - wrongStateTest
-    command: com.okta.spring.tests.oauth2.reactive.code.ReactiveRedirectCodeFlowApplication
+    command: com.okta.spring.tests.common.reactive.code.ReactiveRedirectCodeFlowApplication
     args:
     - --server.port=${applicationPort}
     - --okta.oauth2.issuer=https://localhost:${mockHttpsPort}/oauth2/default
@@ -58,7 +58,7 @@ scenarios:
     protectedPath: /oauth2/authorization/okta
 
   pkce-code-flow-remote-validation:
-    command: com.okta.spring.tests.oauth2.reactive.code.ReactiveRedirectCodeFlowApplication
+    command: com.okta.spring.tests.common.reactive.code.ReactiveRedirectCodeFlowApplication
     args:
     - --server.port=${applicationPort}
     - --okta.oauth2.issuer=https://localhost:${mockHttpsPort}/oauth2/default

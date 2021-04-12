@@ -18,7 +18,7 @@ implementation: com.okta.spring.tests.oauth2.SpringApplicationUnderTest
 scenarios:
 
   code-flow-remote-validation:
-    command: com.okta.spring.tests.common.code.BasicRedirectCodeFlowApplication
+    command: com.okta.spring.tests.common.basic.code.BasicRedirectCodeFlowApplication
     args:
     - --server.port=${applicationPort}
     - --okta.oauth2.issuer=https://localhost:${mockHttpsPort}/oauth2/default
@@ -30,7 +30,7 @@ scenarios:
     protectedPath: /oauth2/authorization/okta
 
   implicit-flow-local-validation:
-    command: com.okta.spring.tests.common.jwt.BasicJwtResourceServerApplication
+    command: com.okta.spring.tests.common.basic.jwt.BasicJwtResourceServerApplication
     args:
     - --server.port=${applicationPort}
     - --okta.oauth2.issuer=https://localhost:${mockHttpsPort}/oauth2/default
@@ -38,7 +38,7 @@ scenarios:
     - --server.session.trackingModes=cookie
 
   implicit-flow-remote-validation:
-    command: com.okta.spring.tests.common.opaquetoken.BasicOpaqueTokenResourceServerApplication
+    command: com.okta.spring.tests.common.basic.opaquetoken.BasicOpaqueTokenResourceServerApplication
     args:
       - --server.port=${applicationPort}
       - --okta.oauth2.issuer=https://localhost:${mockHttpsPort}/oauth2/default
@@ -50,7 +50,7 @@ scenarios:
     disabledTests:
     # Spring does remote validation of the token
     - invalidIssuerIdTokenJwtTest
-    command: com.okta.spring.tests.common.code.BasicRedirectCodeFlowApplication
+    command: com.okta.spring.tests.common.basic.code.BasicRedirectCodeFlowApplication
     args:
     - --server.port=${applicationPort}
     - --okta.oauth2.issuer=https://localhost:${mockHttpsPort}/oauth2/default
@@ -62,7 +62,7 @@ scenarios:
     protectedPath: /oauth2/authorization/okta
 
   pkce-code-flow-remote-validation:
-    command: com.okta.spring.tests.common.code.BasicRedirectCodeFlowApplication
+    command: com.okta.spring.tests.common.basic.code.BasicRedirectCodeFlowApplication
     args:
     - --server.port=${applicationPort}
     - --okta.oauth2.issuer=https://localhost:${mockHttpsPort}/oauth2/default
