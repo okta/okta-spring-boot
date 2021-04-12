@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
@@ -34,7 +35,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Optional;
 
-import static org.springframework.util.StringUtils.isEmpty;
+import static com.okta.commons.lang.Strings.isEmpty;
 
 final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Configurer, HttpSecurity> {
 
@@ -53,11 +54,15 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
             // Auth Code Flow Config
 
             // if OAuth2ClientProperties bean is not available do NOT configure
+            OAuth2ClientProperties.Provider propertiesProvider;
+            OAuth2ClientProperties.Registration propertiesRegistration;
             if (!context.getBeansOfType(OAuth2ClientProperties.class).isEmpty()
-                && !isEmpty(oktaOAuth2Properties.getIssuer())
-                && !isEmpty(oktaOAuth2Properties.getClientId())) {
+                && (propertiesProvider = context.getBean(OAuth2ClientProperties.class).getProvider().get("okta")) != null
+                && (propertiesRegistration = context.getBean(OAuth2ClientProperties.class).getRegistration().get("okta")) != null
+                && !isEmpty(propertiesProvider.getIssuerUri())
+                && !isEmpty(propertiesRegistration.getClientId())) {
                 // configure Okta user services
-                configureLogin(http, oktaOAuth2Properties);
+                configureLogin(http, oktaOAuth2Properties, context.getBean(Environment.class));
 
                 // check for RP-Initiated logout
                 if (!context.getBeansOfType(OidcClientInitiatedLogoutSuccessHandler.class).isEmpty()) {
@@ -67,7 +72,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                 // Resource Server Config
 
                 // if issuer is root org, use opaque token validation
-                if (TokenUtil.isRootOrgIssuer(oktaOAuth2Properties.getIssuer())) {
+                if (TokenUtil.isRootOrgIssuer(propertiesProvider.getIssuerUri())) {
                     log.debug("Opaque Token validation/introspection will be configured.");
                     configureResourceServerForOpaqueTokenValidation(http, oktaOAuth2Properties);
                     return;
@@ -130,7 +135,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         return Optional.ofNullable((T) field.get(source));
     }
 
-    private void configureLogin(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {
+    private void configureLogin(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties, Environment environment) throws Exception {
 
         RestTemplate restTemplate = OktaOAuth2ResourceServerAutoConfig.restTemplate(oktaOAuth2Properties);
 
@@ -138,8 +143,9 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
             .tokenEndpoint()
             .accessTokenResponseClient(accessTokenResponseClient(restTemplate));
 
-        if (oktaOAuth2Properties.getRedirectUri() != null) {
-            http.oauth2Login().redirectionEndpoint().baseUri(oktaOAuth2Properties.getRedirectUri());
+        String redirectUri = environment.getProperty("spring.security.oauth2.client.registration.okta.redirect-uri");
+        if (redirectUri != null) {
+            http.oauth2Login().redirectionEndpoint().baseUri(redirectUri.replace("{baseUrl}", ""));
         }
     }
 
