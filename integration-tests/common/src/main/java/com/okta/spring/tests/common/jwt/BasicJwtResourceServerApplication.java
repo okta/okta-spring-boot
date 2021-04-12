@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.tests.oauth2.spring.opaquetoken;
+package com.okta.spring.tests.common.jwt;
 
 import com.okta.spring.boot.oauth.Okta;
 import org.springframework.boot.SpringApplication;
@@ -36,14 +36,14 @@ import java.util.Map;
 
 @SpringBootApplication
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
-public class BasicOpaqueTokenResourceServerApplication {
+public class BasicJwtResourceServerApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(BasicOpaqueTokenResourceServerApplication.class, args);
+        SpringApplication.run(BasicJwtResourceServerApplication.class, args);
     }
 
     @Configuration
-    static class OpaqueTokenResourceSecurityConfigurer extends WebSecurityConfigurerAdapter {
+    static class JwtResourceSecurityConfigurer extends WebSecurityConfigurerAdapter {
 
         @Override
         public void configure(HttpSecurity http) throws Exception {
@@ -51,11 +51,10 @@ public class BasicOpaqueTokenResourceServerApplication {
             Okta.configureResourceServer401ResponseBody(http);
 
             http.authorizeRequests()
-                .antMatchers(HttpMethod.OPTIONS,"/**").permitAll()
-                .anyRequest().authenticated()
-                .and().oauth2ResourceServer().opaqueToken();
+                    .antMatchers(HttpMethod.OPTIONS,"/**").permitAll()
+                    .anyRequest().authenticated()
+            .and().oauth2ResourceServer().jwt();
         }
-
     }
 
     @RestController
@@ -80,12 +79,6 @@ public class BasicOpaqueTokenResourceServerApplication {
             ));
 
             return result;
-        }
-
-        @GetMapping("/api/invalidScope")
-        @PreAuthorize("hasAuthority('SCOPE_invalid')")
-        public String invalidScope() {
-            throw new IllegalStateException("Test exception, user should not have access to this method");
         }
 
         @GetMapping("/")
