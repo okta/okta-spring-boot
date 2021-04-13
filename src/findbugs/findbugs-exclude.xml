@@ -39,7 +39,7 @@
     </Match>
     <!-- Allow for any endpoints for tests -->
     <Match>
-        <Package name="~com\.okta\.spring\.tests\.oauth2.*"/>
+        <Package name="~com\.okta\.spring\.tests\.common.*"/>
         <Bug pattern="SPRING_ENDPOINT" />
     </Match>
     <!-- Findbugs does NOT like how we are compiling groovy -->
@@ -53,7 +53,7 @@
 
     <Match>
         <!-- CSRF is disabled in the ITs to make testing RP-initiated logout easier -->
-        <Package name="com.okta.spring.tests.oauth2.code"></Package>
+        <Package name="com.okta.spring.tests.common.basic.code"/>
         <Bug pattern="SPRING_CSRF_PROTECTION_DISABLED"/>
     </Match>
 
