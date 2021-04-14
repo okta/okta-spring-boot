@@ -22,11 +22,7 @@ scenarios:
     args:
       - --server.port=${applicationPort}
       - --spring.security.oauth2.resourceserver.jwt.issuer-uri=https://localhost:${mockHttpsPort}/oauth2/default
-      - --spring.security.oauth2.resourceserver.jwt.jwk-set-uri=https://localhost:${mockHttpsPort}/oauth2/default/v1/keys
       - --spring.security.oauth2.client.provider.okta.authorization-uri=https://localhost:${mockHttpsPort}/oauth2/default/v1/authorize
-      - --spring.security.oauth2.client.provider.okta.token-uri=https://localhost:${mockHttpsPort}/oauth2/default/v1/token
-      - --spring.security.oauth2.client.provider.okta.user-info-uri=https://localhost:${mockHttpsPort}/oauth2/default/v1/userinfo
-      - --spring.security.oauth2.client.provider.okta.jwk-set-uri=https://localhost:${mockHttpsPort}/oauth2/default/v1/keys
       - --spring.security.oauth2.client.provider.okta.issuer-uri=https://localhost:${mockHttpsPort}/oauth2/default
       - --spring.security.oauth2.client.registration.okta.client-id=OOICU812
       - --spring.security.oauth2.client.registration.okta.client-secret=VERY_SECRET
@@ -54,3 +50,35 @@ scenarios:
       - --spring.security.oauth2.resourceserver.opaque-token.client-secret=VERY_SECRET
       - --spring.security.oauth2.resourceserver.opaque-token.introspection-uri=https://localhost:${mockHttpsPort}/oauth2/default/v1/introspect
       - --server.session.trackingModes=cookie
+
+  oidc-code-flow-local-validation:
+    disabledTests:
+      # Spring does remote validation of the token
+      - invalidIssuerIdTokenJwtTest
+    command: com.okta.spring.tests.common.basic.code.BasicRedirectCodeFlowApplication
+    args:
+      - --server.port=${applicationPort}
+      - --server.servlet.session.tracking-modes=cookie
+      - --spring.security.oauth2.resourceserver.jwt.issuer-uri=https://localhost:${mockHttpsPort}/oauth2/default
+      - --spring.security.oauth2.client.provider.okta.authorization-uri=https://localhost:${mockHttpsPort}/oauth2/default/v1/authorize
+      - --spring.security.oauth2.client.provider.okta.issuer-uri=https://localhost:${mockHttpsPort}/oauth2/default
+      - --spring.security.oauth2.client.registration.okta.client-id=OOICU812
+      - --spring.security.oauth2.client.registration.okta.client-secret=VERY_SECRET
+      - --spring.security.oauth2.client.registration.okta.redirect-uri={baseUrl}/authorization-code/callback
+      - --spring.security.oauth2.client.registration.okta.scope=profile,email,openid
+      - --okta.oauth2.postLogoutRedirectUri=/you-are-logged-out
+    protectedPath: /oauth2/authorization/okta
+
+  pkce-code-flow-remote-validation:
+    command: com.okta.spring.tests.common.basic.code.BasicRedirectCodeFlowApplication
+    args:
+      - --server.port=${applicationPort}
+      - --server.servlet.session.tracking-modes=cookie
+      - --spring.security.oauth2.resourceserver.jwt.issuer-uri=https://localhost:${mockHttpsPort}/oauth2/default
+      - --spring.security.oauth2.client.provider.okta.authorization-uri=https://localhost:${mockHttpsPort}/oauth2/default/v1/authorize
+      - --spring.security.oauth2.client.provider.okta.issuer-uri=https://localhost:${mockHttpsPort}/oauth2/default
+      - --spring.security.oauth2.client.registration.okta.client-id=OOICU812
+      - --spring.security.oauth2.client.registration.okta.scope=offline_access
+      - --spring.security.oauth2.client.registration.okta.redirect-uri={baseUrl}/authorization-code/callback
+      - --spring.security.oauth2.client.registration.okta.client-authentication-method=none
+    protectedPath: /oauth2/authorization/okta
