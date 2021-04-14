@@ -96,23 +96,6 @@
     </dependencies>
 
     <build>
-        <testResources>
-            <testResource>
-                <directory>src/test/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>versions.properties</include>
-                </includes>
-            </testResource>
-            <testResource>
-                <directory>src/test/resources</directory>
-                <filtering>false</filtering>
-                <excludes>
-                    <exclude>versions.properties</exclude>
-                </excludes>
-            </testResource>
-        </testResources>
-
         <pluginManagement>
             <plugins>
                 <plugin>
