@@ -17,7 +17,6 @@ package com.okta.spring.tests.common.basic.code;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -30,8 +29,6 @@ import java.security.Principal;
 
 @SpringBootApplication
 @RestController
-// fail loading this config if the SDK 'Client' is found. It should NOT exist on the classpath by default
-@ConditionalOnMissingClass("com.okta.sdk.client.Client")
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class BasicRedirectCodeFlowApplication {
 
