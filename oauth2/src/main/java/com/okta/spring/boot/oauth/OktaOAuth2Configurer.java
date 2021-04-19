@@ -143,9 +143,11 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
             .tokenEndpoint()
             .accessTokenResponseClient(accessTokenResponseClient(restTemplate));
 
-        String redirectUri = environment.getProperty("spring.security.oauth2.client.registration.okta.redirect-uri");
-        if (redirectUri != null) {
-            http.oauth2Login().redirectionEndpoint().baseUri(redirectUri.replace("{baseUrl}", ""));
+        String redirectUriProperty = environment.getProperty("spring.security.oauth2.client.registration.okta.redirect-uri");
+        if (redirectUriProperty != null) {
+            //  remove `{baseUrl}` pattern, if present, as Spring will solve this on its own
+            String redirectUri = redirectUriProperty.replace("{baseUrl}", "");
+            http.oauth2Login().redirectionEndpoint().baseUri(redirectUri);
         }
     }
 
