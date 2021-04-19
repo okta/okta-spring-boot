@@ -42,12 +42,12 @@
         <module>oauth2</module>
         <module>sdk</module>
         <module>okta-spring-boot-starter</module>
-        <module>integration-tests/common-basic</module>
         <module>integration-tests/common-reactive</module>
-        <module>integration-tests/oauth2</module>
+        <module>integration-tests/common-servlet</module>
         <module>integration-tests/oauth2-reactive</module>
-        <module>integration-tests/oauth2-spring</module>
-        <module>integration-tests/oauth2-spring-reactive</module>
+        <module>integration-tests/oauth2-reactive-spring</module>
+        <module>integration-tests/oauth2-servlet</module>
+        <module>integration-tests/oauth2-servlet-spring</module>
         <module>examples</module>
         <module>coverage</module>
     </modules>
@@ -100,7 +100,7 @@
             </dependency>
             <dependency>
                 <groupId>com.okta.spring</groupId>
-                <artifactId>okta-spring-boot-integration-tests-common-basic</artifactId>
+                <artifactId>okta-spring-boot-integration-tests-common-servlet</artifactId>
                 <version>2.0.2-SNAPSHOT</version>
             </dependency>
             <dependency>
