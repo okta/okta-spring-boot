@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.tests.oauth2.opaquetoken
+package com.okta.spring.tests.common.servlet.opaquetoken
 
 import com.okta.test.mock.Scenario
 import com.okta.test.mock.application.ApplicationTestRunner

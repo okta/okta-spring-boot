@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-implementation: com.okta.spring.tests.oauth2.SpringApplicationUnderTest
+implementation: com.okta.spring.tests.common.reactive.SpringApplicationUnderTest
 scenarios:
 
   code-flow-remote-validation:

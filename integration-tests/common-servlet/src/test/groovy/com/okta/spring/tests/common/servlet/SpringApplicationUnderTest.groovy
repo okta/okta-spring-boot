@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-Present Okta, Inc.
+ * Copyright 2017 Okta, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.tests.oauth2
+package com.okta.spring.tests.common.servlet
 
 import com.okta.test.mock.application.ApplicationUnderTest
 import org.slf4j.Logger
@@ -26,10 +26,6 @@ class SpringApplicationUnderTest implements ApplicationUnderTest {
     private final Logger logger = LoggerFactory.getLogger(SpringApplicationUnderTest)
 
     private ConfigurableApplicationContext applicationContext
-
-    static {
-        System.setProperty("codeFlow.redirectPath", "/login/oauth2/code/okta")
-    }
 
     @Override
     void start() {

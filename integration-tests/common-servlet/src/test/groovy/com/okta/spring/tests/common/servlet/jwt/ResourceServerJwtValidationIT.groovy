@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-Present Okta, Inc.
+ * Copyright 2017 Okta, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.tests.oauth2.implicit
+package com.okta.spring.tests.common.servlet.jwt
 
 import com.okta.test.mock.Scenario
 import com.okta.test.mock.application.ApplicationTestRunner
@@ -26,7 +26,7 @@ import static com.okta.test.mock.scenarios.Scenario.IMPLICIT_FLOW_LOCAL_VALIDATI
 import static org.hamcrest.Matchers.startsWith
 
 @Scenario(IMPLICIT_FLOW_LOCAL_VALIDATION)
-class ReactiveImplicitLocalValidationGroupIT extends ApplicationTestRunner {
+class ResourceServerJwtValidationIT extends ApplicationTestRunner {
 
     private final static String ERROR_401 = "401 Unauthorized"
 
@@ -39,6 +39,7 @@ class ReactiveImplicitLocalValidationGroupIT extends ApplicationTestRunner {
         .when()
             .get("http://localhost:${applicationPort}/everyone")
         .then()
+            .statusCode(200)
             .body(Matchers.equalTo("Everyone has Access: joe.coder@example.com"))
     }
 
