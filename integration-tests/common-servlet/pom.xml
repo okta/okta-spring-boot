@@ -27,6 +27,10 @@
     <artifactId>okta-spring-boot-integration-tests-common-servlet</artifactId>
     <name>Okta Spring Boot :: ITs :: Common-Servlet</name>
 
+    <properties>
+        <skipTests>true</skipTests>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.okta.spring</groupId>
@@ -68,6 +72,39 @@
             <artifactId>logback-classic</artifactId>
             <scope>runtime</scope>
         </dependency>
+
+        <!-- Test deps -->
+        <dependency>
+            <groupId>com.okta.oidc.tck</groupId>
+            <artifactId>okta-oidc-tck</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

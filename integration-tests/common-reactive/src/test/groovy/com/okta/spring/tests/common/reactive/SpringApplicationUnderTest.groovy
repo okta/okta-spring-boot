@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.spring.tests.oauth2
+package com.okta.spring.tests.common.reactive
 
 import com.okta.test.mock.application.ApplicationUnderTest
 import org.slf4j.Logger
