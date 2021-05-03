@@ -452,7 +452,6 @@ class AutoConfigConditionalTest implements HttpMock {
                 assertThat(context).doesNotHaveBean(AuthoritiesProvider)
 
                 assertWebFiltersDisabled(context, OAuth2LoginAuthenticationWebFilter)
-                assertWebFiltersDisabled(context, ServerHttpSecurity.OAuth2ResourceServerSpec.BearerTokenAuthenticationWebFilter)
             }
     }
 
@@ -476,7 +475,7 @@ class AutoConfigConditionalTest implements HttpMock {
                 assertThat(context).hasSingleBean(ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig)
 
                 assertWebFiltersDisabled(context, OAuth2LoginAuthenticationWebFilter)
-                assertWebFiltersEnabled(context, ServerHttpSecurity.OAuth2ResourceServerSpec.BearerTokenAuthenticationWebFilter)
+                assertWebFiltersEnabled(context, AuthenticationWebFilter)
                 assertJwtBearerWebFilterEnabled(context)
             }
     }
@@ -501,7 +500,7 @@ class AutoConfigConditionalTest implements HttpMock {
             assertThat(context).hasSingleBean(OAuth2ClientProperties)
             assertThat(context).hasSingleBean(OktaOAuth2Properties)
 
-            assertWebFiltersEnabled(context, ServerHttpSecurity.OAuth2ResourceServerSpec.BearerTokenAuthenticationWebFilter)
+            assertWebFiltersEnabled(context, AuthenticationWebFilter)
             assertJwtBearerWebFilterEnabled(context)
         }
     }
@@ -529,7 +528,7 @@ class AutoConfigConditionalTest implements HttpMock {
                 assertThat(context).hasSingleBean(OktaOAuth2Properties)
                 assertThat(context).getBeans(AuthoritiesProvider).containsOnlyKeys("tokenScopesAuthoritiesProvider", "groupClaimsAuthoritiesProvider")
 
-                assertWebFiltersEnabled(context, OAuth2LoginAuthenticationWebFilter, ServerHttpSecurity.OAuth2ResourceServerSpec.BearerTokenAuthenticationWebFilter)
+                assertWebFiltersEnabled(context, AuthenticationWebFilter)
                 assertJwtBearerWebFilterEnabled(context)
             }
     }
@@ -559,7 +558,7 @@ class AutoConfigConditionalTest implements HttpMock {
                 assertThat(context).hasSingleBean(OktaOAuth2Properties)
                 assertThat(context).getBeans(AuthoritiesProvider).containsOnlyKeys("tokenScopesAuthoritiesProvider", "groupClaimsAuthoritiesProvider")
 
-                assertWebFiltersEnabled(context, OAuth2LoginAuthenticationWebFilter, ServerHttpSecurity.OAuth2ResourceServerSpec.BearerTokenAuthenticationWebFilter)
+                assertWebFiltersEnabled(context, OAuth2LoginAuthenticationWebFilter, AuthenticationWebFilter)
                 assertJwtBearerWebFilterEnabled(context)
         }
     }
@@ -588,7 +587,7 @@ class AutoConfigConditionalTest implements HttpMock {
             assertThat(context).hasSingleBean(OktaOAuth2Properties)
             assertThat(context).getBeans(AuthoritiesProvider).containsOnlyKeys("tokenScopesAuthoritiesProvider", "groupClaimsAuthoritiesProvider")
 
-            assertWebFiltersEnabled(context, OAuth2LoginAuthenticationWebFilter, ServerHttpSecurity.OAuth2ResourceServerSpec.BearerTokenAuthenticationWebFilter)
+            assertWebFiltersEnabled(context, OAuth2LoginAuthenticationWebFilter, AuthenticationWebFilter)
             assertJwtBearerWebFilterEnabled(context)
         }
     }
@@ -649,7 +648,7 @@ class AutoConfigConditionalTest implements HttpMock {
                 assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2UserService)
                 assertThat(context).doesNotHaveBean(ReactiveOktaOidcUserService)
 
-                assertWebFiltersEnabled(context, OAuth2LoginAuthenticationWebFilter, ServerHttpSecurity.OAuth2ResourceServerSpec.BearerTokenAuthenticationWebFilter)
+                assertWebFiltersEnabled(context, OAuth2LoginAuthenticationWebFilter, AuthenticationWebFilter)
                 assertJwtBearerWebFilterEnabled(context)
             }
     }
@@ -676,7 +675,7 @@ class AutoConfigConditionalTest implements HttpMock {
 
     private static Stream<WebFilter> activeJwtAuthenticationWebFilters(ApplicationContext context) {
         return activeWebFilters(context).stream()
-                        .filter { it.getClass() == ServerHttpSecurity.OAuth2ResourceServerSpec.BearerTokenAuthenticationWebFilter }
+                        .filter { it.getClass() == AuthenticationWebFilter }
                         .map {(AuthenticationWebFilter) it}
                         .filter {
                             // here be dragons
@@ -691,8 +690,9 @@ class AutoConfigConditionalTest implements HttpMock {
     static void assertFilterConfiguredWithJwtAuthenticationManager(ApplicationContext context) {
         MatcherSecurityWebFilterChain filterChain = (MatcherSecurityWebFilterChain) context.getBean(BeanIds.SPRING_SECURITY_FILTER_CHAIN)
         Stream<WebFilter> filters = filterChain.getWebFilters().toStream()
-        AuthenticationWebFilter webFilter = (AuthenticationWebFilter) filters
-            .filter { (it.getClass().name == ServerHttpSecurity.OAuth2ResourceServerSpec.BearerTokenAuthenticationWebFilter.name) }
+        AuthenticationWebFilter webFilter = filters
+            .filter { (it.getClass().name == AuthenticationWebFilter.name) }
+            .map {(AuthenticationWebFilter) it}
             .findFirst()
             .orElseThrow { new TestException("Failed to find BearerTokenAuthenticationWebFilter configured for JWTs, this could be caused by a configuration error, or a change in Spring Security (internal APIs are used to discover this WebFilter)")}
         ReactiveAuthenticationManagerResolver<?> authenticationManagerResolver = (ReactiveAuthenticationManagerResolver<?>) ReflectionTestUtils
