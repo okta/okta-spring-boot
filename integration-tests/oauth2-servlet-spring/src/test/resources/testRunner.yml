@@ -21,7 +21,6 @@ scenarios:
     command: com.okta.spring.tests.common.servlet.code.BasicRedirectCodeFlowApplication
     args:
       - --server.port=${applicationPort}
-      - --spring.security.oauth2.resourceserver.jwt.issuer-uri=https://localhost:${mockHttpsPort}/oauth2/default
       - --spring.security.oauth2.client.provider.okta.authorization-uri=https://localhost:${mockHttpsPort}/oauth2/default/v1/authorize
       - --spring.security.oauth2.client.provider.okta.issuer-uri=https://localhost:${mockHttpsPort}/oauth2/default
       - --spring.security.oauth2.client.registration.okta.client-id=OOICU812
@@ -74,7 +73,6 @@ scenarios:
     args:
       - --server.port=${applicationPort}
       - --server.servlet.session.tracking-modes=cookie
-      - --spring.security.oauth2.resourceserver.jwt.issuer-uri=https://localhost:${mockHttpsPort}/oauth2/default
       - --spring.security.oauth2.client.provider.okta.authorization-uri=https://localhost:${mockHttpsPort}/oauth2/default/v1/authorize
       - --spring.security.oauth2.client.provider.okta.issuer-uri=https://localhost:${mockHttpsPort}/oauth2/default
       - --spring.security.oauth2.client.registration.okta.client-id=OOICU812

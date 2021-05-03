@@ -88,9 +88,9 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                     log.debug("Opaque Token configurer is set in OAuth resource server configuration. " +
                         "Opaque Token validation/introspection will be configured.");
                     configureResourceServerForOpaqueTokenValidation(http, oktaOAuth2Properties);
-                } else {
-                    log.debug("Defaulting to Okta JWT resource server configuration.");
-                    configureResourceServerForJwtValidation(http, oktaOAuth2Properties);
+                }
+                else {
+                    log.debug("OAuth2ResourceServerConfigurer bean not configured, Resource Server support will not be enabled.");
                 }
             } else {
                 log.debug("OAuth/OIDC Login not configured due to missing issuer, client-id, or client-secret property");
