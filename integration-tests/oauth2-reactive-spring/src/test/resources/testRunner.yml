@@ -27,7 +27,7 @@ scenarios:
       - --spring.security.oauth2.client.registration.okta.client-id=OOICU812
       - --spring.security.oauth2.client.registration.okta.client-secret=VERY_SECRET
       - --spring.security.oauth2.client.registration.okta.scope=offline_access
-      #    - --okta.oauth2.redirectUri=/authorization-code/callback # not implemented until Spring Sec 5.2
+      - --spring.security.oauth2.client.registration.okta.redirect-uri={baseUrl}/login/oauth2/code/okta
       - --server.servlet.session.tracking-modes=cookie
       - --debug
     protectedPath: /oauth2/authorization/okta
@@ -58,8 +58,7 @@ scenarios:
       - --spring.security.oauth2.client.provider.okta.issuer-uri=https://localhost:${mockHttpsPort}/oauth2/default
       - --spring.security.oauth2.client.registration.okta.client-id=OOICU812
       - --spring.security.oauth2.client.registration.okta.client-secret=VERY_SECRET
-      # not implemented until Spring Sec 5.2
-      #- --spring.security.oauth2.client.registration.okta.redirect-uri={baseUrl}/authorization-code/callback
+      - --spring.security.oauth2.client.registration.okta.redirect-uri={baseUrl}/login/oauth2/code/okta
       - --spring.security.oauth2.client.registration.okta.scope=profile,email,openid
       - --okta.oauth2.postLogoutRedirectUri=/you-are-logged-out
     protectedPath: /oauth2/authorization/okta
@@ -74,7 +73,6 @@ scenarios:
       - --spring.security.oauth2.client.provider.okta.issuer-uri=https://localhost:${mockHttpsPort}/oauth2/default
       - --spring.security.oauth2.client.registration.okta.client-id=OOICU812
       - --spring.security.oauth2.client.registration.okta.scope=offline_access
-      # not implemented until Spring Sec 5.2
-      #- --spring.security.oauth2.client.registration.okta.redirect-uri={baseUrl}/authorization-code/callback
+      - --spring.security.oauth2.client.registration.okta.redirect-uri={baseUrl}/login/oauth2/code/okta
       - --spring.security.oauth2.client.registration.okta.client-authentication-method=none
     protectedPath: /oauth2/authorization/okta
