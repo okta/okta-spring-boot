@@ -15,6 +15,7 @@
  */
 package com.okta.spring.boot.oauth.env;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
@@ -97,6 +98,7 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
 
     private static final String OKTA_OAUTH_PREFIX = "okta.oauth2.";
     private static final String OKTA_OAUTH_ISSUER = OKTA_OAUTH_PREFIX + "issuer";
+    private static final String OKTA_OAUTH_ISSUER_WITH_PATH = OKTA_OAUTH_ISSUER + "-with-path";
     private static final String OKTA_OAUTH_CLIENT_ID = OKTA_OAUTH_PREFIX + "client-id";
     private static final String OKTA_OAUTH_CLIENT_SECRET = OKTA_OAUTH_PREFIX + "client-secret";
     private static final String OKTA_OAUTH_SCOPES = OKTA_OAUTH_PREFIX + "scopes"; // array vs string
@@ -110,6 +112,7 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
         // default scopes, as of Spring Security 5.4 default scopes are no longer added, this restores that functionality
         environment.getPropertySources().addLast(defaultOktaScopesSource(environment));
         // okta's endpoints can be resolved from an issuer
+        environment.getPropertySources().addLast(new OktaIssuerWithPathPropertySource(environment));
         environment.getPropertySources().addLast(oktaStaticDiscoveryPropertySource(environment));
         environment.getPropertySources().addLast(oktaOpaqueTokenPropertySource(environment));
         environment.getPropertySources().addLast(oktaRedirectUriPropertySource(environment));
@@ -158,18 +161,14 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
     }
 
     private PropertySource oktaStaticDiscoveryPropertySource(Environment environment) {
-        String oauth2Suffix = Optional.ofNullable(environment.getProperty("okta.oauth2.issuer"))
-            .filter(issuer -> issuer.contains("/oauth2")) // Check if URL is a Custom Authorization Server
-            .map(s -> "") // if so, leave URL as is
-            .orElse("/oauth2"); // for the Okta Org Authorization Server, /oauth2 needs to be appended
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("spring.security.oauth2.resourceserver.jwt.issuer-uri", "${okta.oauth2.issuer}");
-        properties.put("spring.security.oauth2.resourceserver.jwt.jwk-set-uri", "${okta.oauth2.issuer}" + oauth2Suffix + "/v1/keys");
-        properties.put("spring.security.oauth2.client.provider.okta.authorization-uri", "${okta.oauth2.issuer}" + oauth2Suffix + "/v1/authorize");
-        properties.put("spring.security.oauth2.client.provider.okta.token-uri", "${okta.oauth2.issuer}" + oauth2Suffix + "/v1/token");
-        properties.put("spring.security.oauth2.client.provider.okta.user-info-uri", "${okta.oauth2.issuer}" + oauth2Suffix + "/v1/userinfo");
-        properties.put("spring.security.oauth2.client.provider.okta.jwk-set-uri", "${okta.oauth2.issuer}" + oauth2Suffix + "/v1/keys");
+        properties.put("spring.security.oauth2.resourceserver.jwt.jwk-set-uri", "${" + OKTA_OAUTH_ISSUER_WITH_PATH + "}/v1/keys");
+        properties.put("spring.security.oauth2.client.provider.okta.authorization-uri", "${" + OKTA_OAUTH_ISSUER_WITH_PATH + "}/v1/authorize");
+        properties.put("spring.security.oauth2.client.provider.okta.token-uri", "${" + OKTA_OAUTH_ISSUER_WITH_PATH + "}/v1/token");
+        properties.put("spring.security.oauth2.client.provider.okta.user-info-uri", "${" + OKTA_OAUTH_ISSUER_WITH_PATH + "}/v1/userinfo");
+        properties.put("spring.security.oauth2.client.provider.okta.jwk-set-uri", "${" + OKTA_OAUTH_ISSUER_WITH_PATH + "}/v1/keys");
         properties.put("spring.security.oauth2.client.provider.okta.issuer-uri", "${okta.oauth2.issuer}"); // required for OIDC logout
 
         return new ConditionalMapPropertySource("okta-static-discovery", properties, environment, OKTA_OAUTH_ISSUER);
@@ -232,6 +231,50 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
                 return Binder.get(environment).bind(OKTA_OAUTH_SCOPES, Bindable.setOf(String.class)).orElse(null);
             }
             return null;
+        }
+    }
+
+    /**
+     * PropertySource that resolves <code>okta.oauth2.issuer-with-path</code> property from
+     * <code>okta.oauth2.issuer</code>. Okta has two types of authorization servers (issuers), and the URL format is
+     * slightly different between them, this PropertySource will dynamically return the base URL for each type at
+     * property lookup time.
+     */
+    private static class OktaIssuerWithPathPropertySource extends PropertySource<String> {
+
+        private final Environment environment;
+
+        private OktaIssuerWithPathPropertySource(Environment environment) {
+            super("okta-issuer-url-resolving-source");
+            this.environment = environment;
+        }
+
+        @Override
+        public Object getProperty(@NotNull String key) {
+
+            // only support this key
+            if (OKTA_OAUTH_ISSUER_WITH_PATH.equals(key)) {
+                // issuer could be null
+                return Optional.ofNullable(environment.getProperty(OKTA_OAUTH_ISSUER))
+                    .map(issuer -> {
+                        // Check if URL is a Okta Org Authorization Server
+                        if (!issuer.contains("/oauth2")) {
+                            // for the Okta Org Authorization Server, /oauth2 needs to be appended
+                            issuer += "/oauth2";
+                        }
+                        // for all other issuers leave the property as is
+                        return issuer;
+                    })
+                    // otherwise return null
+                    .orElse(null);
+            }
+
+            return null;
+        }
+
+        @Override
+        public boolean containsProperty(@NotNull String key) {
+            return OKTA_OAUTH_ISSUER_WITH_PATH.equals(key) && environment.containsProperty(OKTA_OAUTH_ISSUER);
         }
     }
 }
