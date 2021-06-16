@@ -166,7 +166,7 @@
             <dependency>
                 <groupId>io.rest-assured</groupId>
                 <artifactId>rest-assured</artifactId>
-                <version>3.2.0</version>
+                <version>4.4.0</version>
             </dependency>
             <!-- TODO: these deps should be removed, they are here temporarily to fix a dependency resolution issue
                  the okta-oidc-tck pulls in 3.2.0 and something else pulls in a later version causing a runtime issue
