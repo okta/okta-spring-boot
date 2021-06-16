@@ -254,7 +254,7 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
 
             // only support this key
             if (OKTA_OAUTH_ISSUER_WITH_PATH.equals(key)) {
-                // issuer could be null
+                // issuer could be null (only resolve properties after checking if the key is `OKTA_OAUTH_ISSUER_WITH_PATH`)
                 return Optional.ofNullable(environment.getProperty(OKTA_OAUTH_ISSUER))
                     .map(issuer -> {
                         // Check if URL is a Okta Org Authorization Server
