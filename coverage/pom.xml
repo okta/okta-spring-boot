@@ -36,10 +36,6 @@
             <groupId>com.okta.spring</groupId>
             <artifactId>okta-spring-sdk</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.okta.spring</groupId>
-            <artifactId>okta-spring-boot-integration-tests-oauth2</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
