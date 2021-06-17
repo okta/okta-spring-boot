@@ -180,7 +180,7 @@
             <dependency>
                 <groupId>io.rest-assured</groupId>
                 <artifactId>xml-path</artifactId>
-                <version>3.2.0</version>
+                <version>4.4.0</version>
             </dependency>
             <!-- end rest-assured dep fix -->
             <dependency>
