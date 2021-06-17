@@ -175,7 +175,7 @@
             <dependency>
                 <groupId>io.rest-assured</groupId>
                 <artifactId>json-path</artifactId>
-                <version>3.2.0</version>
+                <version>4.4.0</version>
             </dependency>
             <dependency>
                 <groupId>io.rest-assured</groupId>
