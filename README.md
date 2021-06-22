@@ -360,6 +360,39 @@ You'll be redirected automatically to an Okta login page. Once you successfully 
 
 This module integrates with Spring Security's OAuth support, all you need is the mark your application with the standard `@EnableOAuth2Client` annotation. 
 
+## Use with Spring Native
+
+You can use this starter with [Spring Native](https://github.com/spring-projects-experimental/spring-native). However, you will need to add some annotations to your main Spring Boot application class.
+
+```java
+package com.okta.rest;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.nativex.hint.AccessBits;
+import org.springframework.nativex.hint.NativeHint;
+import org.springframework.nativex.hint.ResourceHint;
+import org.springframework.nativex.hint.TypeHint;
+
+@SpringBootApplication
+@NativeHint(options = "--enable-url-protocols=https")
+@ResourceHint(patterns = "com/okta/commons/configcheck/configuration-validator", isBundle = true)
+@TypeHint(typeNames = {
+    "com.okta.spring.boot.oauth.OktaOpaqueTokenIntrospectConditional",
+    "com.okta.spring.boot.oauth.OktaOpaqueTokenIntrospectConditional$ClientIdCondition",
+    "com.okta.spring.boot.oauth.OktaOpaqueTokenIntrospectConditional$ClientSecretCondition",
+    "com.okta.spring.boot.oauth.OktaOpaqueTokenIntrospectConditional$IntrospectionUriCondition"
+}, access = AccessBits.ALL)
+public class DemoApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(DemoApplication.class, args);
+    }
+}
+```
+
+We are working on providing a native hints dependency with this configuration. This will allow you to add a dependency to your build file without making code changes.
+
 ## Proxy
 
 If you're running your application (with this okta-spring-boot dependency) from behind a network proxy, you could setup properties for it in application.yml:
