@@ -68,8 +68,7 @@ class OktaOAuth2AutoConfig {
     @Bean
     @ConditionalOnMissingBean(name="oidcUserService")
     OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService(
-        @Qualifier("oAuth2UserService") OAuth2UserService<OAuth2UserRequest,
-            OAuth2User> oAuth2UserService,
+        @Qualifier("oAuth2UserService") OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService,
         Collection<AuthoritiesProvider> authoritiesProviders) {
         return new OktaOidcUserService(oAuth2UserService, authoritiesProviders);
     }
