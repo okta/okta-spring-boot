@@ -16,6 +16,7 @@
 package com.okta.spring.boot.oauth;
 
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -41,7 +42,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import java.net.URI;
 import java.util.Collection;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnOktaClientProperties
 @EnableConfigurationProperties(OktaOAuth2Properties.class)
 @ConditionalOnClass({ EnableWebSecurity.class, ClientRegistration.class })
@@ -66,8 +67,11 @@ class OktaOAuth2AutoConfig {
 
     @Bean
     @ConditionalOnMissingBean(name="oidcUserService")
-    OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService(Collection<AuthoritiesProvider> authoritiesProviders) {
-        return new OktaOidcUserService(oAuth2UserService(authoritiesProviders), authoritiesProviders);
+    OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService(
+        @Qualifier("oAuth2UserService") OAuth2UserService<OAuth2UserRequest,
+            OAuth2User> oAuth2UserService,
+        Collection<AuthoritiesProvider> authoritiesProviders) {
+        return new OktaOidcUserService(oAuth2UserService, authoritiesProviders);
     }
 
     @Configuration(proxyBeanMethods = false)
