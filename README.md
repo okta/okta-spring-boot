@@ -395,7 +395,7 @@ This module integrates with Spring Security's OAuth support, all you need is the
 You can use this starter with [Spring Native](https://github.com/spring-projects-experimental/spring-native). However, you will need to add some annotations to your main Spring Boot application class.
 
 ```java
-package com.okta.rest;
+package com.example.demo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
