@@ -113,7 +113,7 @@ public class WebConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-            // allow antonymous access to the root and logout pages
+            // allow anonymous access to the root and logout pages
             .antMatchers("/", "/logout/callback").permitAll()
             // all other requests
             .anyRequest().authenticated();
