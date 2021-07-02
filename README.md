@@ -97,7 +97,7 @@ There are many more properties that you can optionally configure as well. Here a
 | okta.oauth2.audience   | api://default | The audience of your [Authorization Server](/docs/how-to/set-up-auth-server.html) |
 | okta.oauth2.groupsClaim | groups | The claim key in the Access Token's JWT that corresponds to an array of the users groups. |
 | okta.oauth2.postLogoutRedirectUri | N/A | Set to an absolute URI to enable [RP-Initiated (SSO) logout](https://developer.okta.com/blog/2020/03/27/spring-oidc-logout-options). |
-**NOTE**: by specifying the **postLogoutRedirectUri**, you will be redirected to it after the end of your session, therefore this resource must be publicly available so don't forget to add it to your HttpSecurity configuration:
+**NOTE**: On setting **postLogoutRedirectUri**, you will be redirected to it after the end of your session. Therefore, this resource must be available anonymously, so be sure to add it to your `HttpSecurity` configuration.
 ```yaml
 okta:
   oauth2:
