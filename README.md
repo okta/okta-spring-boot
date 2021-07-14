@@ -86,7 +86,7 @@ Only these three properties are required for a web app:
 
 | Property | Default | Details |
 |----------|---------|---------|
-| okta.oauth2.issuer     | N/A | [Authorization Server](/docs/how-to/set-up-auth-server.html) issuer URL, i.e.: https://{yourOktaDomain}/oauth2/default |
+| okta.oauth2.issuer     | N/A | [Authorization Server](https://developer.okta.com/docs/how-to/set-up-auth-server.html) issuer URL, i.e.: https://{yourOktaDomain}/oauth2/default |
 | okta.oauth2.clientId   | N/A | The Client Id of your Okta OIDC application |
 | okta.oauth2.clientSecret   | N/A | The Client Secret of your Okta OIDC application |
 
