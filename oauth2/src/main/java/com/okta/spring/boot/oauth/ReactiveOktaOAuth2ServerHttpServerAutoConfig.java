@@ -76,7 +76,8 @@ class ReactiveOktaOAuth2ServerHttpServerAutoConfig {
     OidcClientInitiatedServerLogoutSuccessHandler oidcClientInitiatedServerLogoutSuccessHandler(OktaOAuth2Properties oktaOAuth2Properties,
                                                                                                 ReactiveClientRegistrationRepository repository) throws URISyntaxException {
         OidcClientInitiatedServerLogoutSuccessHandler logoutSuccessHandler = new OidcClientInitiatedServerLogoutSuccessHandler(repository);
-        logoutSuccessHandler.setPostLogoutRedirectUri(new URI(oktaOAuth2Properties.getPostLogoutRedirectUri()));
+        String logoutUri = oktaOAuth2Properties.getPostLogoutRedirectUri();
+        logoutSuccessHandler.setPostLogoutRedirectUri((logoutUri.startsWith("/") ? "{baseUrl}" : "") + logoutUri);
         return logoutSuccessHandler;
     }
 

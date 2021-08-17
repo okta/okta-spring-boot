@@ -55,7 +55,8 @@ class OktaOAuth2AutoConfig {
     OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler(OktaOAuth2Properties oktaOAuth2Properties,
                                                                      ClientRegistrationRepository clientRegistrationRepository) {
         OidcClientInitiatedLogoutSuccessHandler successHandler = new OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository);
-        successHandler.setPostLogoutRedirectUri(URI.create(oktaOAuth2Properties.getPostLogoutRedirectUri()));
+        String logoutUri = oktaOAuth2Properties.getPostLogoutRedirectUri();
+        successHandler.setPostLogoutRedirectUri((logoutUri.startsWith("/") ? "{baseUrl}" : "") + logoutUri);
         return successHandler;
     }
 
