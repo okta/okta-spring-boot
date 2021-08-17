@@ -39,7 +39,6 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 
-import java.net.URI;
 import java.util.Collection;
 
 @Configuration(proxyBeanMethods = false)
