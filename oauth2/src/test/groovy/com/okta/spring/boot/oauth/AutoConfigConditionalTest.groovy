@@ -354,6 +354,39 @@ class AutoConfigConditionalTest implements HttpMock {
             "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}oauth2/custom-as", // work around to not validate the https url
             "okta.oauth2.client-id=test-client-id",
             "okta.oauth2.client-secret=test-client-secret",
+            "okta.oauth2.postLogoutRedirectUri=http://logout.example.com")
+            .run { context ->
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2AutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ServerHttpServerAutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2UserService)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOidcUserService)
+                assertThat(context).doesNotHaveBean(OidcClientInitiatedServerLogoutSuccessHandler)
+
+                assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).hasSingleBean(JwtDecoder)
+                assertThat(context).hasSingleBean(OAuth2ClientProperties)
+                assertThat(context).hasSingleBean(OktaOAuth2Properties)
+                assertThat(context).hasSingleBean(OktaOAuth2AutoConfig)
+                assertThat(context).hasSingleBean(OktaOAuth2UserService)
+                assertThat(context).hasSingleBean(OktaOidcUserService)
+                assertThat(context).hasSingleBean(OidcClientInitiatedLogoutSuccessHandler)
+                assertThat(context).getBeans(AuthoritiesProvider).containsOnlyKeys("tokenScopesAuthoritiesProvider", "groupClaimsAuthoritiesProvider")
+                assertThat(context.getBean(OidcClientInitiatedLogoutSuccessHandler).postLogoutRedirectUri).isEqualTo("http://logout.example.com")
+
+                assertFiltersEnabled(context, OAuth2LoginAuthenticationFilter, BearerTokenAuthenticationFilter)
+            }
+    }
+
+    @Test
+    void webLoginConfig_withLogoutUriRelative() {
+
+        webContextRunner().withPropertyValues(
+            "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as",
+            "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}oauth2/custom-as", // work around to not validate the https url
+            "okta.oauth2.client-id=test-client-id",
+            "okta.oauth2.client-secret=test-client-secret",
             "okta.oauth2.postLogoutRedirectUri=/logout/callback")
             .run { context ->
                 assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2AutoConfig)
@@ -383,7 +416,6 @@ class AutoConfigConditionalTest implements HttpMock {
                 assertThat(logoutHandler.postLogoutRedirectUri(request).toString()).isEqualTo("https://test.example.com:80/logout/callback")
             }
     }
-
     @Test
     void webLoginConfig_withIssuerAndClientId_pkce() {
 
