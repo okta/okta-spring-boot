@@ -32,7 +32,6 @@ import org.springframework.boot.autoconfigure.security.oauth2.resource.reactive.
 import org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
 import org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration
 import org.springframework.boot.autoconfigure.security.reactive.ReactiveUserDetailsServiceAutoConfiguration
-import org.springframework.boot.test.context.assertj.AssertableReactiveWebApplicationContext
 import org.springframework.boot.test.context.runner.AbstractApplicationContextRunner
 import org.springframework.boot.test.context.runner.ReactiveWebApplicationContextRunner
 import org.springframework.boot.test.context.runner.WebApplicationContextRunner
@@ -43,13 +42,13 @@ import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.ConfigurableEnvironment
+import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.authentication.ReactiveAuthenticationManagerResolver
 import org.springframework.security.config.BeanIds
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
-import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcReactiveOAuth2UserService
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest
@@ -62,7 +61,6 @@ import org.springframework.security.oauth2.client.web.server.authentication.OAut
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.security.oauth2.jwt.JwtDecoder
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
 import org.springframework.security.oauth2.server.resource.authentication.JwtReactiveAuthenticationManager
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationFilter
@@ -78,6 +76,7 @@ import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 
 import javax.servlet.Filter
+import javax.servlet.ServletRequest
 import java.util.function.Supplier
 import java.util.stream.Collectors
 import java.util.stream.Stream
@@ -374,11 +373,49 @@ class AutoConfigConditionalTest implements HttpMock {
                 assertThat(context).hasSingleBean(OktaOidcUserService)
                 assertThat(context).hasSingleBean(OidcClientInitiatedLogoutSuccessHandler)
                 assertThat(context).getBeans(AuthoritiesProvider).containsOnlyKeys("tokenScopesAuthoritiesProvider", "groupClaimsAuthoritiesProvider")
+                assertThat(context.getBean(OidcClientInitiatedLogoutSuccessHandler).postLogoutRedirectUri).isEqualTo("http://logout.example.com")
 
                 assertFiltersEnabled(context, OAuth2LoginAuthenticationFilter, BearerTokenAuthenticationFilter)
             }
     }
 
+    @Test
+    void webLoginConfig_withLogoutUriRelative() {
+
+        webContextRunner().withPropertyValues(
+            "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as",
+            "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}oauth2/custom-as", // work around to not validate the https url
+            "okta.oauth2.client-id=test-client-id",
+            "okta.oauth2.client-secret=test-client-secret",
+            "okta.oauth2.postLogoutRedirectUri=/logout/callback")
+            .run { context ->
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2AutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ServerHttpServerAutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2UserService)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOidcUserService)
+                assertThat(context).doesNotHaveBean(OidcClientInitiatedServerLogoutSuccessHandler)
+
+                assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).hasSingleBean(JwtDecoder)
+                assertThat(context).hasSingleBean(OAuth2ClientProperties)
+                assertThat(context).hasSingleBean(OktaOAuth2Properties)
+                assertThat(context).hasSingleBean(OktaOAuth2AutoConfig)
+                assertThat(context).hasSingleBean(OktaOAuth2UserService)
+                assertThat(context).hasSingleBean(OktaOidcUserService)
+                assertThat(context).hasSingleBean(OidcClientInitiatedLogoutSuccessHandler)
+                assertThat(context).getBeans(AuthoritiesProvider).containsOnlyKeys("tokenScopesAuthoritiesProvider", "groupClaimsAuthoritiesProvider")
+
+                assertFiltersEnabled(context, OAuth2LoginAuthenticationFilter, BearerTokenAuthenticationFilter)
+                def logoutHandler = context.getBean(OidcClientInitiatedLogoutSuccessHandler)
+                assertThat(logoutHandler.postLogoutRedirectUri).isEqualTo("{baseUrl}/logout/callback")
+                ServletRequest request = new MockHttpServletRequest()
+                request.setScheme("https")
+                request.setServerName("test.example.com")
+                assertThat(logoutHandler.postLogoutRedirectUri(request).toString()).isEqualTo("https://test.example.com:80/logout/callback")
+            }
+    }
     @Test
     void webLoginConfig_withIssuerAndClientId_pkce() {
 
@@ -560,6 +597,7 @@ class AutoConfigConditionalTest implements HttpMock {
 
                 assertWebFiltersEnabled(context, OAuth2LoginAuthenticationWebFilter, AuthenticationWebFilter)
                 assertJwtBearerWebFilterEnabled(context)
+                assertThat(context.getBean(OidcClientInitiatedServerLogoutSuccessHandler).postLogoutRedirectUri).isEqualTo("http://logout.example.com")
         }
     }
 

@@ -52,7 +52,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 
 @Configuration
@@ -76,7 +75,8 @@ class ReactiveOktaOAuth2ServerHttpServerAutoConfig {
     OidcClientInitiatedServerLogoutSuccessHandler oidcClientInitiatedServerLogoutSuccessHandler(OktaOAuth2Properties oktaOAuth2Properties,
                                                                                                 ReactiveClientRegistrationRepository repository) throws URISyntaxException {
         OidcClientInitiatedServerLogoutSuccessHandler logoutSuccessHandler = new OidcClientInitiatedServerLogoutSuccessHandler(repository);
-        logoutSuccessHandler.setPostLogoutRedirectUri(new URI(oktaOAuth2Properties.getPostLogoutRedirectUri()));
+        String logoutUri = oktaOAuth2Properties.getPostLogoutRedirectUri();
+        logoutSuccessHandler.setPostLogoutRedirectUri((logoutUri.startsWith("/") ? "{baseUrl}" : "") + logoutUri);
         return logoutSuccessHandler;
     }
 

@@ -8,6 +8,12 @@ Okta Spring Boot Starter
 
 Okta's Spring Boot Starter will enable your Spring Boot application to work with Okta via OAuth 2.0/OIDC.
 
+<a href="https://foojay.io/today/works-with-openjdk">
+   <img align="right" 
+        src="https://github.com/foojayio/badges/raw/main/works_with_openjdk/Works-with-OpenJDK.png"   
+        width="100">
+</a>
+
 ## Release status
 
 This library uses semantic versioning and follows Okta's [library version policy](https://developer.okta.com/code/library-versions/).
@@ -96,7 +102,8 @@ There are many more properties that you can optionally configure as well. Here a
 |----------|---------|---------|
 | okta.oauth2.audience   | api://default | The audience of your [Authorization Server](/docs/how-to/set-up-auth-server.html) |
 | okta.oauth2.groupsClaim | groups | The claim key in the Access Token's JWT that corresponds to an array of the users groups. |
-| okta.oauth2.postLogoutRedirectUri | N/A | Set to an absolute URI to enable [RP-Initiated (SSO) logout](https://developer.okta.com/blog/2020/03/27/spring-oidc-logout-options). |
+| okta.oauth2.postLogoutRedirectUri | N/A | Set to a relative or absolute URI to enable [RP-Initiated (SSO) logout](https://developer.okta.com/blog/2020/03/27/spring-oidc-logout-options). |
+
 **NOTE**: On setting **postLogoutRedirectUri**, you will be redirected to it after the end of your session. Therefore, this resource must be available anonymously, so be sure to add it to your `HttpSecurity` configuration.
 ```yaml
 okta:
