@@ -392,27 +392,17 @@ This module integrates with Spring Security's OAuth support, all you need is the
 
 ## Use with Spring Native
 
-You can use this starter with [Spring Native](https://github.com/spring-projects-experimental/spring-native). However, you will need to add an annotation to your main Spring Boot application class.
+You can use this starter with [Spring Native](https://github.com/spring-projects-experimental/spring-native). However, you will need to enable HTTPS in your main Spring Boot application class. For example:
 
 ```java
 package com.example.demo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.nativex.hint.AccessBits;
 import org.springframework.nativex.hint.NativeHint;
-import org.springframework.nativex.hint.ResourceHint;
-import org.springframework.nativex.hint.TypeHint;
 
+@NativeHint(options = "--enable-https")
 @SpringBootApplication
-@NativeHint(options = "--enable-url-protocols=https")
-@ResourceHint(patterns = "com/okta/commons/configcheck/configuration-validator", isBundle = true)
-@TypeHint(typeNames = {
-    "com.okta.spring.boot.oauth.OktaOpaqueTokenIntrospectConditional",
-    "com.okta.spring.boot.oauth.OktaOpaqueTokenIntrospectConditional$ClientIdCondition",
-    "com.okta.spring.boot.oauth.OktaOpaqueTokenIntrospectConditional$ClientSecretCondition",
-    "com.okta.spring.boot.oauth.OktaOpaqueTokenIntrospectConditional$IntrospectionUriCondition"
-}, access = AccessBits.ALL)
 public class DemoApplication {
 
     public static void main(String[] args) {
@@ -421,7 +411,7 @@ public class DemoApplication {
 }
 ```
 
-We are working on providing a native hints dependency with this configuration. This will allow you to add a dependency to your build file without making code changes.
+You can also configure this setting in your `pom.xml` or `build.gradle`. See [Spring Native's documentation](https://docs.spring.io/spring-native/docs/current/reference/htmlsingle/#native-image-options) for more information.
 
 ## Proxy
 
