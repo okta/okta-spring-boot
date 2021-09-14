@@ -155,23 +155,8 @@
             <dependency>
                 <groupId>io.rest-assured</groupId>
                 <artifactId>rest-assured</artifactId>
-                <version>3.2.0</version>
-            </dependency>
-            <!-- TODO: these deps should be removed, they are here temporarily to fix a dependency resolution issue
-                 the okta-oidc-tck pulls in 3.2.0 and something else pulls in a later version causing a runtime issue
-                 Next time Spring or rest-assured is updated, try to remove the following deps.
-             -->
-            <dependency>
-                <groupId>io.rest-assured</groupId>
-                <artifactId>json-path</artifactId>
                 <version>4.4.0</version>
             </dependency>
-            <dependency>
-                <groupId>io.rest-assured</groupId>
-                <artifactId>xml-path</artifactId>
-                <version>4.4.0</version>
-            </dependency>
-            <!-- end rest-assured dep fix -->
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
