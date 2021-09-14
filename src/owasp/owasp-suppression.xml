@@ -47,4 +47,19 @@
         <cve>CVE-2020-10693</cve>
     </suppress>
 
+    <!-- false positive, see https://github.com/jeremylong/DependencyCheck/issues/3606
+         This is fixed in 6.3.0
+         -->
+    <suppress base="true">
+        <notes><![CDATA[ file name: lang-tag-1.5.jar ]]></notes>
+        <gav regex="true">^com\.nimbusds:lang-tag:.*$</gav>
+        <cve>CVE-2020-23171</cve>
+    </suppress>
+
+    <suppress>
+        <notes>Suppress https://nvd.nist.gov/vuln/detail/CVE-2020-0822</notes>
+        <gav regex="true">^org\.apache\.tomcat\.embed:(tomcat-embed-core|tomcat-embed-websocket):.*$</gav>
+        <cve>CVE-2020-0822</cve>
+    </suppress>
+
 </suppressions>
