@@ -41,7 +41,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 import java.util.Collection;
 
-@Configuration(proxyBeanMethods = false)
+@Configuration
 @ConditionalOnOktaClientProperties
 @EnableConfigurationProperties(OktaOAuth2Properties.class)
 @ConditionalOnClass({ EnableWebSecurity.class, ClientRegistration.class })
@@ -73,7 +73,7 @@ class OktaOAuth2AutoConfig {
         return new OktaOidcUserService(oAuth2UserService, authoritiesProviders);
     }
 
-    @Configuration(proxyBeanMethods = false)
+    @Configuration
     @ConditionalOnDefaultWebSecurity
     static class OAuth2SecurityFilterChainConfiguration {
 
