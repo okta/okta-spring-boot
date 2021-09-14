@@ -39,6 +39,12 @@
             <optional>true</optional>
         </dependency>
 
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>22.0.0</version>
+        </dependency>
+
         <!-- Okta deps -->
         <dependency>
             <groupId>com.okta.commons</groupId>
