@@ -47,7 +47,7 @@
         <cve>CVE-2020-10693</cve>
     </suppress>
 
-    <!-- false positive, see https://github.com/jeremylong/DependencyCheck/issues/3606
+    <!-- false positive, see https://github.com/jeremylong/DependencyCheck/issues/3594
          This is fixed in 6.3.0
          -->
     <suppress base="true">
