@@ -56,10 +56,4 @@
         <cve>CVE-2020-23171</cve>
     </suppress>
 
-    <suppress>
-        <notes>Suppress https://nvd.nist.gov/vuln/detail/CVE-2020-0822</notes>
-        <gav regex="true">^org\.apache\.tomcat\.embed:(tomcat-embed-core|tomcat-embed-websocket):.*$</gav>
-        <cve>CVE-2020-0822</cve>
-    </suppress>
-
 </suppressions>
