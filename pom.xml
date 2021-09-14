@@ -140,6 +140,7 @@
                 <version>0.5.7</version>
             </dependency>
 
+            <!-- TODO: remove below tomcat deps in future (likely) springboot patch release (2.5.4+) -->
             <dependency>
                 <groupId>org.apache.tomcat.embed</groupId>
                 <artifactId>tomcat-embed-core</artifactId>
