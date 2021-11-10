@@ -36,7 +36,7 @@
         <github.slug>okta/okta-spring-boot</github.slug>
         <okta.sdk.version>6.0.0</okta.sdk.version>
         <okta.commons.version>1.2.8</okta.commons.version>
-        <embedded.tomcat.version>9.0.53</embedded.tomcat.version>
+        <embedded.tomcat.version>10.0.12</embedded.tomcat.version>
     </properties>
 
     <modules>
