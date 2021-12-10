@@ -29,6 +29,10 @@
     <name>Okta Spring Boot :: Examples</name>
     <packaging>pom</packaging>
 
+    <properties>
+       <org.thymeleaf.version>3.0.14.RELEASE</org.thymeleaf.version>
+    </properties>
+
     <modules>
         <module>siw-jquery</module>
         <module>redirect-code-flow</module>
@@ -36,6 +40,22 @@
         <module>config-server</module>
         <module>webflux-resource-server</module>
     </modules>
+
+    <dependencyManagement>
+       <dependencies>
+          <dependency>
+            <groupId>org.thymeleaf</groupId>
+            <artifactId>thymeleaf</artifactId>
+            <version>${org.thymeleaf.version}</version>
+          </dependency>
+
+          <dependency>
+            <groupId>org.thymeleaf</groupId>
+            <artifactId>thymeleaf-spring5</artifactId>
+            <version>${org.thymeleaf.version}</version>
+          </dependency>
+       </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>
