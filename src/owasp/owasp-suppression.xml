@@ -19,34 +19,6 @@
   -->
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
 
-    <!-- https://pivotal.io/security/cve-2018-1258
-         Update to 5.0.5.RELEASE+ or Spring Boot 2.0.2.RELEASE+
-         (Wrong version detected by OWASP plugin)
-         See https://github.com/jeremylong/DependencyCheck/issues/1827 for more info -->
-    <suppress>
-        <cve>CVE-2018-1258</cve>
-    </suppress>
-
-   <!-- false positive, see https://github.com/jeremylong/DependencyCheck/issues/1665 -->
-    <suppress>
-        <notes><![CDATA[ file name: spring-security-rsa-1.0.9.RELEASE.jar ]]></notes>
-        <gav regex="true">^org\.springframework\.security:spring-security-rsa:.*$</gav>
-        <cve>CVE-2011-2731</cve>
-        <cve>CVE-2011-2732</cve>
-        <cve>CVE-2012-5055</cve>
-    </suppress>
-
-    <!-- false positive, this CVE was fixed in 6.1.5 per:
-         https://in.relation.to/2020/05/07/hibernate-validator-615-6020-released/
-         And the release notes for 6.2.0 make reference to that post/fix:
-         https://in.relation.to/2021/01/06/hibernate-validator-700-62-final-released/
-         -->
-    <suppress>
-        <notes><![CDATA[ file name: spring-security-rsa-1.0.9.RELEASE.jar ]]></notes>
-        <gav regex="true">^org\.hibernate\.validator:hibernate-validator:6\.2.*$</gav>
-        <cve>CVE-2020-10693</cve>
-    </suppress>
-
     <!-- false positive, see https://github.com/jeremylong/DependencyCheck/issues/3594
          This is fixed in 6.3.0
          -->
@@ -54,6 +26,24 @@
         <notes><![CDATA[ file name: lang-tag-1.5.jar ]]></notes>
         <gav regex="true">^com\.nimbusds:lang-tag:.*$</gav>
         <cve>CVE-2020-23171</cve>
+    </suppress>
+
+    <!-- false positive, see https://github.com/jeremylong/DependencyCheck/issues/3865 -->
+    <suppress base="true">
+        <notes><![CDATA[ file name: netty-tcnative-classes-2.0.46.Final.jar ]]></notes>
+        <gav regex="true">^io\.netty:netty-tcnative-classes.*$</gav>
+        <cve>CVE-2014-3488</cve>
+        <cve>CVE-2015-2156</cve>
+        <cve>CVE-2019-16869</cve>
+        <cve>CVE-2019-20444</cve>
+        <cve>CVE-2019-20445</cve>
+        <cve>CVE-2021-21290</cve>
+        <cve>CVE-2021-21295</cve>
+        <cve>CVE-2021-21409</cve>
+        <cve>CVE-2021-37136</cve>
+        <cve>CVE-2021-37137</cve>
+        <cve>CVE-2021-42550</cve>
+        <cve>CVE-2021-43797</cve>
     </suppress>
 
 </suppressions>
