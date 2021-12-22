@@ -36,7 +36,6 @@
         <github.slug>okta/okta-spring-boot</github.slug>
         <okta.sdk.version>8.0.0</okta.sdk.version>
         <okta.commons.version>1.3.0</okta.commons.version>
-        <embedded.tomcat.version>9.0.54</embedded.tomcat.version>
     </properties>
 
     <modules>
@@ -139,20 +138,6 @@
                 <artifactId>okta-oidc-tck</artifactId>
                 <version>0.5.7</version>
             </dependency>
-
-            <!-- TODO: remove below tomcat deps in future (likely) springboot patch release (2.5.4+) -->
-<!--
-            <dependency>
-                <groupId>org.apache.tomcat.embed</groupId>
-                <artifactId>tomcat-embed-core</artifactId>
-                <version>${embedded.tomcat.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.tomcat.embed</groupId>
-                <artifactId>tomcat-embed-websocket</artifactId>
-                <version>${embedded.tomcat.version}</version>
-            </dependency>
--->
 
             <!-- test dependencies -->
             <dependency>
