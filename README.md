@@ -82,9 +82,9 @@ compile 'com.okta.spring:okta-spring-boot-starter:${okta.springboot.version}'
 
 where ${okta.springboot.version} is the latest published version in [Maven Central](https://search.maven.org/search?q=g:com.okta.spring%20a:okta-spring-boot-starter).
 
-## Supporting client side applications - OAuth Implicit flow
+## Building API Applications - Resource Server
 
-Are you writing backend endpoints in order to support a client side application? If so follow along, otherwise skip to the next section.
+Are you building backend endpoints in order to support a client side application? If so follow along, otherwise skip to the next section.
 
 ### Configure your properties
 
@@ -92,43 +92,15 @@ You can configure your applications properties with environment variables, syste
 
 Only these three properties are required for a web app:
 
-| Property | Default | Details |
-|----------|---------|---------|
-| okta.oauth2.issuer     | N/A | [Authorization Server](https://developer.okta.com/docs/how-to/set-up-auth-server.html) issuer URL, i.e.: https://{yourOktaDomain}/oauth2/default |
-| okta.oauth2.clientId   | N/A | The Client Id of your Okta OIDC application |
-| okta.oauth2.clientSecret   | N/A | The Client Secret of your Okta OIDC application |
+| Property | Default | Required | Details |
+|----------|---------|----------|---------|
+| okta.oauth2.issuer     | N/A | ✅ | [Authorization Server](https://developer.okta.com/docs/how-to/set-up-auth-server.html) issuer URL, i.e.: https://{yourOktaDomain}/oauth2/default |
+| okta.oauth2.clientId   | N/A | `*` | The Client Id of your Okta OIDC application |
+| okta.oauth2.clientSecret   | N/A | `*` | The Client Secret of your Okta OIDC application |
+| okta.oauth2.audience   | `api://default` |  | The audience of your [Authorization Server](/docs/how-to/set-up-auth-server.html) |
+| okta.oauth2.groupsClaim | `groups` | | The claim key in the Access Token's JWT that corresponds to an array of the users groups. |
 
-There are many more properties that you can optionally configure as well. Here are some examples:
-
-| Property | Default | Details |
-|----------|---------|---------|
-| okta.oauth2.audience   | api://default | The audience of your [Authorization Server](/docs/how-to/set-up-auth-server.html) |
-| okta.oauth2.groupsClaim | groups | The claim key in the Access Token's JWT that corresponds to an array of the users groups. |
-| okta.oauth2.postLogoutRedirectUri | N/A | Set to a relative or absolute URI to enable [RP-Initiated (SSO) logout](https://developer.okta.com/blog/2020/03/27/spring-oidc-logout-options). |
-
-**NOTE**: On setting **postLogoutRedirectUri**, you will be redirected to it after the end of your session. Therefore, this resource must be available anonymously, so be sure to add it to your `HttpSecurity` configuration.
-```yaml
-okta:
-  oauth2:
-    postLogoutRedirectUri: "http://localhost:8080/logout/callback"
-```
-```java
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-
-@Configuration
-public class WebConfig extends WebSecurityConfigurerAdapter {
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-            // allow anonymous access to the root and logout pages
-            .antMatchers("/", "/logout/callback").permitAll()
-            // all other requests
-            .anyRequest().authenticated();
-    }
-}
-```
+`*` Required when using [opaque access tokens](https://developer.okta.com/blog/2020/08/07/spring-boot-remote-vs-local-tokens).
 
 ### Create a Controller
 
@@ -144,8 +116,8 @@ public class DemoApplication {
 	}
 
 	@GetMapping("/hello-oauth")
-	public String hello(@AuthenticationPrincipal OidcUser user) {
-	    return "Hello, " + user.getFullName();
+	public String hello(Principal principal) {
+	    return "Hello, " + principal.getName();
 	}
 }
 ```
@@ -326,6 +298,38 @@ You can configure your applications properties with environment variables, syste
 | okta.oauth2.issuer     | true | [Authorization Server](/docs/how-to/set-up-auth-server.html) issuer URL, i.e.: https://{yourOktaDomain}/oauth2/default |
 | okta.oauth2.clientId   | true | The Client Id of your Okta OIDC application |
 | okta.oauth2.clientSecret   | true | The Client Secret of your Okta OIDC application |
+| okta.oauth2.postLogoutRedirectUri | false | Set to a relative or absolute URI to enable [RP-Initiated (SSO) logout](https://developer.okta.com/blog/2020/03/27/spring-oidc-logout-options). |
+
+**NOTE**: On setting **postLogoutRedirectUri**, you will be redirected to it after the end of your session. Therefore, this resource must be available anonymously, so be sure to add it to your `HttpSecurity` configuration.
+
+<details>
+<summary>See a <code>postLogoutRedirectUri</code> example:</summary>
+
+```yaml
+okta:
+  oauth2:
+    postLogoutRedirectUri: "http://localhost:8080/logout/callback"
+```
+
+```java
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+
+@Configuration
+public class WebConfig extends WebSecurityConfigurerAdapter {
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.authorizeRequests()
+            // allow anonymous access to the root and logout pages
+            .antMatchers("/", "/logout/callback").permitAll()
+            // all other requests
+            .anyRequest().authenticated();
+    }
+}
+```
+
+</details>
 
 ### Create a simple application
 
