@@ -20,8 +20,10 @@ import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Allows for custom {@link GrantedAuthority}s to be added to the current OAuth Principal. Multiple implementations
@@ -45,5 +47,15 @@ public interface AuthoritiesProvider {
 
     default Collection<? extends GrantedAuthority> getAuthorities(OidcUser user, OidcUserRequest userRequest) {
         return getAuthorities((OAuth2User) user, userRequest);
+    }
+
+    /**
+     * Returns collections of authorities based on the contents of a JWT or other Bearer token.
+     * @param token a bearer token
+     * @return A collections of authorities based on the contents of a JWT or other Bearer token.
+     * @since 2.2.0
+     */
+    default Collection<GrantedAuthority> getAuthorities(Jwt token) {
+        return Collections.emptySet();
     }
 }

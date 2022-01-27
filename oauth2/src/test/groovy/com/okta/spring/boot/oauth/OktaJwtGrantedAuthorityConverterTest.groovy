@@ -25,7 +25,7 @@ import static org.hamcrest.Matchers.hasItems
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.hasSize
 
-class OktaJwtAuthenticationConverterTest {
+class OktaJwtGrantedAuthorityConverterTest {
 
     @Test
     void extractAuthorities_simpleTest() {
@@ -36,11 +36,8 @@ class OktaJwtAuthenticationConverterTest {
                 myGroups: ["g1", "g2"]
         ])
 
-        def authorities = new OktaJwtAuthenticationConverter("myGroups").extractAuthorities(jwt)
+        def authorities = new OktaJwtGrantedAuthorityConverter("myGroups").convert(jwt)
         assertThat authorities, hasItems(
-                new SimpleGrantedAuthority("SCOPE_one"),
-                new SimpleGrantedAuthority("SCOPE_two"),
-                new SimpleGrantedAuthority("SCOPE_three"),
                 new SimpleGrantedAuthority("g1"),
                 new SimpleGrantedAuthority("g2"))
     }
@@ -49,7 +46,7 @@ class OktaJwtAuthenticationConverterTest {
     void extractAuthorities_emptyTest() {
         def jwt = new Jwt("foo", Instant.now(), Instant.now().plusMillis(1000L), [simple: "value"], [simple: "value"]) // these maps must not be empty
 
-        def authorities = new OktaJwtAuthenticationConverter("myGroups").extractAuthorities(jwt)
+        def authorities = new OktaJwtGrantedAuthorityConverter("myGroups").convert(jwt)
         assertThat authorities, hasSize(0)
     }
 }

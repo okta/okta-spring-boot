@@ -28,6 +28,7 @@ import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationC
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.web.client.RestTemplate;
 
 import java.lang.reflect.Field;
@@ -83,7 +84,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                 if (getJwtConfigurer(oAuth2ResourceServerConfigurer).isPresent()) {
                     log.debug("JWT configurer is set in OAuth resource server configuration. " +
                         "JWT validation will be configured.");
-                    configureResourceServerForJwtValidation(http, oktaOAuth2Properties);
+                    configureResourceServerForJwtValidation(http, context.getBean(JwtAuthenticationConverter.class));
                 } else if (getOpaqueTokenConfigurer(oAuth2ResourceServerConfigurer).isPresent()) {
                     log.debug("Opaque Token configurer is set in OAuth resource server configuration. " +
                         "Opaque Token validation/introspection will be configured.");
@@ -151,9 +152,9 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         }
     }
 
-    private void configureResourceServerForJwtValidation(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {
+    private void configureResourceServerForJwtValidation(HttpSecurity http, JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
         http.oauth2ResourceServer()
-            .jwt().jwtAuthenticationConverter(new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim()));
+            .jwt().jwtAuthenticationConverter(jwtAuthenticationConverter);
     }
 
     private void configureResourceServerForOpaqueTokenValidation(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {

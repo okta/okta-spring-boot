@@ -180,7 +180,7 @@ class AutoConfigConditionalTest implements HttpMock {
             .run { context ->
                 assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
                 assertThat(context).hasSingleBean(JwtDecoder)
-                assertThat(context).hasSingleBean(OktaJwtAuthenticationConverter)
+                assertThat(context).hasSingleBean(OktaJwtGrantedAuthorityConverter)
                 assertThat(context).doesNotHaveBean(OktaOAuth2AutoConfig)
                 assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2AutoConfig)
                 assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerAutoConfig)
@@ -304,7 +304,7 @@ class AutoConfigConditionalTest implements HttpMock {
 
             assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
             assertThat(context).hasSingleBean(JwtDecoder)
-            assertThat(context).hasSingleBean(OktaJwtAuthenticationConverter)
+            assertThat(context).hasSingleBean(OktaJwtGrantedAuthorityConverter)
             assertThat(context).hasSingleBean(OAuth2ClientProperties)
             assertThat(context).hasSingleBean(OktaOAuth2Properties)
             assertThat(context).hasSingleBean(OktaOAuth2AutoConfig)
@@ -431,7 +431,7 @@ class AutoConfigConditionalTest implements HttpMock {
 
             assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
             assertThat(context).hasSingleBean(JwtDecoder)
-            assertThat(context).hasSingleBean(OktaJwtAuthenticationConverter)
+            assertThat(context).hasSingleBean(OktaJwtGrantedAuthorityConverter)
             assertThat(context).hasSingleBean(OAuth2ClientProperties)
             assertThat(context).hasSingleBean(OktaOAuth2Properties)
             assertThat(context).hasSingleBean(OktaOAuth2AutoConfig)

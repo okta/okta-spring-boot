@@ -15,27 +15,23 @@
  */
 package com.okta.spring.boot.oauth;
 
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 
 import java.util.Collection;
 import java.util.HashSet;
 
-final class OktaJwtAuthenticationConverter extends JwtAuthenticationConverter {
+final class OktaJwtGrantedAuthorityConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
 
     private final String groupClaim;
 
-    public OktaJwtAuthenticationConverter(String groupClaim) {
+    public OktaJwtGrantedAuthorityConverter(String groupClaim) {
         this.groupClaim = groupClaim;
     }
 
     @Override
-    protected Collection<GrantedAuthority> extractAuthorities(Jwt jwt) {
-
-        Collection<GrantedAuthority> result = new HashSet<>(super.extractAuthorities(jwt));
-        result.addAll(TokenUtil.tokenClaimsToAuthorities(jwt.getClaims(), groupClaim));
-
-        return result;
+    public Collection<GrantedAuthority> convert(Jwt jwt) {
+        return new HashSet<>(TokenUtil.tokenClaimsToAuthorities(jwt.getClaims(), groupClaim));
     }
 }
