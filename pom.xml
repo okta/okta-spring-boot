@@ -56,6 +56,14 @@
         <dependencies>
 
             <dependency>
+                <groupId>io.rest-assured</groupId>
+                <artifactId>rest-assured-bom</artifactId>
+                <version>5.0.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
                 <!-- Import dependency management from Spring Boot -->
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -136,7 +144,7 @@
             <dependency>
                 <groupId>com.okta.oidc.tck</groupId>
                 <artifactId>okta-oidc-tck</artifactId>
-                <version>0.5.7</version>
+                <version>0.5.8-SNAPSHOT</version>
             </dependency>
 
             <!-- test dependencies -->
@@ -154,7 +162,7 @@
             </dependency>
             <dependency>
                 <groupId>io.rest-assured</groupId>
-                <artifactId>rest-assured-all</artifactId>
+                <artifactId>rest-assured</artifactId>
                 <version>5.0.0</version>
                 <scope>test</scope>
             </dependency>
