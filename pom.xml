@@ -31,10 +31,10 @@
     <packaging>pom</packaging>
 
     <properties>
-        <spring-boot.version>2.6.5</spring-boot.version>
+        <spring-boot.version>2.6.6</spring-boot.version>
         <spring-cloud.version>3.1.1</spring-cloud.version>
         <github.slug>okta/okta-spring-boot</github.slug>
-        <okta.sdk.version>8.1.0</okta.sdk.version>
+        <okta.sdk.version>8.2.0</okta.sdk.version>
         <okta.commons.version>1.3.0</okta.commons.version>
     </properties>
 
@@ -163,7 +163,7 @@
             <dependency>
                 <groupId>io.rest-assured</groupId>
                 <artifactId>rest-assured</artifactId>
-                <version>5.0.0</version>
+                <version>5.0.1</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
