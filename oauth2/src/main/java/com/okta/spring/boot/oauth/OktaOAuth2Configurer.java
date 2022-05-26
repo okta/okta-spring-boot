@@ -62,7 +62,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                 && !isEmpty(propertiesProvider.getIssuerUri())
                 && !isEmpty(propertiesRegistration.getClientId())) {
                 // configure Okta user services
-                configureLogin(http, oktaOAuth2Properties, context.getBean(Environment.class));
+                configureLogin(http, oktaOAuth2Properties, context.getEnvironment());
 
                 // check for RP-Initiated logout
                 if (!context.getBeansOfType(OidcClientInitiatedLogoutSuccessHandler.class).isEmpty()) {
