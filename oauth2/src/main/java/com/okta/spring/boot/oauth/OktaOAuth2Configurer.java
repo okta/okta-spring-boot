@@ -135,6 +135,23 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         return Optional.ofNullable((T) field.get(source));
     }
 
+    private void unsetJwtConfigurer(OAuth2ResourceServerConfigurer oAuth2ResourceServerConfigurer) {
+
+        AccessController.doPrivileged((PrivilegedAction<Field>) () -> {
+            Field result = null;
+            try {
+                result = OAuth2ResourceServerConfigurer.class.getDeclaredField("jwtConfigurer");
+                result.setAccessible(true);
+
+                result.set(oAuth2ResourceServerConfigurer, null);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                log.warn("Could not access field '" + "jwtConfigurer" + "' of {} via reflection",
+                    OAuth2ResourceServerConfigurer.class.getName(), e);
+            }
+            return result;
+        });
+    }
+
     private void configureLogin(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties, Environment environment) throws Exception {
 
         RestTemplate restTemplate = OktaOAuth2ResourceServerAutoConfig.restTemplate(oktaOAuth2Properties);
@@ -159,6 +176,11 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
     private void configureResourceServerForOpaqueTokenValidation(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {
 
         if (!isEmpty(oktaOAuth2Properties.getClientId()) && !isEmpty(oktaOAuth2Properties.getClientSecret())) {
+            // Spring (2.7.x+) configures JWT be default and this creates startup failure "Spring Security
+            // only supports JWTs or Opaque Tokens, not both at the same time" when we try to configure Opaque Token mode in following line.
+            // Therefore, we are unsetting JWT mode before attempting to configure Opaque Token mode for ROOT issuer case.
+            unsetJwtConfigurer(http.getConfigurer(OAuth2ResourceServerConfigurer.class));
+
             http.oauth2ResourceServer().opaqueToken();
         }
     }
