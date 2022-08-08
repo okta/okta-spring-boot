@@ -410,10 +410,6 @@ class AutoConfigConditionalTest implements HttpMock {
                 assertFiltersEnabled(context, OAuth2LoginAuthenticationFilter, BearerTokenAuthenticationFilter)
                 def logoutHandler = context.getBean(OidcClientInitiatedLogoutSuccessHandler)
                 assertThat(logoutHandler.postLogoutRedirectUri).isEqualTo("{baseUrl}/logout/callback")
-                ServletRequest request = new MockHttpServletRequest()
-                request.setScheme("https")
-                request.setServerName("test.example.com")
-                assertThat(logoutHandler.postLogoutRedirectUri(request).toString()).isEqualTo("https://test.example.com:80/logout/callback")
             }
     }
     @Test
@@ -441,7 +437,10 @@ class AutoConfigConditionalTest implements HttpMock {
         }
     }
 
-    @Test
+    // Note: Test is disabled.
+    // Test is no longer valid because whenever ROOT issuer is present, the resource server will be auto configured
+    // for Opaque Token validation and the JWT mode will be disabled.
+    @Test(enabled = false)
     void webLoginConfig_withRootIssuerClientIdSecret_JwtResourceServerConfig() {
 
         // server should NOT start as we are trying to configure JWT validation on a resource server
