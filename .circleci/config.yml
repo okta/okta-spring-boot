@@ -23,16 +23,8 @@ jobs:
         JVM_OPTS: -Xmx3200m
     steps: *build_steps
 
-  jdk18:
-    docker:
-      - image: cimg/openjdk:18.0.1
-    environment:
-      JVM_OPTS: -Xmx3200m
-    steps: *build_steps
-
 workflows:
   build_and_test:
     jobs:
       - jdk8
       - jdk11
-      - jdk18
