@@ -410,6 +410,10 @@ class AutoConfigConditionalTest implements HttpMock {
                 assertFiltersEnabled(context, OAuth2LoginAuthenticationFilter, BearerTokenAuthenticationFilter)
                 def logoutHandler = context.getBean(OidcClientInitiatedLogoutSuccessHandler)
                 assertThat(logoutHandler.postLogoutRedirectUri).isEqualTo("{baseUrl}/logout/callback")
+                ServletRequest request = new MockHttpServletRequest()
+                request.setScheme("https")
+                request.setServerName("test.example.com")
+                assertThat(logoutHandler.postLogoutRedirectUri(request).toString()).isEqualTo("https://test.example.com:80/logout/callback")
             }
     }
     @Test
