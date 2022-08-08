@@ -1,0 +1,30 @@
+version: 2.1
+
+aliases:
+
+  - &build_steps
+    - checkout
+    - run: java -version
+    - run: ./mvnw clean install -Pci
+
+jobs:
+  
+  jdk8:
+    docker:
+      - image: cimg/openjdk:8.0.322
+    environment:
+        JVM_OPTS: -Xmx3200m
+    steps: *build_steps
+  
+  jdk11:
+    docker:
+      - image: cimg/openjdk:11.0.13
+    environment:
+        JVM_OPTS: -Xmx3200m
+    steps: *build_steps
+          
+workflows:
+  build_and_test:
+    jobs:
+      - jdk8
+      - jdk11
