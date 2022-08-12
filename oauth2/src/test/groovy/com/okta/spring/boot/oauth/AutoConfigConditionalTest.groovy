@@ -437,22 +437,29 @@ class AutoConfigConditionalTest implements HttpMock {
         }
     }
 
-    // Note: Test is disabled.
-    // Test is no longer valid because whenever ROOT issuer is present, the resource server will be auto configured
-    // for Opaque Token validation and the JWT mode will be disabled.
-    @Test(enabled = false)
+    @Test
     void webLoginConfig_withRootIssuerClientIdSecret_JwtResourceServerConfig() {
 
-        // server should NOT start as we are trying to configure JWT validation on a resource server
-        // and also specifying a root issuer. Spring does NOT allow both JWT and Opaque Token
-        // configurations at the same time.
+        // server would start with Opaque Token validation mode since the issuer is ROOT.
         webContextRunner(JwtResourceServerConfiguredApp).withPropertyValues(
             "okta.oauth2.issuer=https://test.example.com",
             "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}", // work around to not validate the https url
             "okta.oauth2.client-id=test-client-id",
             "okta.oauth2.client-secret=test-client-secret")
             .run { context ->
-                assertThat(context).hasFailed()
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2AutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ServerHttpServerAutoConfig)
+
+                assertThat(context).getBeans(AuthoritiesProvider).containsOnlyKeys("tokenScopesAuthoritiesProvider", "groupClaimsAuthoritiesProvider")
+                assertThat(context).hasSingleBean(OktaOAuth2AutoConfig)
+                assertThat(context).hasSingleBean(OAuth2ClientProperties)
+                assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).hasSingleBean(OpaqueTokenIntrospector)
+                assertThat(context).hasSingleBean(OktaOAuth2Properties)
+
+                assertFiltersEnabled(context, OAuth2LoginAuthenticationFilter, BearerTokenAuthenticationFilter)
             }
     }
 
