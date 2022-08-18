@@ -17,7 +17,7 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
 
     <!-- false positive, see https://github.com/jeremylong/DependencyCheck/issues/3594
          This is fixed in 6.3.0
@@ -46,4 +46,19 @@
         <cve>CVE-2021-43797</cve>
     </suppress>
 
+    <!-- false positive, see https://github.com/jeremylong/DependencyCheck/issues/4628 -->
+    <suppress base="true">
+        <notes><![CDATA[ FP per issue #4628 ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework/spring-web@.*$</packageUrl>
+        <cve>CVE-2016-1000027</cve>
+    </suppress>
+
+    <!-- false positive, see https://github.com/jeremylong/DependencyCheck/issues/4564 -->
+    <suppress base="true">
+        <notes><![CDATA[ FP per issue #4564 ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring-security-crypto@.*$</packageUrl>
+        <cve>CVE-2020-5408</cve>
+    </suppress>
+
 </suppressions>
+
