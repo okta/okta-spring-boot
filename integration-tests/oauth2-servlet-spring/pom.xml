@@ -67,6 +67,7 @@
                     <configuration>
                         <dependenciesToScan>
                             <dependency>com.okta.oidc.tck:okta-oidc-tck</dependency>
+                            <dependency>com.okta.spring:okta-spring-boot-integration-tests-common-servlet</dependency>
                         </dependenciesToScan>
                         <reuseForks>true</reuseForks>
                         <parallel>classesAndMethods</parallel>
