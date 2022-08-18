@@ -15,7 +15,6 @@
  */
 package com.okta.spring.tests.common.servlet.code;
 
-import com.okta.spring.boot.oauth.Okta;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
