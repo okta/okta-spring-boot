@@ -58,7 +58,7 @@ public class BasicRedirectCodeFlowApplication {
     @Bean
     SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository) throws Exception {
        http.authorizeRequests().anyRequest().authenticated();
-       Okta.configureOAuth2WithPkce(http, clientRegistrationRepository);
+       configureOAuth2WithPkce(http, clientRegistrationRepository);
        http.oauth2Client();
 
         // disable csrf to make testing easier
