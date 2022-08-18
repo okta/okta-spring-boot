@@ -30,6 +30,7 @@ import org.springframework.security.config.annotation.web.reactive.EnableWebFlux
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcReactiveOAuth2UserService;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserService;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -66,11 +67,11 @@ class ReactiveOktaOAuth2AutoConfig {
     @Bean
     @ConditionalOnBean(ReactiveJwtDecoder.class)
     @ConditionalOnMissingBean(SecurityWebFilterChain.class)
-    SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http, ReactiveJwtDecoder jwtDecoder) {
+    SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http, ReactiveJwtDecoder jwtDecoder, ReactiveClientRegistrationRepository clientRegistrationRepository) {
         // as of Spring Security 5.4 the default chain uses oauth2Login OR a JWT resource server (NOT both)
         // this does the same as both defaults merged together (and provides the previous behavior)
         http.authorizeExchange().anyExchange().authenticated();
-        http.oauth2Login();
+        Okta.configureOAuth2WithPkce(http, clientRegistrationRepository);
         http.oauth2Client();
         http.oauth2ResourceServer((server) -> customDecoder(server, jwtDecoder));
         return http.build();

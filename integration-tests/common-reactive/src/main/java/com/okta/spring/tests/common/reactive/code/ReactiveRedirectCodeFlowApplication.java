@@ -15,6 +15,7 @@
  */
 package com.okta.spring.tests.common.reactive.code;
 
+import com.okta.spring.boot.oauth.Okta;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -22,6 +23,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -56,15 +58,16 @@ public class ReactiveRedirectCodeFlowApplication {
     static class SecurityConfiguration {
 
         @Bean
-        public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
-            return http
-                    .authorizeExchange()
-                    .anyExchange().authenticated()
-                    .and()
-                    .oauth2Login()
-                    .and()
-                    .csrf().disable() // make testing easier
-                    .build();
+        public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http, ReactiveClientRegistrationRepository clientRegistrationRepository) {
+            http
+                .authorizeExchange()
+                .anyExchange().authenticated()
+                .and()
+                .csrf().disable(); // make testing easier
+
+            Okta.configureOAuth2WithPkce(http, clientRegistrationRepository);
+
+            return http.build();
         }
     }
 
