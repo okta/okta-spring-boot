@@ -15,17 +15,21 @@
  */
 package com.okta.spring.tests.common.servlet.code;
 
+import com.okta.spring.boot.oauth.Okta;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
+
+import static com.okta.spring.boot.oauth.Okta.configureOAuth2WithPkce;
 
 @SpringBootApplication
 @RestController
@@ -51,17 +55,16 @@ public class BasicRedirectCodeFlowApplication {
     }
 
 // The following isn't needed as the equivalent is provided by Spring Boot Security by default
-    @Configuration
-    static class WebConfig extends WebSecurityConfigurerAdapter {
-        @Override
-        protected void configure(HttpSecurity http) throws Exception {
-            http.authorizeRequests().anyRequest().authenticated()
-                .and().oauth2Client()
-                .and().oauth2Login();
+    @Bean
+    SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository) throws Exception {
+       http.authorizeRequests().anyRequest().authenticated();
+       Okta.configureOAuth2WithPkce(http, clientRegistrationRepository);
+       http.oauth2Client();
 
-            // disable csrf to make testing easier
-            http.csrf().disable();
-        }
+        // disable csrf to make testing easier
+       http.csrf().disable();
+
+       return http.build();
     }
 
     public static void main(String[] args) {
