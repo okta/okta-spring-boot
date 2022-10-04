@@ -33,6 +33,7 @@ jobs:
         with:
           distribution: zulu
           java-version: ${{ matrix.java }}
+          check-latest: true
 
       - name: Build and Test
         run: |
