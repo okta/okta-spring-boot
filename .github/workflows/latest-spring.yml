@@ -24,7 +24,7 @@ jobs:
     name: Java ${{ matrix.java }}
     strategy:
       matrix:
-        java: [11]
+        java: [11, 17]
     steps:
       - uses: actions/checkout@v3
 
