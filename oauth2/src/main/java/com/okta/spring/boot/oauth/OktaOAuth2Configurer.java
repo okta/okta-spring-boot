@@ -15,7 +15,6 @@
  */
 package com.okta.spring.boot.oauth;
 
-import com.okta.commons.lang.Strings;
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -168,17 +167,21 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
 
         RestTemplate restTemplate = OktaOAuth2ResourceServerAutoConfig.restTemplate(oktaOAuth2Properties);
 
+        CustomAuthorizationRequestResolver customAuthorizationRequestResolver = new CustomAuthorizationRequestResolver(
+            clientRegistrationRepository,
+            oktaOAuth2Properties.getIssuer() + "/v1/authorize",
+            oktaOAuth2Properties.getAcrValues(),
+            oktaOAuth2Properties.getPrompt(),
+            oktaOAuth2Properties.getEnrollAmrValues());
+
         http.oauth2Login()
                 .authorizationEndpoint()
-                .authorizationRequestResolver(new CustomAuthorizationRequestResolver(
-                    clientRegistrationRepository,
-                    oktaOAuth2Properties.getIssuer() + "/v1/authorize",
-                    oktaOAuth2Properties.getAcrValues(),
-                    oktaOAuth2Properties.getPrompt(),
-                    oktaOAuth2Properties.getEnrollAmrValues()))
+                .authorizationRequestResolver(customAuthorizationRequestResolver)
             .and()
             .tokenEndpoint()
             .accessTokenResponseClient(accessTokenResponseClient(restTemplate));
+
+        Okta.configureOAuth2WithPkce(http, clientRegistrationRepository);
 
         String redirectUriProperty = environment.getProperty("spring.security.oauth2.client.registration.okta.redirect-uri");
         if (redirectUriProperty != null) {
