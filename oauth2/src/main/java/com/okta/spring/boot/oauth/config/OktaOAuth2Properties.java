@@ -72,6 +72,28 @@ public final class OktaOAuth2Properties implements Validator {
     private String postLogoutRedirectUri;
 
     /**
+     * Authentication Context Reference (acr_values).
+     * e.g. urn:okta:loa:2fa:any:ifpossible
+     * 'acr_values' is a supported query param on /authorize call (optional).
+     * 'acr' claim will be included in Tokens (ID + Access) only when 'acr_values' query parameter
+     * is passed in /authorize API call.
+     */
+    private String acrValues;
+
+    /**
+     *  Used to support enrollment of a factor during an /authorize call.
+     *  e.g. enroll_authenticator
+     */
+    private String prompt;
+
+    /**
+     *  space-delimited, case-sensitive string that represents a list of authenticator method references.
+     *  'enroll_amr_values' is a supported query param on /authorize call (optional).
+     *  e.g. sms okta_verify
+     */
+    private String enrollAmrValues;
+
+    /**
      * Proxy Properties
      */
     private Proxy proxy;
@@ -157,6 +179,30 @@ public final class OktaOAuth2Properties implements Validator {
 
     public void setPostLogoutRedirectUri(String postLogoutRedirectUri) {
         this.postLogoutRedirectUri = postLogoutRedirectUri;
+    }
+
+    public String getAcrValues() {
+        return acrValues;
+    }
+
+    public void setAcrValues(String acrValues) {
+        this.acrValues = acrValues;
+    }
+
+    public String getPrompt() {
+        return prompt;
+    }
+
+    public void setPrompt(String prompt) {
+        this.prompt = prompt;
+    }
+
+    public String getEnrollAmrValues() {
+        return enrollAmrValues;
+    }
+
+    public void setEnrollAmrValues(String enrollAmrValues) {
+        this.enrollAmrValues = enrollAmrValues;
     }
 
     public Proxy getProxy() {

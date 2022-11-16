@@ -15,6 +15,7 @@
  */
 package com.okta.spring.boot.oauth;
 
+import com.okta.commons.lang.Strings;
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +29,7 @@ import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationC
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.web.client.RestTemplate;
 
 import java.lang.reflect.Field;
@@ -62,7 +64,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                 && !isEmpty(propertiesProvider.getIssuerUri())
                 && !isEmpty(propertiesRegistration.getClientId())) {
                 // configure Okta user services
-                configureLogin(http, oktaOAuth2Properties, context.getEnvironment());
+                configureLogin(http, oktaOAuth2Properties, context.getBean(ClientRegistrationRepository.class), context.getEnvironment());
 
                 // check for RP-Initiated logout
                 if (!context.getBeansOfType(OidcClientInitiatedLogoutSuccessHandler.class).isEmpty()) {
@@ -161,11 +163,20 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         });
     }
 
-    private void configureLogin(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties, Environment environment) throws Exception {
+    private void configureLogin(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties,
+                                ClientRegistrationRepository clientRegistrationRepository, Environment environment) throws Exception {
 
         RestTemplate restTemplate = OktaOAuth2ResourceServerAutoConfig.restTemplate(oktaOAuth2Properties);
 
         http.oauth2Login()
+                .authorizationEndpoint()
+                .authorizationRequestResolver(new CustomAuthorizationRequestResolver(
+                    clientRegistrationRepository,
+                    oktaOAuth2Properties.getIssuer() + "/v1/authorize",
+                    oktaOAuth2Properties.getAcrValues(),
+                    oktaOAuth2Properties.getPrompt(),
+                    oktaOAuth2Properties.getEnrollAmrValues()))
+            .and()
             .tokenEndpoint()
             .accessTokenResponseClient(accessTokenResponseClient(restTemplate));
 
