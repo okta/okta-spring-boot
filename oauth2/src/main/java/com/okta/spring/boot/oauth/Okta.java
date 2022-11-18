@@ -15,6 +15,9 @@
  */
 package com.okta.spring.boot.oauth;
 
+import com.okta.commons.lang.Strings;
+import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -91,7 +94,7 @@ public final class Okta {
      * @param clientRegistrationRepository the repository bean, this should be injected into the calling method.
      * @return the {@code http} to allow method chaining
      */
-    public static ServerHttpSecurity configureOAuth2WithPkce(ServerHttpSecurity http, ReactiveClientRegistrationRepository clientRegistrationRepository) {
+    public static ServerHttpSecurity configureOAuth2WithPkceAndAuthReqParams(ServerHttpSecurity http, ReactiveClientRegistrationRepository clientRegistrationRepository) {
         // Create a request resolver that enables PKCE
         DefaultServerOAuth2AuthorizationRequestResolver authorizationRequestResolver = new DefaultServerOAuth2AuthorizationRequestResolver(clientRegistrationRepository);
         authorizationRequestResolver.setAuthorizationRequestCustomizer(withPkce());
@@ -102,8 +105,8 @@ public final class Okta {
     }
 
     /**
-     * Configures the {@code http} with an OAuth2 Login, that supports PKCE. The default Spring Security implementation
-     * only enables PKCE for public clients.
+     * Configures the {@code http} with an OAuth2 Login that supports PKCE and additional Okta supported authorization request query params.
+     * The default Spring Security implementation only enables PKCE for public clients.
      * <p>
      * <b>NOTE:</b> Enabling PKCE will be required for all clients (public and confidential) in the future OAuth 2.1 spec.
      *
@@ -112,10 +115,35 @@ public final class Okta {
      * @return the {@code http} to allow method chaining
      * @throws Exception
      */
-    public static HttpSecurity configureOAuth2WithPkce(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository) throws Exception {
+    public static HttpSecurity configureOAuth2WithPkceAndAuthReqParams(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository) throws Exception {
+
+        ApplicationContext context = http.getSharedObject(ApplicationContext.class);
+        OktaOAuth2Properties oktaOAuth2Properties = context.getBean(OktaOAuth2Properties.class);
+
         // Create a request resolver that enables PKCE
         DefaultOAuth2AuthorizationRequestResolver authorizationRequestResolver = new DefaultOAuth2AuthorizationRequestResolver(clientRegistrationRepository, "/oauth2/authorization");
-        authorizationRequestResolver.setAuthorizationRequestCustomizer(withPkce());
+        authorizationRequestResolver.setAuthorizationRequestCustomizer(withPkce().andThen(builder -> builder.additionalParameters((params) -> {
+            // Add custom params
+            if (Strings.hasText(oktaOAuth2Properties.getAcrValues())) {
+                params.put(OktaOAuth2CustomParam.ACR_VALUES, oktaOAuth2Properties.getAcrValues());
+            }
+            if (Strings.hasText(oktaOAuth2Properties.getPrompt())) {
+                params.put(OktaOAuth2CustomParam.PROMPT, oktaOAuth2Properties.getPrompt());
+
+                // Okta enforced rules
+                if (oktaOAuth2Properties.getPrompt().equals("enroll_authenticator")) {
+                    //params.put("response_type", "none");
+                    params.put(OktaOAuth2CustomParam.ACR_VALUES, "urn:okta:loa:2fa:any:ifpossible");
+                    params.put(OktaOAuth2CustomParam.MAX_AGE, "0");
+                    params.remove("scope");
+                    //params.remove("nonce");
+                }
+            }
+            if (Strings.hasText(oktaOAuth2Properties.getEnrollAmrValues())) {
+                params.put(OktaOAuth2CustomParam.ENROLL_AMR_VALUES, oktaOAuth2Properties.getEnrollAmrValues());
+            }
+        })));
+
         // enable oauth2 login that uses PKCE
         http.oauth2Login()
             .authorizationEndpoint()

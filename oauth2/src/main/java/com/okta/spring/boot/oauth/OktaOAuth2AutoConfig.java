@@ -82,7 +82,7 @@ class OktaOAuth2AutoConfig {
             // as of Spring Security 5.4 the default chain uses oauth2Login OR a JWT resource server (NOT both)
             // this does the same as both defaults merged together (and provides the previous behavior)
             http.authorizeRequests((requests) -> requests.anyRequest().authenticated());
-            Okta.configureOAuth2WithPkce(http, clientRegistrationRepository);
+            Okta.configureOAuth2WithPkceAndAuthReqParams(http, clientRegistrationRepository);
             http.oauth2Client();
             http.oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
             return http.build();

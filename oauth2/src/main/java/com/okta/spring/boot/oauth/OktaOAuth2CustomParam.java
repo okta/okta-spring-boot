@@ -31,4 +31,10 @@ public abstract class OktaOAuth2CustomParam {
      * space-delimited, case-sensitive string that represents a list of authenticator method references.
      */
     public static final String ENROLL_AMR_VALUES = "enroll_amr_values";
+
+    /**
+     * Allowable elapsed time, in seconds, since the last time the end user was actively authenticated by Okta.
+     */
+    public static final String MAX_AGE = "max_age";
+
 }

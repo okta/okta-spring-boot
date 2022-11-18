@@ -65,7 +65,7 @@ public class ReactiveRedirectCodeFlowApplication {
                 .and()
                 .csrf().disable(); // make testing easier
 
-            Okta.configureOAuth2WithPkce(http, clientRegistrationRepository);
+            Okta.configureOAuth2WithPkceAndAuthReqParams(http, clientRegistrationRepository);
 
             return http.build();
         }

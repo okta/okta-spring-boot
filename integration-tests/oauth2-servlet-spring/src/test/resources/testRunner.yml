@@ -66,7 +66,9 @@ scenarios:
       - --spring.security.oauth2.client.registration.okta.redirect-uri={baseUrl}/authorization-code/callback
       - --spring.security.oauth2.client.registration.okta.scope=profile,email,openid
       - --okta.oauth2.postLogoutRedirectUri=/you-are-logged-out
-      - --okta.oauth2.acrValues=blah
+      - --okta.oauth2.acrValues=acr:high-assurance
+      - --okta.oauth2.prompt=enroll_authenticator
+      - --okta.oauth2.enroll_amr_values=sms okta_verify
     protectedPath: /oauth2/authorization/okta
 
   pkce-code-flow-remote-validation:

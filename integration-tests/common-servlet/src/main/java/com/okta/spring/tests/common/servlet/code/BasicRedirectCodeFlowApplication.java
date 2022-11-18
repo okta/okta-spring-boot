@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
 
-import static com.okta.spring.boot.oauth.Okta.configureOAuth2WithPkce;
+import static com.okta.spring.boot.oauth.Okta.configureOAuth2WithPkceAndAuthReqParams;
 
 @SpringBootApplication
 @RestController
@@ -57,7 +57,7 @@ public class BasicRedirectCodeFlowApplication {
     @Bean
     SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository) throws Exception {
        http.authorizeRequests().anyRequest().authenticated();
-       configureOAuth2WithPkce(http, clientRegistrationRepository);
+       configureOAuth2WithPkceAndAuthReqParams(http, clientRegistrationRepository);
        http.oauth2Client();
 
         // disable csrf to make testing easier

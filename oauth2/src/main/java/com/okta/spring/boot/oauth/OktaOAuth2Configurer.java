@@ -28,7 +28,6 @@ import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationC
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.web.client.RestTemplate;
 
 import java.lang.reflect.Field;
@@ -63,7 +62,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                 && !isEmpty(propertiesProvider.getIssuerUri())
                 && !isEmpty(propertiesRegistration.getClientId())) {
                 // configure Okta user services
-                configureLogin(http, oktaOAuth2Properties, context.getBean(ClientRegistrationRepository.class), context.getEnvironment());
+                configureLogin(http, oktaOAuth2Properties, context.getEnvironment());
 
                 // check for RP-Initiated logout
                 if (!context.getBeansOfType(OidcClientInitiatedLogoutSuccessHandler.class).isEmpty()) {
@@ -162,26 +161,13 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         });
     }
 
-    private void configureLogin(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties,
-                                ClientRegistrationRepository clientRegistrationRepository, Environment environment) throws Exception {
+    private void configureLogin(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties, Environment environment) throws Exception {
 
         RestTemplate restTemplate = OktaOAuth2ResourceServerAutoConfig.restTemplate(oktaOAuth2Properties);
 
-        CustomAuthorizationRequestResolver customAuthorizationRequestResolver = new CustomAuthorizationRequestResolver(
-            clientRegistrationRepository,
-            oktaOAuth2Properties.getIssuer() + "/v1/authorize",
-            oktaOAuth2Properties.getAcrValues(),
-            oktaOAuth2Properties.getPrompt(),
-            oktaOAuth2Properties.getEnrollAmrValues());
-
         http.oauth2Login()
-                .authorizationEndpoint()
-                .authorizationRequestResolver(customAuthorizationRequestResolver)
-            .and()
             .tokenEndpoint()
             .accessTokenResponseClient(accessTokenResponseClient(restTemplate));
-
-        Okta.configureOAuth2WithPkce(http, clientRegistrationRepository);
 
         String redirectUriProperty = environment.getProperty("spring.security.oauth2.client.registration.okta.redirect-uri");
         if (redirectUriProperty != null) {
