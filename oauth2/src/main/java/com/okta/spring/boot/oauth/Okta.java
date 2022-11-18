@@ -39,6 +39,8 @@ import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.accept.ContentNegotiationStrategy;
 
+import java.util.Map;
+
 import static org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestCustomizers.withPkce;
 
 /**
@@ -122,27 +124,7 @@ public final class Okta {
 
         // Create a request resolver that enables PKCE
         DefaultOAuth2AuthorizationRequestResolver authorizationRequestResolver = new DefaultOAuth2AuthorizationRequestResolver(clientRegistrationRepository, "/oauth2/authorization");
-        authorizationRequestResolver.setAuthorizationRequestCustomizer(withPkce().andThen(builder -> builder.additionalParameters((params) -> {
-            // Add custom params
-            if (Strings.hasText(oktaOAuth2Properties.getAcrValues())) {
-                params.put(OktaOAuth2CustomParam.ACR_VALUES, oktaOAuth2Properties.getAcrValues());
-            }
-            if (Strings.hasText(oktaOAuth2Properties.getPrompt())) {
-                params.put(OktaOAuth2CustomParam.PROMPT, oktaOAuth2Properties.getPrompt());
-
-                // Okta enforced rules
-                if (oktaOAuth2Properties.getPrompt().equals("enroll_authenticator")) {
-                    //params.put("response_type", "none");
-                    params.put(OktaOAuth2CustomParam.ACR_VALUES, "urn:okta:loa:2fa:any:ifpossible");
-                    params.put(OktaOAuth2CustomParam.MAX_AGE, "0");
-                    params.remove("scope");
-                    //params.remove("nonce");
-                }
-            }
-            if (Strings.hasText(oktaOAuth2Properties.getEnrollAmrValues())) {
-                params.put(OktaOAuth2CustomParam.ENROLL_AMR_VALUES, oktaOAuth2Properties.getEnrollAmrValues());
-            }
-        })));
+        authorizationRequestResolver.setAuthorizationRequestCustomizer(withPkce().andThen(builder -> builder.additionalParameters((params) -> addCustomAuthorizationRequestParams(params, oktaOAuth2Properties))));
 
         // enable oauth2 login that uses PKCE
         http.oauth2Login()
@@ -150,6 +132,28 @@ public final class Okta {
             .authorizationRequestResolver(authorizationRequestResolver);
 
         return http;
+    }
+
+    private static void addCustomAuthorizationRequestParams(Map<String, Object> params, OktaOAuth2Properties oktaOAuth2Properties) {
+
+        if (Strings.hasText(oktaOAuth2Properties.getAcrValues())) {
+            params.put(OktaOAuth2CustomParam.ACR_VALUES, oktaOAuth2Properties.getAcrValues());
+        }
+        if (Strings.hasText(oktaOAuth2Properties.getPrompt())) {
+            params.put(OktaOAuth2CustomParam.PROMPT, oktaOAuth2Properties.getPrompt());
+
+            // Okta enforced rules
+            if (oktaOAuth2Properties.getPrompt().equals("enroll_authenticator")) {
+                //params.put("response_type", "none");
+                params.put(OktaOAuth2CustomParam.ACR_VALUES, "urn:okta:loa:2fa:any:ifpossible");
+                params.put(OktaOAuth2CustomParam.MAX_AGE, "0");
+                params.remove("scope");
+                //params.remove("nonce");
+            }
+        }
+        if (Strings.hasText(oktaOAuth2Properties.getEnrollAmrValues())) {
+            params.put(OktaOAuth2CustomParam.ENROLL_AMR_VALUES, oktaOAuth2Properties.getEnrollAmrValues());
+        }
     }
 
     private static RequestMatcher textRequestMatcher(HttpSecurity http) {
