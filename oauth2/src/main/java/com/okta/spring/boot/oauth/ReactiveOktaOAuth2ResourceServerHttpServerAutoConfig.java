@@ -24,31 +24,39 @@ import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2Res
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.security.oauth2.server.resource.BearerTokenAuthenticationToken;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter;
+
+import java.util.Collection;
 
 @Configuration
 @ConditionalOnOktaResourceServerProperties
 @AutoConfigureAfter(ReactiveOktaOAuth2ResourceServerAutoConfig.class)
 @EnableConfigurationProperties({OktaOAuth2Properties.class, OAuth2ResourceServerProperties.class})
+@Import(ResourceServerConfig.class)
 @ConditionalOnClass({ EnableWebFluxSecurity.class, BearerTokenAuthenticationToken.class, ReactiveJwtDecoder.class })
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
 class ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig {
 
     @Bean
-    BeanPostProcessor oktaOAuth2ResourceServerBeanPostProcessor(OktaOAuth2Properties oktaOAuth2Properties) {
-        return new OktaOAuth2ResourceServerBeanPostProcessor(oktaOAuth2Properties);
+    BeanPostProcessor oktaOAuth2ResourceServerBeanPostProcessor(Converter<Jwt, Collection<GrantedAuthority>> converter) {
+        return new OktaOAuth2ResourceServerBeanPostProcessor(converter);
     }
 
     static class OktaOAuth2ResourceServerBeanPostProcessor implements BeanPostProcessor {
 
-        private final OktaOAuth2Properties oktaOAuth2Properties;
+        private final Converter<Jwt, Collection<GrantedAuthority>> converter;
 
-        OktaOAuth2ResourceServerBeanPostProcessor(OktaOAuth2Properties oktaOAuth2Properties) {
-            this.oktaOAuth2Properties = oktaOAuth2Properties;
+        OktaOAuth2ResourceServerBeanPostProcessor(Converter<Jwt, Collection<GrantedAuthority>> converter) {
+            this.converter = converter;
         }
 
         @Override
@@ -57,7 +65,8 @@ class ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig {
                 final ServerHttpSecurity http = (ServerHttpSecurity) bean;
                 http.oauth2ResourceServer().jwt()
                         .jwtAuthenticationConverter(new ReactiveJwtAuthenticationConverterAdapter(
-                                new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim())));
+                            jwt -> new JwtAuthenticationToken(jwt, converter.convert(jwt))
+                        ));
             }
             return bean;
         }
