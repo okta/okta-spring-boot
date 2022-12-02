@@ -29,6 +29,7 @@ import org.springframework.security.oauth2.client.web.DefaultOAuth2Authorization
 import org.springframework.security.oauth2.client.web.server.DefaultServerOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.server.resource.BearerTokenError;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.server.BearerTokenServerAuthenticationEntryPoint;
@@ -96,7 +97,7 @@ public final class Okta {
      * @param clientRegistrationRepository the repository bean, this should be injected into the calling method.
      * @return the {@code http} to allow method chaining
      */
-    public static ServerHttpSecurity configureOAuth2WithPkceAndAuthReqParams(ServerHttpSecurity http, ReactiveClientRegistrationRepository clientRegistrationRepository) {
+    public static ServerHttpSecurity configureOAuth2WithPkce(ServerHttpSecurity http, ReactiveClientRegistrationRepository clientRegistrationRepository) {
         // Create a request resolver that enables PKCE
         DefaultServerOAuth2AuthorizationRequestResolver authorizationRequestResolver = new DefaultServerOAuth2AuthorizationRequestResolver(clientRegistrationRepository);
         authorizationRequestResolver.setAuthorizationRequestCustomizer(withPkce());
@@ -115,7 +116,7 @@ public final class Okta {
      * @param http the HttpSecurity to configure
      * @param clientRegistrationRepository the repository bean, this should be injected into the calling method.
      * @return the {@code http} to allow method chaining
-     * @throws Exception
+     * @throws Exception the exception
      */
     public static HttpSecurity configureOAuth2WithPkceAndAuthReqParams(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository) throws Exception {
 
@@ -124,7 +125,9 @@ public final class Okta {
 
         // Create a request resolver that enables PKCE
         DefaultOAuth2AuthorizationRequestResolver authorizationRequestResolver = new DefaultOAuth2AuthorizationRequestResolver(clientRegistrationRepository, "/oauth2/authorization");
-        authorizationRequestResolver.setAuthorizationRequestCustomizer(withPkce().andThen(builder -> builder.additionalParameters((params) -> addCustomAuthorizationRequestParams(params, oktaOAuth2Properties))));
+        authorizationRequestResolver.setAuthorizationRequestCustomizer(withPkce().andThen(builder -> {
+            builder.additionalParameters(params -> addCustomAuthorizationRequestParams(params, oktaOAuth2Properties));
+        }));
 
         // enable oauth2 login that uses PKCE
         http.oauth2Login()
@@ -144,11 +147,10 @@ public final class Okta {
 
             // Okta enforced rules
             if (oktaOAuth2Properties.getPrompt().equals("enroll_authenticator")) {
-                //params.put("response_type", "none");
+                params.put(OAuth2ParameterNames.RESPONSE_TYPE, "none");
                 params.put(OktaOAuth2CustomParam.ACR_VALUES, "urn:okta:loa:2fa:any:ifpossible");
                 params.put(OktaOAuth2CustomParam.MAX_AGE, "0");
-                params.remove("scope");
-                //params.remove("nonce");
+                params.remove(OAuth2ParameterNames.SCOPE);
             }
         }
         if (Strings.hasText(oktaOAuth2Properties.getEnrollAmrValues())) {

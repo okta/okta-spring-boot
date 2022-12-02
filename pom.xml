@@ -144,7 +144,7 @@
             <dependency>
                 <groupId>com.okta.oidc.tck</groupId>
                 <artifactId>okta-oidc-tck</artifactId>
-                <version>0.5.9</version>
+                <version>0.5.10-SNAPSHOT</version>
             </dependency>
 
             <!-- test dependencies -->

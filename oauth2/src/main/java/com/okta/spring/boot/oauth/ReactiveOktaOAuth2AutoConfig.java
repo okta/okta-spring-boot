@@ -71,7 +71,7 @@ class ReactiveOktaOAuth2AutoConfig {
         // as of Spring Security 5.4 the default chain uses oauth2Login OR a JWT resource server (NOT both)
         // this does the same as both defaults merged together (and provides the previous behavior)
         http.authorizeExchange().anyExchange().authenticated();
-        Okta.configureOAuth2WithPkceAndAuthReqParams(http, clientRegistrationRepository);
+        Okta.configureOAuth2WithPkce(http, clientRegistrationRepository);
         http.oauth2Client();
         http.oauth2ResourceServer((server) -> customDecoder(server, jwtDecoder));
         return http.build();

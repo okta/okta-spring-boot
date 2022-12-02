@@ -28,6 +28,7 @@ import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationC
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.web.client.RestTemplate;
 
 import java.lang.reflect.Field;
@@ -61,8 +62,10 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                 && (propertiesRegistration = context.getBean(OAuth2ClientProperties.class).getRegistration().get("okta")) != null
                 && !isEmpty(propertiesProvider.getIssuerUri())
                 && !isEmpty(propertiesRegistration.getClientId())) {
+                ClientRegistrationRepository clientRegistrationRepository = context.getBean(ClientRegistrationRepository.class);
+
                 // configure Okta user services
-                configureLogin(http, oktaOAuth2Properties, context.getEnvironment());
+                configureLogin(http, oktaOAuth2Properties, context.getEnvironment(), clientRegistrationRepository);
 
                 // check for RP-Initiated logout
                 if (!context.getBeansOfType(OidcClientInitiatedLogoutSuccessHandler.class).isEmpty()) {
@@ -161,7 +164,8 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         });
     }
 
-    private void configureLogin(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties, Environment environment) throws Exception {
+    private void configureLogin(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties, Environment environment,
+                                ClientRegistrationRepository clientRegistrationRepository) throws Exception {
 
         RestTemplate restTemplate = OktaOAuth2ResourceServerAutoConfig.restTemplate(oktaOAuth2Properties);
 
@@ -175,6 +179,8 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
             String redirectUri = redirectUriProperty.replace("{baseUrl}", "");
             http.oauth2Login().redirectionEndpoint().baseUri(redirectUri);
         }
+
+        Okta.configureOAuth2WithPkceAndAuthReqParams(http, clientRegistrationRepository);
     }
 
     private void configureResourceServerForJwtValidation(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {

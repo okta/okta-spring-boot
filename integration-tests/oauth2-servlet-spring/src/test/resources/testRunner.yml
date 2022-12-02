@@ -66,9 +66,6 @@ scenarios:
       - --spring.security.oauth2.client.registration.okta.redirect-uri={baseUrl}/authorization-code/callback
       - --spring.security.oauth2.client.registration.okta.scope=profile,email,openid
       - --okta.oauth2.postLogoutRedirectUri=/you-are-logged-out
-      - --okta.oauth2.acrValues=acr:high-assurance
-      - --okta.oauth2.prompt=enroll_authenticator
-      - --okta.oauth2.enroll_amr_values=sms okta_verify
     protectedPath: /oauth2/authorization/okta
 
   pkce-code-flow-remote-validation:
@@ -82,4 +79,19 @@ scenarios:
       - --spring.security.oauth2.client.registration.okta.scope=offline_access
       - --spring.security.oauth2.client.registration.okta.redirect-uri={baseUrl}/authorization-code/callback
       - --spring.security.oauth2.client.registration.okta.client-authentication-method=none
+    protectedPath: /oauth2/authorization/okta
+
+  oidc-flow-none-response-type-validation:
+    command: com.okta.spring.tests.common.servlet.code.BasicRedirectCodeFlowApplication
+    args:
+      - --server.port=${applicationPort}
+      - --server.servlet.session.tracking-modes=cookie
+      - --spring.security.oauth2.client.provider.okta.authorization-uri=https://localhost:${mockHttpsPort}/oauth2/default/v1/authorize
+      - --spring.security.oauth2.client.provider.okta.issuer-uri=https://localhost:${mockHttpsPort}/oauth2/default
+      - --spring.security.oauth2.client.registration.okta.client-id=OOICU812
+      - --spring.security.oauth2.client.registration.okta.redirect-uri={baseUrl}/authorization-code/callback
+      - --spring.security.oauth2.client.registration.okta.client-authentication-method=none
+      - --okta.oauth2.acrValues=acr:high-assurance
+      - --okta.oauth2.prompt=enroll_authenticator
+      - --okta.oauth2.enroll_amr_values=sms okta_verify
     protectedPath: /oauth2/authorization/okta
