@@ -98,6 +98,11 @@ public final class OktaOAuth2Properties implements Validator {
      */
     private Proxy proxy;
 
+    /**
+     * URL that Okta should send callback to, after the user app sends enrollment request.
+     */
+    private String enrollmentCallbackUri;
+
     // work around for https://github.com/spring-projects/spring-boot/issues/17035
     private OktaOAuth2Properties() {
         this(null);
@@ -203,6 +208,14 @@ public final class OktaOAuth2Properties implements Validator {
 
     public void setEnrollAmrValues(String enrollAmrValues) {
         this.enrollAmrValues = enrollAmrValues;
+    }
+
+    public String getEnrollmentCallbackUri() {
+        return enrollmentCallbackUri;
+    }
+
+    public void setEnrollmentCallbackUri(String enrollmentCallbackUri) {
+        this.enrollmentCallbackUri = enrollmentCallbackUri;
     }
 
     public Proxy getProxy() {

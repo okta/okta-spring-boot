@@ -151,6 +151,11 @@ public final class Okta {
                 params.put(OktaOAuth2CustomParam.ACR_VALUES, "urn:okta:loa:2fa:any:ifpossible");
                 params.put(OktaOAuth2CustomParam.MAX_AGE, "0");
                 params.remove(OAuth2ParameterNames.SCOPE);
+
+                String enrollmentCallbackUri = oktaOAuth2Properties.getEnrollmentCallbackUri();
+                if (Strings.hasText(enrollmentCallbackUri)) {
+                    params.put(OAuth2ParameterNames.REDIRECT_URI, enrollmentCallbackUri);
+                }
             }
         }
         if (Strings.hasText(oktaOAuth2Properties.getEnrollAmrValues())) {

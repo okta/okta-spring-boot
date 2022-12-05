@@ -94,4 +94,5 @@ scenarios:
       - --okta.oauth2.acrValues=acr:high-assurance
       - --okta.oauth2.prompt=enroll_authenticator
       - --okta.oauth2.enroll_amr_values=sms okta_verify
+      - --okta.oauth2.enrollmentCallbackUri=http://localhost:${mockHttpsPort}/enrollment/callback
     protectedPath: /oauth2/authorization/okta
