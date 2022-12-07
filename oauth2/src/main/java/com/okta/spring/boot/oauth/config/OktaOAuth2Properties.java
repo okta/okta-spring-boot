@@ -72,9 +72,30 @@ public final class OktaOAuth2Properties implements Validator {
     private String postLogoutRedirectUri;
 
     /**
+     * Authentication Context Reference (acr_values).
+     * e.g. urn:okta:loa:2fa:any:ifpossible
+     * 'acr_values' is a supported query param on /authorize call (optional).
+     * 'acr' claim will be included in Tokens (ID + Access) only when 'acr_values' query parameter
+     * is passed in /authorize API call.
+     */
+    private String acrValues;
+
+    /**
+     *  space-delimited, case-sensitive string that represents a list of authenticator method references.
+     *  'enroll_amr_values' is a supported query param on /authorize call (optional).
+     *  e.g. sms okta_verify
+     */
+    private String enrollAmrValues;
+
+    /**
      * Proxy Properties
      */
     private Proxy proxy;
+
+    /**
+     * URL that Okta should send callback to, after the user app sends enrollment request.
+     */
+    private String enrollmentCallbackUri;
 
     // work around for https://github.com/spring-projects/spring-boot/issues/17035
     private OktaOAuth2Properties() {
@@ -157,6 +178,30 @@ public final class OktaOAuth2Properties implements Validator {
 
     public void setPostLogoutRedirectUri(String postLogoutRedirectUri) {
         this.postLogoutRedirectUri = postLogoutRedirectUri;
+    }
+
+    public String getAcrValues() {
+        return acrValues;
+    }
+
+    public void setAcrValues(String acrValues) {
+        this.acrValues = acrValues;
+    }
+
+    public String getEnrollAmrValues() {
+        return enrollAmrValues;
+    }
+
+    public void setEnrollAmrValues(String enrollAmrValues) {
+        this.enrollAmrValues = enrollAmrValues;
+    }
+
+    public String getEnrollmentCallbackUri() {
+        return enrollmentCallbackUri;
+    }
+
+    public void setEnrollmentCallbackUri(String enrollmentCallbackUri) {
+        this.enrollmentCallbackUri = enrollmentCallbackUri;
     }
 
     public Proxy getProxy() {
