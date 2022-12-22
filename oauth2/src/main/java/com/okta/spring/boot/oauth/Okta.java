@@ -34,7 +34,7 @@ import org.springframework.security.web.server.DelegatingServerAuthenticationEnt
 import org.springframework.security.web.server.util.matcher.MediaTypeServerWebExchangeMatcher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
-import org.springframework.web.accept.ContentNegotiationStrategy;
+import org.springframework.web.accept.HeaderContentNegotiationStrategy;
 
 import static org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestCustomizers.withPkce;
 
@@ -78,7 +78,7 @@ public final class Okta {
      */
     public static HttpSecurity configureResourceServer401ResponseBody(HttpSecurity http) throws Exception {
         return http.exceptionHandling()
-                    .defaultAuthenticationEntryPointFor(authenticationEntryPoint(), textRequestMatcher(http)).and();
+                    .defaultAuthenticationEntryPointFor(authenticationEntryPoint(), textRequestMatcher()).and();
     }
 
     /**
@@ -124,8 +124,8 @@ public final class Okta {
         return http;
     }
 
-    private static RequestMatcher textRequestMatcher(HttpSecurity http) {
-        return new MediaTypeRequestMatcher(http.getSharedObject(ContentNegotiationStrategy.class), MediaType.TEXT_PLAIN);
+    private static RequestMatcher textRequestMatcher() {
+        return new MediaTypeRequestMatcher(new HeaderContentNegotiationStrategy(), MediaType.TEXT_PLAIN);
     }
 
     private static AuthenticationEntryPoint authenticationEntryPoint() {
