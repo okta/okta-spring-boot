@@ -40,7 +40,6 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.oauth2.server.resource.introspection.NimbusOpaqueTokenIntrospector;
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 import org.springframework.web.client.RestTemplate;
@@ -62,9 +61,7 @@ class OktaOAuth2ResourceServerAutoConfig {
 
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter(OktaOAuth2Properties oktaOAuth2Properties) {
-        OktaJwtAuthenticationConverter converter = new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim());
-        converter.setJwtGrantedAuthoritiesConverter(new JwtGrantedAuthoritiesConverter());
-        return converter;
+        return new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim());
     }
 
     @Bean
