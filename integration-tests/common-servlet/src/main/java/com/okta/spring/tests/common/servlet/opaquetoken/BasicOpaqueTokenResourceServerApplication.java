@@ -18,13 +18,14 @@ package com.okta.spring.tests.common.servlet.opaquetoken;
 import com.okta.spring.boot.oauth.Okta;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,17 +44,18 @@ public class BasicOpaqueTokenResourceServerApplication {
     }
 
     @Configuration
-    static class OpaqueTokenResourceSecurityConfigurer extends WebSecurityConfigurerAdapter {
+    static class OpaqueTokenResourceSecurityConfigurer {
 
-        @Override
-        public void configure(HttpSecurity http) throws Exception {
+        @Bean
+        SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
             Okta.configureResourceServer401ResponseBody(http);
 
-            http.authorizeRequests()
+            http.authorizeHttpRequests()
                 .antMatchers(HttpMethod.OPTIONS,"/**").permitAll()
                 .anyRequest().authenticated()
                 .and().oauth2ResourceServer().opaqueToken();
+            return http.build();
         }
     }
 

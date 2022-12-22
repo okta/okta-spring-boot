@@ -17,10 +17,10 @@ package com.okta.spring.example;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 @SpringBootApplication
-@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
+@EnableMethodSecurity(securedEnabled = true)
 public class RedirectCodeFlowApplication {
 
     public static void main(String[] args) {
@@ -30,12 +30,15 @@ public class RedirectCodeFlowApplication {
 // By default Spring configures the equivalent for you. Secure by default.
 
 //    @Configuration
-//    static class WebConfig extends WebSecurityConfigurerAdapter {
-//        @Override
-//        protected void configure(HttpSecurity http) throws Exception {
-//            http.authorizeRequests().anyRequest().authenticated()
+//    static class SecurityConfig {
+//        @Bean
+//        SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//            http.authorizeHttpRequests()
+//                .anyRequest().authenticated()
 //                .and().oauth2Client()
-//                .and().oauth2Login();
+//                .and().oauth2Login()
+//                .and().oauth2ResourceServer().jwt()
+//            return http.build();
 //        }
 //    }
 }

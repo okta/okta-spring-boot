@@ -17,13 +17,14 @@ package com.okta.spring.example;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.SecurityFilterChain;
 
 @SpringBootApplication
-@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
+@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class ImplicitFlowApplication {
 
     public static void main(String[] args) {
@@ -31,16 +32,16 @@ public class ImplicitFlowApplication {
     }
 
     @Configuration
-    static class OktaOAuth2WebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
+    static class SecurityConfig {
 
-        @Override
-        protected void configure(HttpSecurity http) throws Exception {
+        @Bean
+        SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+            http.authorizeHttpRequests()
+                .antMatchers("/", "/index.html", "/sign-in-widget-config").permitAll()
+                .anyRequest().authenticated().and()
+                .oauth2ResourceServer().jwt();
 
-            http.authorizeRequests()
-                    .antMatchers("/", "/index.html", "/sign-in-widget-config").permitAll()
-                    .anyRequest().authenticated();
-
-            http.oauth2ResourceServer().jwt();
+            return http.build();
         }
     }
 }
