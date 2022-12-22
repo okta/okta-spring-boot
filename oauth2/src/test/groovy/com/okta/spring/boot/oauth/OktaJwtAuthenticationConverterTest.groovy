@@ -36,7 +36,7 @@ class OktaJwtAuthenticationConverterTest {
                 myGroups: ["g1", "g2"]
         ])
 
-        def authorities = new OktaJwtAuthenticationConverter("myGroups").extractAuthorities(jwt)
+        def authorities = new OktaJwtAuthenticationConverter("myGroups").convert(jwt).getAuthorities()
         assertThat authorities, hasItems(
                 new SimpleGrantedAuthority("SCOPE_one"),
                 new SimpleGrantedAuthority("SCOPE_two"),
@@ -49,7 +49,7 @@ class OktaJwtAuthenticationConverterTest {
     void extractAuthorities_emptyTest() {
         def jwt = new Jwt("foo", Instant.now(), Instant.now().plusMillis(1000L), [simple: "value"], [simple: "value"]) // these maps must not be empty
 
-        def authorities = new OktaJwtAuthenticationConverter("myGroups").extractAuthorities(jwt)
+        def authorities = new OktaJwtAuthenticationConverter("myGroups").convert(jwt).getAuthorities()
         assertThat authorities, hasSize(0)
     }
 }
