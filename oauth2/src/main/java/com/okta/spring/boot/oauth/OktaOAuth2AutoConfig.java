@@ -17,6 +17,7 @@ package com.okta.spring.boot.oauth;
 
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -41,7 +42,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 import java.util.Collection;
 
-@Configuration
+@AutoConfiguration
 @ConditionalOnOktaClientProperties
 @EnableConfigurationProperties(OktaOAuth2Properties.class)
 @ConditionalOnClass({ EnableWebSecurity.class, ClientRegistration.class })

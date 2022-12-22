@@ -28,6 +28,7 @@ import com.okta.sdk.client.Clients;
 import com.okta.spring.boot.sdk.cache.SpringCacheManager;
 import com.okta.spring.boot.sdk.config.OktaClientProperties;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionOutcome;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -36,7 +37,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.context.annotation.Conditional;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 
 import static com.okta.commons.configcheck.ConfigurationValidator.validateApiToken;
@@ -47,7 +47,7 @@ import static com.okta.commons.configcheck.ConfigurationValidator.validateOrgUrl
  *
  * @since 0.3.0
  */
-@Configuration
+@AutoConfiguration
 @Conditional(OktaSdkConfig.OktaApiConditions.class)
 @ConditionalOnClass(Client.class)
 @EnableConfigurationProperties(OktaClientProperties.class)
