@@ -42,12 +42,10 @@ import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.ConfigurableEnvironment
-import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.authentication.ReactiveAuthenticationManagerResolver
 import org.springframework.security.config.BeanIds
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcReactiveOAuth2UserService
@@ -65,6 +63,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtRea
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationFilter
 import org.springframework.security.web.FilterChainProxy
+import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.server.MatcherSecurityWebFilterChain
 import org.springframework.security.web.server.WebFilterChainProxy
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter
@@ -76,7 +75,6 @@ import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 
 import javax.servlet.Filter
-import javax.servlet.ServletRequest
 import java.util.function.Supplier
 import java.util.stream.Collectors
 import java.util.stream.Stream
@@ -815,31 +813,34 @@ class AutoConfigConditionalTest implements HttpMock {
 
     @Configuration
     @EnableWebSecurity
-    static class JwtResourceServerConfiguredApp extends WebSecurityConfigurerAdapter {
+    static class JwtResourceServerConfiguredApp {
 
-        @Override
-        protected void configure(HttpSecurity http) throws Exception {
+        @Bean
+        SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
             http.oauth2ResourceServer().jwt()
+            return http.build()
         }
     }
 
     @Configuration
     @EnableWebSecurity
-    static class OpaqueTokenResourceServerConfiguredApp extends WebSecurityConfigurerAdapter {
+    static class OpaqueTokenResourceServerConfiguredApp {
 
-        @Override
-        protected void configure(HttpSecurity http) throws Exception {
+        @Bean
+        SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
             http.oauth2ResourceServer().opaqueToken()
+            return http.build()
         }
     }
 
     @Configuration
     @EnableWebSecurity
-    static class JwtAndOpaqueTokenResourceServerConfiguredApp extends WebSecurityConfigurerAdapter {
+    static class JwtAndOpaqueTokenResourceServerConfiguredApp {
 
-        @Override
-        protected void configure(HttpSecurity http) throws Exception {
+        @Bean
+        SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
             http.oauth2ResourceServer().jwt().and().opaqueToken()
+            return http.build()
         }
     }
 
