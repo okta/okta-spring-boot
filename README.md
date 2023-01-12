@@ -187,21 +187,19 @@ public class DemoApplication {
 **NOTE**: `message:read` and `message:write` used above in `@PreAuthorize` are OAuth scopes. If you are looking
 to add custom scopes, refer to the [documentation](https://developer.okta.com/docs/guides/customize-authz-server/create-scopes/).
  
-3. Configure your Resource Server either for JWT or Opaque Token validation by extending the `WebSecurityConfigurerAdapter` class 
-and overriding the `configure` method. If neither JWT nor Opaque Token is specified in configuration, JWT validation will be used by default.
+3. Configure your Resource Server either for JWT or Opaque Token validation by creating a `SecurityFilterChain` bean. If neither JWT nor Opaque Token is specified in configuration, JWT validation will be used by default.
 
 ```java
 import com.okta.spring.boot.oauth.Okta;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.SecurityFilterChain;
 
 @EnableWebSecurity
-public class OAuth2ResourceServerSecurityConfiguration extends WebSecurityConfigurerAdapter {
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+public class OAuth2ResourceServerSecurityConfiguration {
+    @Bean
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http.authorizeRequests()
             // allow anonymous access to the root page
@@ -213,6 +211,7 @@ public class OAuth2ResourceServerSecurityConfiguration extends WebSecurityConfig
 
         // Send a 401 message to the browser (w/o this, you'll see a blank page)
         Okta.configureResourceServer401ResponseBody(http);
+        return http.build();
     }
 }
 ```
@@ -314,17 +313,18 @@ okta:
 ```java
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
-public class WebConfig extends WebSecurityConfigurerAdapter {
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+public class SecurityConfig {
+    @Bean
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeRequests()
             // allow anonymous access to the root and logout pages
             .antMatchers("/", "/logout/callback").permitAll()
             // all other requests
             .anyRequest().authenticated();
+        return http.build();
     }
 }
 ```
@@ -351,18 +351,19 @@ public class ExampleApplication {
 }
 ```
 
-If you want to allow anonymous access to specific routes you can add a `WebSecurityConfigurerAdapter`:
+If you want to allow anonymous access to specific routes you can add a `SecurityFilterChain` bean:
 
 ```java
 @Configuration
-static class WebConfig extends WebSecurityConfigurerAdapter {
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+static class SecurityConfig {
+    @Bean
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeRequests()
                 .antMatchers("/my-anon-page").permitAll()
                 .anyRequest().authenticated()
             .and().oauth2Client()
             .and().oauth2Login();
+        return http.build();
     }
 }
 ```
