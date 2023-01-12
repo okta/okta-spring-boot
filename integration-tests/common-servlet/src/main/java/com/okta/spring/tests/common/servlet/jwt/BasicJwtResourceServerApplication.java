@@ -20,7 +20,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -51,10 +50,11 @@ public class BasicJwtResourceServerApplication {
 
             Okta.configureResourceServer401ResponseBody(http);
 
-            http.authorizeHttpRequests()
-                    .antMatchers(HttpMethod.OPTIONS,"/**").permitAll()
+            http.authorizeHttpRequests((requests) -> requests
+                    .requestMatchers("/**").hasAnyRole()
                     .anyRequest().authenticated()
-            .and().oauth2ResourceServer().jwt();
+                )
+                .oauth2ResourceServer().jwt();
             return http.build();
         }
     }
