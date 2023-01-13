@@ -36,9 +36,10 @@ public class ImplicitFlowApplication {
 
         @Bean
         SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-            http.authorizeHttpRequests()
-                .antMatchers("/", "/index.html", "/sign-in-widget-config").permitAll()
-                .anyRequest().authenticated().and()
+            http.authorizeHttpRequests((requests) -> requests
+                    .requestMatchers("/", "/index.html", "/sign-in-widget-config").permitAll()
+                    .anyRequest().authenticated()
+                )
                 .oauth2ResourceServer().jwt();
 
             return http.build();

@@ -19,7 +19,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -37,12 +36,15 @@ public class HostedLoginCodeFlowExampleApplication {
 
         @Bean
         SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-            http.authorizeHttpRequests()
-                    .antMatchers(HttpMethod.GET,"/okta-custom-login", "/css/okta.css").permitAll()
+            http.authorizeHttpRequests((requests) -> requests
+                    .requestMatchers("/okta-custom-login", "/css/okta.css").permitAll()
                     .anyRequest().authenticated()
-                .and().oauth2Client()
-                .and().oauth2Login()
-                .and().oauth2ResourceServer().jwt();
+                )
+                .oauth2Client()
+                .and()
+                .oauth2Login()
+                .and()
+                .oauth2ResourceServer().jwt();
             return http.build();
         }
     }

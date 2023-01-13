@@ -51,7 +51,7 @@ public class BasicOpaqueTokenResourceServerApplication {
             Okta.configureResourceServer401ResponseBody(http);
 
             http.authorizeHttpRequests((requests) -> requests
-                    .requestMatchers("/**").hasAnyRole()
+                    .requestMatchers("/**").permitAll()
                     .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer().opaqueToken();
