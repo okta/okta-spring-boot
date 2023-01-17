@@ -9,23 +9,9 @@ aliases:
 
 jobs:
   
-  jdk8:
-    docker:
-      - image: cimg/openjdk:8.0.322
-    environment:
-        JVM_OPTS: -Xmx3200m
-    steps: *build_steps
-  
-  jdk11:
-    docker:
-      - image: cimg/openjdk:11.0.13
-    environment:
-        JVM_OPTS: -Xmx3200m
-    steps: *build_steps
-
   jdk17:
     docker:
-      - image: cimg/openjdk:17.0.4
+      - image: cimg/openjdk:17.0.5
     environment:
       JVM_OPTS: -Xmx3200m
     steps: *build_steps
@@ -33,6 +19,4 @@ jobs:
 workflows:
   build_and_test:
     jobs:
-      - jdk8
-      - jdk11
       - jdk17
