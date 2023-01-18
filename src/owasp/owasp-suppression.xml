@@ -60,5 +60,12 @@
         <cve>CVE-2020-5408</cve>
     </suppress>
 
+    <!-- See https://bitbucket.org/snakeyaml/snakeyaml/issues/561/cve-2022-1471-vulnerability-in -->
+    <suppress>
+        <notes><![CDATA[Ignored since it is deemed "won't fix" by the library authors.]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.yaml/snakeyaml.*$</packageUrl>
+        <cve>CVE-2022-1471</cve>
+    </suppress>
+
 </suppressions>
 
