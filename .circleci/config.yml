@@ -5,7 +5,7 @@ aliases:
   - &build_steps
     - checkout
     - run: java -version
-    - run: ./mvnw clean install -Pci
+    - run: ./mvnw -ntp clean install -Pci 
 
 jobs:
   
