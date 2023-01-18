@@ -20,7 +20,7 @@
     <parent>
         <groupId>com.okta</groupId>
         <artifactId>okta-parent</artifactId>
-        <version>24</version>
+        <version>26</version>
         <relativePath>../okta-java-parent</relativePath>
     </parent>
 
@@ -144,7 +144,7 @@
             <dependency>
                 <groupId>com.okta.oidc.tck</groupId>
                 <artifactId>okta-oidc-tck</artifactId>
-                <version>0.5.10-SNAPSHOT</version>
+                <version>0.5.10</version>
             </dependency>
 
             <!-- test dependencies -->
@@ -179,6 +179,18 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <build>
+       <pluginManagement>
+          <plugins>
+             <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>8.0.0</version>
+             </plugin>
+          </plugins>
+       </pluginManagement>
+    </build>
 
     <profiles>
         <profile>
