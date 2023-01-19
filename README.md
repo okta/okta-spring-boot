@@ -20,20 +20,24 @@ This library uses semantic versioning and follows Okta's [library version policy
 
 :heavy_check_mark: The current stable major version series is: 2.x
 
-| Version | Status                    |
-| ------- | ------------------------- |
+| Version      | Status                    |
+|--------------| ------------------------- |
 | 0.x.x, 1.x.x | :warning: Retired |
-| 2.x.x | :heavy_check_mark: Stable |
+| 2.x.x        | :heavy_check_mark: Stable |
+| 3.x.x        | :heavy_check_mark: Stable |
+
+> Note: 3.x.x versions of the SDK would need JDK 17 or above.
 
 ## Spring Boot Version Compatibility
 
 | Okta Spring Boot SDK Versions | Compatible Spring Boot Versions |
-| ------- | ------------------------- |
-| 1.2.x | 2.1.x |
-| 1.4.x | 2.2.x |
-| 1.5.x | 2.4.x |
-| 2.0.x | 2.4.x |
-| 2.1.x | 2.7.x |
+|-------------------------------|---------------------------------|
+| 1.2.x                         | 2.1.x                           |
+| 1.4.x                         | 2.2.x                           |
+| 1.5.x                         | 2.4.x                           |
+| 2.0.x                         | 2.4.x                           |
+| 2.1.x                         | 2.7.x                           |
+| 3.x.x                         | 3.0.x                           |
               
 The latest release can always be found on the [releases page](https://github.com/okta/okta-spring-boot/releases).
 
