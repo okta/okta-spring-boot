@@ -74,7 +74,7 @@ import org.testng.annotations.AfterClass
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 
-import javax.servlet.Filter
+import jakarta.servlet.Filter
 import java.util.function.Supplier
 import java.util.stream.Collectors
 import java.util.stream.Stream
