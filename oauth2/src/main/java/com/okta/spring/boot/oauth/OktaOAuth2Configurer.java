@@ -188,7 +188,10 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
             // Spring (2.7.x+) configures JWT be default and this creates startup failure "Spring Security
             // only supports JWTs or Opaque Tokens, not both at the same time" when we try to configure Opaque Token mode in following line.
             // Therefore, we are unsetting JWT mode before attempting to configure Opaque Token mode for ROOT issuer case.
-            unsetJwtConfigurer(http.getConfigurer(OAuth2ResourceServerConfigurer.class));
+
+            if (http.getConfigurer(OAuth2ResourceServerConfigurer.class) != null) {
+                unsetJwtConfigurer(http.getConfigurer(OAuth2ResourceServerConfigurer.class));
+            }
 
             http.oauth2ResourceServer().opaqueToken();
         }
