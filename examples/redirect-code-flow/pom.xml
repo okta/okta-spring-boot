@@ -20,7 +20,7 @@
     <parent>
         <groupId>com.okta.spring.examples</groupId>
         <artifactId>okta-spring-boot-examples</artifactId>
-        <version>3.0.2-SNAPSHOT</version>
+        <version>3.0.2</version>
     </parent>
 
     <artifactId>okta-spring-boot-redirect-code-flow-example</artifactId>
