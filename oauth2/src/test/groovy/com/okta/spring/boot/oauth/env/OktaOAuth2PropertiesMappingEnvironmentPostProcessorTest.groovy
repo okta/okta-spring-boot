@@ -15,6 +15,9 @@
  */
 package com.okta.spring.boot.oauth.env
 
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock
+import com.okta.spring.boot.oauth.HttpMock
 import org.springframework.core.env.Environment
 import org.springframework.core.env.MapPropertySource
 import org.springframework.mock.env.MockEnvironment
@@ -24,7 +27,7 @@ import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.is
 import static org.hamcrest.Matchers.nullValue
 
-class OktaOAuth2PropertiesMappingEnvironmentPostProcessorTest {
+class OktaOAuth2PropertiesMappingEnvironmentPostProcessorTest implements HttpMock {
 
     final static String CLIENT_ID = "spring.security.oauth2.client.registration.okta.client-id"
     final static String CLIENT_SECRET = "spring.security.oauth2.client.registration.okta.client-secret"
@@ -39,27 +42,50 @@ class OktaOAuth2PropertiesMappingEnvironmentPostProcessorTest {
     final static String USER_INFO_URI = "spring.security.oauth2.client.provider.okta.user-info-uri"
     final static String PROVIDER_KEYS_URI = "spring.security.oauth2.client.provider.okta.jwk-set-uri"
 
+    @Override
+    void configureHttpMock(WireMockServer wireMockServer) {
+        String orgIssuer = "${mockBaseUrl()}foobar/"
+        wireMockServer.stubFor(
+            WireMock.get("/foobar/.well-known/openid-configuration")
+                .willReturn(WireMock.aResponse()
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(""" {
+                        "issuer": "${orgIssuer}",
+                        "subject_types_supported": ["public"],
+                        "end_session_endpoint":"${orgIssuer}oauth2/v1/logout",
+                        "authorization_endpoint":"${orgIssuer}oauth2/v1/authorize",
+                        "token_endpoint":"${orgIssuer}oauth2/v1/token",
+                        "userinfo_endpoint":"${orgIssuer}oauth2/v1/userinfo",
+                        "registration_endpoint":"${orgIssuer}oauth2/v1/clients",
+                        "jwks_uri":"${orgIssuer}oauth2/v1/keys",
+                        "introspection_endpoint":"${orgIssuer}oauth2/v1/introspect"
+                    }
+                    """)))
+    }
+
     @Test
     void happyPath() {
+        String orgIssuer = "${mockBaseUrl()}foobar/"
         def environment = buildAndProcessEnvironment([
                 "okta.oauth2.client-id": "test-client-id",
                 "okta.oauth2.client-secret": "test-client-secret",
-                "okta.oauth2.issuer": "https://issuer.example.com/foobar",
+                "okta.oauth2.issuer": orgIssuer,
                 "okta.oauth2.scopes": ["one", "two", "three"],
         ])
+
 
         assertThat environment.getProperty(CLIENT_ID), is("test-client-id")
         assertThat environment.getProperty(CLIENT_SECRET), is("test-client-secret")
         assertThat environment.getProperty(SCOPE, Set), is(["one", "two", "three"] as Set)
-        assertThat environment.getProperty(ISSUER), is("https://issuer.example.com/foobar")
-        assertThat environment.getProperty(RS_KEYS_URI),is("https://issuer.example.com/foobar/oauth2/v1/keys")
-        assertThat environment.getProperty(AUTHZ_URI), is("https://issuer.example.com/foobar/oauth2/v1/authorize")
-        assertThat environment.getProperty(TOKEN_URI), is("https://issuer.example.com/foobar/oauth2/v1/token")
-        assertThat environment.getProperty(USER_INFO_URI), is("https://issuer.example.com/foobar/oauth2/v1/userinfo")
-        assertThat environment.getProperty(PROVIDER_KEYS_URI), is("https://issuer.example.com/foobar/oauth2/v1/keys")
+        assertThat environment.getProperty(ISSUER), is(orgIssuer)
+        assertThat environment.getProperty(RS_KEYS_URI), is("${orgIssuer}oauth2/v1/keys" as String)
+        assertThat environment.getProperty(AUTHZ_URI), is("${orgIssuer}oauth2/v1/authorize" as String)
+        assertThat environment.getProperty(TOKEN_URI), is("${orgIssuer}oauth2/v1/token" as String)
+        assertThat environment.getProperty(USER_INFO_URI), is("${orgIssuer}oauth2/v1/userinfo" as String)
+        assertThat environment.getProperty(PROVIDER_KEYS_URI), is("${orgIssuer}oauth2/v1/keys" as String)
         assertThat environment.getProperty(RS_CLIENT_ID), is("test-client-id")
         assertThat environment.getProperty(RS_CLIENT_SECRET), is("test-client-secret")
-        assertThat environment.getProperty(RS_INTROSPECTION_URI), is("https://issuer.example.com/foobar/v1/introspect")
+        assertThat environment.getProperty(RS_INTROSPECTION_URI), is("${orgIssuer}oauth2/v1/introspect" as String)
     }
 
     @Test
@@ -82,21 +108,22 @@ class OktaOAuth2PropertiesMappingEnvironmentPostProcessorTest {
 
     @Test
     void missingClientSecret() {
+        String orgIssuer = "${mockBaseUrl()}foobar/"
         def environment = buildAndProcessEnvironment([
             "okta.oauth2.client-id": "test-client-id",
-            "okta.oauth2.issuer": "https://issuer.example.com/foobar",
+            "okta.oauth2.issuer": orgIssuer,
             "okta.oauth2.scopes": ["one", "two", "three"],
         ])
 
         assertThat environment.getProperty(CLIENT_ID), is("test-client-id")
         assertThat environment.getProperty(CLIENT_SECRET), nullValue()
         assertThat environment.getProperty(SCOPE, Set), is(["one", "two", "three"] as Set)
-        assertThat environment.getProperty(ISSUER), is("https://issuer.example.com/foobar")
-        assertThat environment.getProperty(RS_KEYS_URI),is("https://issuer.example.com/foobar/oauth2/v1/keys")
-        assertThat environment.getProperty(AUTHZ_URI), is("https://issuer.example.com/foobar/oauth2/v1/authorize")
-        assertThat environment.getProperty(TOKEN_URI), is("https://issuer.example.com/foobar/oauth2/v1/token")
-        assertThat environment.getProperty(USER_INFO_URI), is("https://issuer.example.com/foobar/oauth2/v1/userinfo")
-        assertThat environment.getProperty(PROVIDER_KEYS_URI), is("https://issuer.example.com/foobar/oauth2/v1/keys")
+        assertThat environment.getProperty(ISSUER), is(orgIssuer)
+        assertThat environment.getProperty(RS_KEYS_URI),is("${orgIssuer}oauth2/v1/keys" as String)
+        assertThat environment.getProperty(AUTHZ_URI), is("${orgIssuer}oauth2/v1/authorize" as String)
+        assertThat environment.getProperty(TOKEN_URI), is("${orgIssuer}oauth2/v1/token" as String)
+        assertThat environment.getProperty(USER_INFO_URI), is("${orgIssuer}oauth2/v1/userinfo" as String)
+        assertThat environment.getProperty(PROVIDER_KEYS_URI), is("${orgIssuer}oauth2/v1/keys" as String)
         assertThat environment.getProperty(RS_CLIENT_ID), nullValue()
         assertThat environment.getProperty(RS_INTROSPECTION_URI), nullValue()
         assertThat environment.getProperty(RS_CLIENT_SECRET), nullValue()
