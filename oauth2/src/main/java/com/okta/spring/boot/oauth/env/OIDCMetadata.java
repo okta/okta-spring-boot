@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 
 public class OIDCMetadata {
 
-    private boolean isAuth0;
     private final String clientAuthenticationMethod = "none";
     private final String scope = "profile,email,openid";
     private final String jwkSetURI;
@@ -15,10 +14,6 @@ public class OIDCMetadata {
     private final String tokenURI;
     private final String userInfoURI;
     private final String introspectionURI;
-
-    public boolean isAuth0() {
-        return isAuth0;
-    }
 
     public String getClientAuthenticationMethod() {
         return clientAuthenticationMethod;
@@ -60,21 +55,17 @@ public class OIDCMetadata {
      * Fetch metadata from the ${issuer}/.well-known/openid-configuration endpoint
      *
      * @param response well known metadata response
-     * @param issuer   OIDC issuer URI
      */
-    public OIDCMetadata(ResponseEntity<String> response, String issuer) throws JsonProcessingException {
+    public OIDCMetadata(ResponseEntity<String> response) throws JsonProcessingException {
 
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(response.getBody());
 
-        // TODO check if there are other possible domains
-        if (issuer != null && issuer.contains("auth0.com")) {
-            this.isAuth0 = true;
-            // TODO temp workaround as auth0 does not have this URL
-            this.introspectionURI = issuer + "introspect";
-        } else {
-            // Auth0 does not have introspection URL
+        if (root.has("introspection_endpoint") && !root.path("introspection_endpoint").isNull()) {
             this.introspectionURI = root.path("introspection_endpoint").asText();
+        } else {
+            // TODO Temp workaround as auth0 does not have this URL and spring boot config needs it
+            this.introspectionURI = root.path("issuer").asText();
         }
 
         this.jwkSetURI = root.path("jwks_uri").asText();
