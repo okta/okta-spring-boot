@@ -20,7 +20,7 @@
     <parent>
         <groupId>com.okta</groupId>
         <artifactId>okta-parent</artifactId>
-        <version>24</version>
+        <version>28</version>
         <relativePath>../okta-java-parent</relativePath>
     </parent>
 
@@ -140,6 +140,11 @@
                 <groupId>com.okta.commons</groupId>
                 <artifactId>okta-commons-lang</artifactId>
                 <version>${okta.commons.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>1.7.36</version>
             </dependency>
             <dependency>
                 <groupId>com.okta.oidc.tck</groupId>
