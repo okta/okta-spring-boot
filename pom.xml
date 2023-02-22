@@ -191,7 +191,6 @@
              <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
-                <version>8.0.0</version>
              </plugin>
           </plugins>
        </pluginManagement>
