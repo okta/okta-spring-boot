@@ -93,7 +93,6 @@ import org.springframework.web.client.RestTemplate;
  *         <td>spring.security.oauth2.resourceserver.opaquetoken.introspection-uri</td></td>
  *     </tr>
  * </table>
- * </p>
  *
  * @since 0.2.0
  */
@@ -122,7 +121,7 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
                 }
                 ResponseEntity<String> response
                     = restTemplate.getForEntity(issuer + ".well-known/openid-configuration", String.class);
-                oidcMetadata = new OIDCMetadata(response);
+                oidcMetadata = new OIDCMetadata(response, issuer);
             } else {
                 oidcMetadata = new OIDCMetadata(OKTA_OAUTH_ISSUER_WITH_PATH);
             }
@@ -137,7 +136,7 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
         // default scopes, as of Spring Security 5.4 default scopes are no longer added, this restores that functionality
         environment.getPropertySources().addLast(defaultOktaScopesSource(environment, Objects.requireNonNull(oidcMetadata)));
         // okta's endpoints can be resolved from an issuer
-        environment.getPropertySources().addLast(new OktaIssuerWithPathPropertySource(environment));
+        environment.getPropertySources().addLast(new OktaIssuerWithPathPropertySource(environment, oidcMetadata.isAuth0()));
         environment.getPropertySources().addLast(oktaStaticDiscoveryPropertySource(environment, oidcMetadata));
         environment.getPropertySources().addLast(oktaOpaqueTokenPropertySource(environment, oidcMetadata));
         environment.getPropertySources().addLast(oktaRedirectUriPropertySource(environment));
@@ -274,10 +273,12 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
     private static class OktaIssuerWithPathPropertySource extends PropertySource<String> {
 
         private final Environment environment;
+        private final boolean isAuth0;
 
-        private OktaIssuerWithPathPropertySource(Environment environment) {
+        private OktaIssuerWithPathPropertySource(Environment environment, boolean isAuth0) {
             super("okta-issuer-url-resolving-source");
             this.environment = environment;
+            this.isAuth0 = isAuth0;
         }
 
         @Override
@@ -289,7 +290,7 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
                 return Optional.ofNullable(environment.getProperty(OKTA_OAUTH_ISSUER))
                     .map(issuer -> {
                         // Check if URL is an Auth0 org or is an Okta Org Authorization Server
-                        if (issuer.contains("auth0.com") || issuer.contains("/oauth2")) {
+                        if (isAuth0 || issuer.contains("/oauth2")) {
                             // if it's an Auth0 org or if already contains the suffix leave the property as is
                             return issuer;
                         }
