@@ -114,14 +114,13 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
         try {
             String issuer = environment.getProperty(OKTA_OAUTH_ISSUER);
             if (issuer != null) {
-                // TODO check if it is acceptable to do http requests here
                 RestTemplate restTemplate = new RestTemplate();
                 if (!issuer.endsWith("/")) {
                     issuer += "/";
                 }
                 ResponseEntity<String> response
                     = restTemplate.getForEntity(issuer + ".well-known/openid-configuration", String.class);
-                oidcMetadata = new OIDCMetadata(response, issuer);
+                oidcMetadata = new OIDCMetadata(response);
             } else {
                 oidcMetadata = new OIDCMetadata(OKTA_OAUTH_ISSUER_WITH_PATH);
             }
@@ -138,7 +137,10 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
         // okta's endpoints can be resolved from an issuer
         environment.getPropertySources().addLast(new OktaIssuerWithPathPropertySource(environment, oidcMetadata.isAuth0()));
         environment.getPropertySources().addLast(oktaStaticDiscoveryPropertySource(environment, oidcMetadata));
-        environment.getPropertySources().addLast(oktaOpaqueTokenPropertySource(environment, oidcMetadata));
+        // Auth0 does not have an introspection endpoint
+        if (oidcMetadata.getIntrospectionURI() != null) {
+            environment.getPropertySources().addLast(oktaOpaqueTokenPropertySource(environment, oidcMetadata));
+        }
         environment.getPropertySources().addLast(oktaRedirectUriPropertySource(environment));
         environment.getPropertySources().addLast(otkaForcePkcePropertySource(environment, oidcMetadata));
 
@@ -208,7 +210,6 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
         Map<String, Object> properties = new HashMap<>();
         properties.put("spring.security.oauth2.resourceserver.opaque-token.client-id", "${" + OKTA_OAUTH_CLIENT_ID + "}");
         properties.put("spring.security.oauth2.resourceserver.opaque-token.client-secret", "${" + OKTA_OAUTH_CLIENT_SECRET + "}");
-        // Auth0 does not have an introspection endpoint :(
         properties.put("spring.security.oauth2.resourceserver.opaque-token.introspection-uri", oidcMetadata.getIntrospectionURI());
 
         return new ConditionalMapPropertySource("okta-opaque-token", properties, environment, OKTA_OAUTH_ISSUER, OKTA_OAUTH_CLIENT_SECRET);
