@@ -67,5 +67,11 @@
         <cve>CVE-2022-1471</cve>
     </suppress>
 
+    <!-- False Positive - See https://github.com/jeremylong/DependencyCheck/issues/5502 -->
+    <suppress>
+        <notes><![CDATA[FP per issue #5502]]></notes>
+        <cve>CVE-2022-45688</cve>
+    </suppress>
+
 </suppressions>
 
