@@ -46,10 +46,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Optional;
+import java.util.*;
 
 @AutoConfiguration
 @AutoConfigureBefore(OAuth2ResourceServerAutoConfiguration.class)
@@ -78,7 +75,7 @@ class OktaOAuth2ResourceServerAutoConfig {
 
     static RestTemplate restTemplate(OktaOAuth2Properties oktaOAuth2Properties) {
 
-        Proxy proxy;
+        Proxy proxy = null;
 
         OktaOAuth2Properties.Proxy proxyProperties = oktaOAuth2Properties.getProxy();
         Optional<BasicAuthenticationInterceptor> basicAuthenticationInterceptor = Optional.empty();
@@ -91,8 +88,6 @@ class OktaOAuth2ResourceServerAutoConfig {
                 basicAuthenticationInterceptor = Optional.of(new BasicAuthenticationInterceptor(proxyProperties.getUsername(),
                     proxyProperties.getPassword()));
             }
-        } else {
-            proxy = Proxy.NO_PROXY;
         }
 
         RestTemplate restTemplate = new RestTemplate(Arrays.asList(
@@ -101,7 +96,9 @@ class OktaOAuth2ResourceServerAutoConfig {
         restTemplate.getInterceptors().add(new UserAgentRequestInterceptor());
         basicAuthenticationInterceptor.ifPresent(restTemplate.getInterceptors()::add);
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-        requestFactory.setProxy(proxy);
+        if (Objects.nonNull(proxy)) {
+            requestFactory.setProxy(proxy);
+        }
         restTemplate.setRequestFactory(requestFactory);
         return restTemplate;
     }
