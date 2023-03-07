@@ -19,6 +19,7 @@ import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -70,14 +71,15 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                 }
 
                 // Resource Server Config
-
-                // if issuer is root org, use opaque token validation
-                if (TokenUtil.isRootOrgIssuer(propertiesProvider.getIssuerUri())) {
+                OAuth2ResourceServerProperties.Opaquetoken propertiesOpaquetoken;
+                if (!context.getBeansOfType(OAuth2ResourceServerProperties.class).isEmpty()
+                    && (propertiesOpaquetoken = context.getBean(OAuth2ResourceServerProperties.class).getOpaquetoken()) != null
+                    && !isEmpty(propertiesOpaquetoken.getIntrospectionUri())
+                    && TokenUtil.isRootOrgIssuer(propertiesProvider.getIssuerUri())) {
                     log.debug("Opaque Token validation/introspection will be configured.");
                     configureResourceServerForOpaqueTokenValidation(http, oktaOAuth2Properties);
                     return;
                 }
-
                 OAuth2ResourceServerConfigurer oAuth2ResourceServerConfigurer = http.getConfigurer(OAuth2ResourceServerConfigurer.class);
 
                 if (getJwtConfigurer(oAuth2ResourceServerConfigurer).isPresent()) {
@@ -88,8 +90,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                     log.debug("Opaque Token configurer is set in OAuth resource server configuration. " +
                         "Opaque Token validation/introspection will be configured.");
                     configureResourceServerForOpaqueTokenValidation(http, oktaOAuth2Properties);
-                }
-                else {
+                } else {
                     log.debug("OAuth2ResourceServerConfigurer bean not configured, Resource Server support will not be enabled.");
                 }
             } else {
@@ -136,13 +137,13 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
     }
 
     /**
-     *  Method to "unset" Jwt Resource Server Configurer using Reflection API.
-     *
-     *  For Root/Org issuer cases, we automatically configure resource server to use Opaque Token validation mode, but Spring
-     *  brings in the default Jwt configuration, therefore we are unable to set Opaque Token configuration
-     *  programmatically (startup fails - Spring only supports Jwt or Opaque is supported, not both simultaneously).
-     *  To address this, we need this helper method to unset Jwt configurer before attempting to set Opaque Token configuration
-     *  for Root/Org issuer use case.
+     * Method to "unset" Jwt Resource Server Configurer using Reflection API.
+     * <p>
+     * For Root/Org issuer cases, we automatically configure resource server to use Opaque Token validation mode, but Spring
+     * brings in the default Jwt configuration, therefore we are unable to set Opaque Token configuration
+     * programmatically (startup fails - Spring only supports Jwt or Opaque is supported, not both simultaneously).
+     * To address this, we need this helper method to unset Jwt configurer before attempting to set Opaque Token configuration
+     * for Root/Org issuer use case.
      */
     private void unsetJwtConfigurer(OAuth2ResourceServerConfigurer oAuth2ResourceServerConfigurer) {
 
