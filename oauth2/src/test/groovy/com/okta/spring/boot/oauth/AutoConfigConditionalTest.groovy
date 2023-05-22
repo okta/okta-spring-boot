@@ -15,14 +15,10 @@
  */
 package com.okta.spring.boot.oauth
 
-import ch.qos.logback.classic.Level
-import ch.qos.logback.classic.Logger
-import ch.qos.logback.classic.LoggerContext
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties
 import com.okta.spring.boot.oauth.env.OktaOAuth2PropertiesMappingEnvironmentPostProcessor
-import org.slf4j.impl.StaticLoggerBinder
 import org.springframework.boot.autoconfigure.AutoConfigurations
 import org.springframework.boot.autoconfigure.logging.ConditionEvaluationReportLoggingListener
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties
@@ -70,8 +66,6 @@ import org.springframework.security.web.server.authentication.AuthenticationWebF
 import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.web.server.WebFilter
 import org.testng.TestException
-import org.testng.annotations.AfterClass
-import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 
 import jakarta.servlet.Filter
@@ -82,9 +76,6 @@ import java.util.stream.Stream
 import static org.assertj.core.api.Assertions.assertThat
 
 class AutoConfigConditionalTest implements HttpMock {
-
-    private Level originalLevel = Level.INFO
-    private Logger conditionLogger =  ((LoggerContext) StaticLoggerBinder.getSingleton().getLoggerFactory()).getLogger(ConditionEvaluationReportLoggingListener)
 
     private List<Class<?>> oktaAutoConfigs = [
         OktaOAuth2AutoConfig,
@@ -136,17 +127,6 @@ class AutoConfigConditionalTest implements HttpMock {
                         "introspection_endpoint":"${orgIssuer}oauth2/v1/introspect"
                     }
                     """)))
-    }
-
-
-    @BeforeClass
-    void enableVerboseConditionEvaluationLogging() {
-        originalLevel = conditionLogger.getLevel()
-    }
-
-    @AfterClass
-    void disableVerboseConditionEvaluationLogging() {
-        conditionLogger.setLevel(originalLevel)
     }
 
     @Test
