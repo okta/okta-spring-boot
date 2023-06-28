@@ -20,7 +20,7 @@
     <parent>
         <groupId>com.okta</groupId>
         <artifactId>okta-parent</artifactId>
-        <version>29</version>
+        <version>30</version>
         <relativePath>../okta-java-parent</relativePath>
     </parent>
 
