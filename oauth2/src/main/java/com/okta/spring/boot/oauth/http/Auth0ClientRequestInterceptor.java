@@ -13,7 +13,7 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 
-public final class Auth0RequestInterceptor implements ClientHttpRequestInterceptor {
+public final class Auth0ClientRequestInterceptor implements ClientHttpRequestInterceptor {
 
     private static final String clientData;
 

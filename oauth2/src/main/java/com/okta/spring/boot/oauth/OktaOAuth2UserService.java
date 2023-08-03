@@ -15,7 +15,7 @@
  */
 package com.okta.spring.boot.oauth;
 
-import com.okta.spring.boot.oauth.http.Auth0RequestInterceptor;
+import com.okta.spring.boot.oauth.http.Auth0ClientRequestInterceptor;
 import com.okta.spring.boot.oauth.http.UserAgentRequestInterceptor;
 import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -39,7 +39,7 @@ final class OktaOAuth2UserService extends DefaultOAuth2UserService {
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
         restTemplate.getInterceptors().add(new UserAgentRequestInterceptor());
-        restTemplate.getInterceptors().add(new Auth0RequestInterceptor());
+        restTemplate.getInterceptors().add(new Auth0ClientRequestInterceptor());
         return restTemplate;
     }
 

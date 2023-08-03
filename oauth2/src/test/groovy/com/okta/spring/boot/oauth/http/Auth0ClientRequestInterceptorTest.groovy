@@ -13,7 +13,7 @@ import static org.hamcrest.Matchers.*
 import static org.mockito.ArgumentMatchers.eq
 import static org.mockito.Mockito.*
 
-class Auth0RequestInterceptorTest {
+class Auth0ClientRequestInterceptorTest {
 
     @Test
     void headerAddedTest() {
@@ -25,7 +25,7 @@ class Auth0RequestInterceptorTest {
         when(request.getHeaders()).thenReturn(headers)
         when(execution.execute(request, null)).thenReturn(response)
 
-        def underTest = new Auth0RequestInterceptor()
+        def underTest = new Auth0ClientRequestInterceptor()
         assertThat underTest.intercept(request, null, execution), is(response)
 
         def auth0ClientCapture = ArgumentCaptor.forClass(String)
