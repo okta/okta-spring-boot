@@ -17,6 +17,7 @@ package com.okta.spring.boot.oauth;
 
 import com.okta.commons.lang.Strings;
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
+import com.okta.spring.boot.oauth.http.Auth0RequestInterceptor;
 import com.okta.spring.boot.oauth.http.UserAgentRequestInterceptor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -98,6 +99,7 @@ class OktaOAuth2ResourceServerAutoConfig {
             new FormHttpMessageConverter(), new OAuth2AccessTokenResponseHttpMessageConverter(), new StringHttpMessageConverter()
         ));
         restTemplate.getInterceptors().add(new UserAgentRequestInterceptor());
+        restTemplate.getInterceptors().add(new Auth0RequestInterceptor());
         basicAuthenticationInterceptor.ifPresent(restTemplate.getInterceptors()::add);
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         if (Objects.nonNull(proxy)) {
