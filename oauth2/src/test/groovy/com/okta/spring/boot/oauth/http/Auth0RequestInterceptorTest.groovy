@@ -17,7 +17,6 @@ class Auth0RequestInterceptorTest {
 
     @Test
     void headerAddedTest() {
-
         def request = mock(HttpRequest)
         def execution = mock(ClientHttpRequestExecution)
         def response = mock(ClientHttpResponse)
