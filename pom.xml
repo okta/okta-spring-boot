@@ -32,9 +32,9 @@
 
     <properties>
         <spring-boot.version>3.1.2</spring-boot.version>
-        <spring-cloud.version>4.0.3</spring-cloud.version>
+        <spring-cloud.version>4.0.4</spring-cloud.version>
         <github.slug>okta/okta-spring-boot</github.slug>
-        <okta.sdk.version>8.2.3</okta.sdk.version>
+        <okta.sdk.version>8.2.5</okta.sdk.version>
         <okta.commons.version>1.3.3</okta.commons.version>
     </properties>
 
@@ -150,6 +150,11 @@
                 <groupId>com.okta.oidc.tck</groupId>
                 <artifactId>okta-oidc-tck</artifactId>
                 <version>0.5.10</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>1.76</version>
             </dependency>
 
             <!-- test dependencies -->

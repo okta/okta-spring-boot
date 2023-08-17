@@ -36,6 +36,11 @@
                     <groupId>commons-logging</groupId>
                     <artifactId>commons-logging</artifactId>
                 </exclusion>
+                <!-- to fix vulnerability -->
+                <exclusion>
+                    <groupId>org.apache.sshd</groupId>
+                    <artifactId>sshd-sftp</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
     </dependencies>
