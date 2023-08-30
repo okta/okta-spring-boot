@@ -81,7 +81,7 @@ For Apache Maven:
 
 For Gradle:
 ```groovy
-compile 'com.okta.spring:okta-spring-boot-starter:${okta.springboot.version}'
+implementation 'com.okta.spring:okta-spring-boot-starter:${okta.springboot.version}'
 ```
 
 where ${okta.springboot.version} is the latest published version in [Maven Central](https://search.maven.org/search?q=g:com.okta.spring%20a:okta-spring-boot-starter).
