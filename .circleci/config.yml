@@ -18,11 +18,33 @@ jobs:
     environment:
       JVM_OPTS: -Xmx3200m
     steps: *build_steps
+
+  snyk-scan:
+    docker:
+      - image: cimg/openjdk:13.0
+    steps:
+      - attach_workspace: # Allows for sharing of build-workspace (containing downloaded dependencies) (optional)
+          at: ~/project
+      - general-platform-helpers/step-load-dependencies
+      - run: | # Install your projects dependencies here or in the build job. Note: Here if Python.
+          pip install -r requirements.txt 
+      - general-platform-helpers/step-run-snyk-monitor:
+          scan-all-projects: true
+          skip-unresolved: false
+
     
 workflows:
   build_and_test:
     jobs:
       - jdk17
+      - general-platform-helpers/job-snyk-prepare:
+          name: prepare-snyk
+          requires:
+            - jdk17
+      - snyk-scan:
+          name: execute-snyk
+          requires:
+            - prepare-snyk
   # See OKTA-634437
   semgrep:
     jobs:
