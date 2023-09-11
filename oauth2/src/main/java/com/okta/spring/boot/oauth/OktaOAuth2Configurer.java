@@ -18,6 +18,7 @@ package com.okta.spring.boot.oauth;
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.context.ApplicationContext;
@@ -29,16 +30,24 @@ import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationC
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.web.client.RestTemplate;
 
 import java.lang.reflect.Field;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static com.okta.commons.lang.Strings.isEmpty;
 
 final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Configurer, HttpSecurity> {
+
+    @Value("${okta.oauth2.audience}")
+    private String audience;
 
     private static final Logger log = LoggerFactory.getLogger(OktaOAuth2Configurer.class);
 
@@ -51,7 +60,6 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         // make sure OktaOAuth2Properties are available
         if (!context.getBeansOfType(OktaOAuth2Properties.class).isEmpty()) {
             OktaOAuth2Properties oktaOAuth2Properties = context.getBean(OktaOAuth2Properties.class);
-
             // Auth Code Flow Config
 
             // if OAuth2ClientProperties bean is not available do NOT configure
@@ -63,7 +71,8 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                 && !isEmpty(propertiesProvider.getIssuerUri())
                 && !isEmpty(propertiesRegistration.getClientId())) {
                 // configure Okta user services
-                configureLogin(http, oktaOAuth2Properties, context.getEnvironment());
+                ClientRegistrationRepository clientRegistrationRepository = context.getBean(ClientRegistrationRepository.class);
+                configureLogin(http, oktaOAuth2Properties, context.getEnvironment(), clientRegistrationRepository);
 
                 // check for RP-Initiated logout
                 if (!context.getBeansOfType(OidcClientInitiatedLogoutSuccessHandler.class).isEmpty()) {
@@ -162,14 +171,22 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         });
     }
 
-    private void configureLogin(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties, Environment environment) throws Exception {
+    private void configureLogin(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties, Environment environment,
+                                ClientRegistrationRepository clientRegistrationRepository) throws Exception {
 
         RestTemplate restTemplate = OktaOAuth2ResourceServerAutoConfig.restTemplate(oktaOAuth2Properties);
 
-        http.oauth2Login()
-            .tokenEndpoint()
-            .accessTokenResponseClient(accessTokenResponseClient(restTemplate));
+        http.oauth2Login(oauth2 -> oauth2
+            .authorizationEndpoint(authorization -> authorization
+                .authorizationRequestResolver(authorizationRequestResolver(clientRegistrationRepository)))
+            .tokenEndpoint(token -> token
+                .accessTokenResponseClient(accessTokenResponseClient(restTemplate)))
+        );
 
+        String audienceProperty = environment.getProperty("okta.oauth2.audience");
+        if (audienceProperty != null) {
+            audience = audienceProperty;
+        }
         String redirectUriProperty = environment.getProperty("spring.security.oauth2.client.registration.okta.redirect-uri");
         if (redirectUriProperty != null) {
             //  remove `{baseUrl}` pattern, if present, as Spring will solve this on its own
@@ -204,5 +221,20 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         accessTokenResponseClient.setRestOperations(restTemplate);
 
         return accessTokenResponseClient;
+    }
+
+    private OAuth2AuthorizationRequestResolver authorizationRequestResolver(ClientRegistrationRepository clientRegistrationRepository) {
+        DefaultOAuth2AuthorizationRequestResolver authorizationRequestResolver =
+            new DefaultOAuth2AuthorizationRequestResolver(
+                clientRegistrationRepository, "/oauth2/authorization");
+        authorizationRequestResolver.setAuthorizationRequestCustomizer(
+            authorizationRequestCustomizer());
+
+        return authorizationRequestResolver;
+    }
+
+    private Consumer<OAuth2AuthorizationRequest.Builder> authorizationRequestCustomizer() {
+        return customizer -> customizer
+            .additionalParameters(params -> params.put("audience", audience));
     }
 }

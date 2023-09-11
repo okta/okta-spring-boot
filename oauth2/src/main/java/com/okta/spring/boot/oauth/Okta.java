@@ -15,6 +15,7 @@
  */
 package com.okta.spring.boot.oauth;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,8 +25,10 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.server.DefaultServerOAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.oauth2.server.resource.BearerTokenError;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.server.BearerTokenServerAuthenticationEntryPoint;
@@ -35,6 +38,8 @@ import org.springframework.security.web.server.util.matcher.MediaTypeServerWebEx
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.accept.HeaderContentNegotiationStrategy;
+
+import java.util.function.Consumer;
 
 import static org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestCustomizers.withPkce;
 
@@ -97,6 +102,12 @@ public final class Okta {
         authorizationRequestResolver.setAuthorizationRequestCustomizer(withPkce());
         // enable oauth2 login that uses PKCE
         http.oauth2Login().authorizationRequestResolver(authorizationRequestResolver);
+        // enable passing the audience parameter
+        http.oauth2Login(oauth2 -> oauth2
+            .authorizationRequestResolver(
+                authorizeRequestResolver(clientRegistrationRepository)
+            )
+        );
 
         return http;
     }
@@ -151,4 +162,23 @@ public final class Okta {
         return status.value() + " " + status.getReasonPhrase();
     }
 
+    @Value("${okta.oauth2.audience:}")
+    private static String audience;
+
+    private static ServerOAuth2AuthorizationRequestResolver authorizeRequestResolver(
+        ReactiveClientRegistrationRepository clientRegistrationRepository) {
+
+        DefaultServerOAuth2AuthorizationRequestResolver authorizationRequestResolver =
+            new DefaultServerOAuth2AuthorizationRequestResolver(
+                clientRegistrationRepository);
+        authorizationRequestResolver.setAuthorizationRequestCustomizer(
+            authorizeRequestCustomizer());
+
+        return authorizationRequestResolver;
+    }
+
+    private static Consumer<OAuth2AuthorizationRequest.Builder> authorizeRequestCustomizer() {
+        return customizer -> customizer
+            .additionalParameters(params -> params.put("audience", audience));
+    }
 }
