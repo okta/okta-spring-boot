@@ -52,7 +52,7 @@ import java.util.Collection;
 @Import(AuthorityProvidersConfig.class)
 class ReactiveOktaOAuth2AutoConfig {
 
-    @Value("${okta.oauth2.audience}")
+    @Value("${okta.oauth2.audience:}")
     private String audience;
 
     @Bean
