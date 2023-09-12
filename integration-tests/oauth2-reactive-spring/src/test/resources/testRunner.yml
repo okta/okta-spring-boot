@@ -27,6 +27,7 @@ scenarios:
       - --spring.security.oauth2.client.registration.okta.client-secret=VERY_SECRET
       - --spring.security.oauth2.client.registration.okta.scope=offline_access
       - --spring.security.oauth2.client.registration.okta.redirect-uri={baseUrl}/login/oauth2/code/okta
+      - --okta.oauth2.audience=default
       - --server.servlet.session.tracking-modes=cookie
       - --debug
     protectedPath: /oauth2/authorization/okta
@@ -60,6 +61,7 @@ scenarios:
       - --spring.security.oauth2.client.registration.okta.redirect-uri={baseUrl}/login/oauth2/code/okta
       - --spring.security.oauth2.client.registration.okta.scope=profile,email,openid
       - --okta.oauth2.postLogoutRedirectUri=/you-are-logged-out
+      - --okta.oauth2.audience=default
     protectedPath: /oauth2/authorization/okta
 
   pkce-code-flow-remote-validation:
@@ -73,4 +75,5 @@ scenarios:
       - --spring.security.oauth2.client.registration.okta.scope=offline_access
       - --spring.security.oauth2.client.registration.okta.redirect-uri={baseUrl}/login/oauth2/code/okta
       - --spring.security.oauth2.client.registration.okta.client-authentication-method=none
+      - --okta.oauth2.audience=default
     protectedPath: /oauth2/authorization/okta
