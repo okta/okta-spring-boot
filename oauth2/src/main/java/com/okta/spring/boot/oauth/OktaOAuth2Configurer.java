@@ -46,7 +46,7 @@ import static com.okta.commons.lang.Strings.isEmpty;
 
 final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Configurer, HttpSecurity> {
 
-    @Value("${okta.oauth2.audience}")
+    @Value("${okta.oauth2.audience:}")
     private String audience;
 
     private static final Logger log = LoggerFactory.getLogger(OktaOAuth2Configurer.class);
