@@ -79,11 +79,12 @@ class OktaOAuth2AutoConfig {
     static class OAuth2SecurityFilterChainConfiguration {
 
         @Bean
-        SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository) throws Exception {
+        SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {
             // as of Spring Security 5.4 the default chain uses oauth2Login OR a JWT resource server (NOT both)
             // this does the same as both defaults merged together (and provides the previous behavior)
             http.authorizeRequests((requests) -> requests.anyRequest().authenticated());
             Okta.configureOAuth2WithPkce(http, clientRegistrationRepository);
+            Okta.configureOAuth2WithAudience(http, clientRegistrationRepository, oktaOAuth2Properties);
             http.oauth2Client();
             http.oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
             return http.build();
