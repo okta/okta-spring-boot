@@ -17,13 +17,9 @@ package com.okta.spring.boot.oauth;
 
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -52,9 +48,6 @@ import java.util.Collection;
 @Import(AuthorityProvidersConfig.class)
 class ReactiveOktaOAuth2AutoConfig {
 
-    @Value("${okta.oauth2.audience:}")
-    private String audience;
-
     @Bean
     @ConditionalOnMissingBean
     ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService(Collection<AuthoritiesProvider> authoritiesProviders) {
@@ -69,13 +62,13 @@ class ReactiveOktaOAuth2AutoConfig {
     }
 
     @Bean
-    @ConditionalOnBean(ReactiveJwtDecoder.class)
     @ConditionalOnMissingBean(SecurityWebFilterChain.class)
-    SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http, ReactiveJwtDecoder jwtDecoder, ReactiveClientRegistrationRepository clientRegistrationRepository) {
+    SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http, ReactiveJwtDecoder jwtDecoder, ReactiveClientRegistrationRepository clientRegistrationRepository, OktaOAuth2Properties properties) throws Exception {
         // as of Spring Security 5.4 the default chain uses oauth2Login OR a JWT resource server (NOT both)
         // this does the same as both defaults merged together (and provides the previous behavior)
         http.authorizeExchange().anyExchange().authenticated();
         Okta.configureOAuth2WithPkce(http, clientRegistrationRepository);
+        Okta.configureOAuth2WithAudience(http, clientRegistrationRepository, properties);
         http.oauth2Client();
         http.oauth2ResourceServer((server) -> customDecoder(server, jwtDecoder));
         return http.build();

@@ -15,7 +15,7 @@
  */
 package com.okta.spring.boot.oauth;
 
-import org.springframework.beans.factory.annotation.Value;
+import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,6 +24,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.server.DefaultServerOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -102,12 +103,6 @@ public final class Okta {
         authorizationRequestResolver.setAuthorizationRequestCustomizer(withPkce());
         // enable oauth2 login that uses PKCE
         http.oauth2Login().authorizationRequestResolver(authorizationRequestResolver);
-        // enable passing the audience parameter
-        http.oauth2Login(oauth2 -> oauth2
-            .authorizationRequestResolver(
-                authorizeRequestResolver(clientRegistrationRepository)
-            )
-        );
 
         return http;
     }
@@ -131,6 +126,61 @@ public final class Okta {
         http.oauth2Login()
             .authorizationEndpoint()
             .authorizationRequestResolver(authorizationRequestResolver);
+
+        return http;
+    }
+
+    /**
+     * Configures the {@code http} with an OAuth2 Login, that sends an audience parameter with the authorize request.
+     *
+     * @param http                         the HttpSecurity to configure
+     * @param clientRegistrationRepository the repository bean, this should be injected into the calling method.
+     * @param properties                   the OktaOAuth2Properties bean, this should be injected into the calling method.
+     * @return the {@code http} to allow method chaining
+     */
+    public static ServerHttpSecurity configureOAuth2WithAudience(ServerHttpSecurity http,
+                                                                 ReactiveClientRegistrationRepository clientRegistrationRepository,
+                                                                 OktaOAuth2Properties properties) throws Exception {
+        // Don't add audience parameter if empty or default
+        if (isDefaultAudience(properties)) {
+            return http;
+        }
+        http.oauth2Login(oauth2 -> oauth2
+            .authorizationRequestResolver(
+                reactiveAuthzRequestResolver(clientRegistrationRepository, properties.getAudience())
+            )
+        );
+
+        return http;
+    }
+
+    private static boolean isDefaultAudience(OktaOAuth2Properties properties) {
+        String audience = properties.getAudience();
+        return audience == null || audience.isEmpty() || audience.equals("api://default");
+    }
+
+    /**
+     * Configures the {@code http} with an OAuth2 Login, that sends an audience parameter with the authorize request.
+     *
+     * @param http                         the HttpSecurity to configure
+     * @param clientRegistrationRepository the repository bean, this should be injected into the calling method.
+     * @param properties                   the OktaOAuth2Properties bean, this should be injected into the calling method.
+     * @return the {@code http} to allow method chaining
+     */
+    public static HttpSecurity configureOAuth2WithAudience(HttpSecurity http,
+                                                           ClientRegistrationRepository clientRegistrationRepository,
+                                                           OktaOAuth2Properties properties) throws Exception {
+        // Don't add audience parameter if empty or default
+        if (isDefaultAudience(properties)) {
+            return http;
+        }
+        http.oauth2Login(oauth2 -> oauth2
+            .authorizationEndpoint(authorization -> authorization
+                .authorizationRequestResolver(
+                    mvcAuthzRequestResolver(clientRegistrationRepository, properties.getAudience())
+                )
+            )
+        );
 
         return http;
     }
@@ -162,22 +212,31 @@ public final class Okta {
         return status.value() + " " + status.getReasonPhrase();
     }
 
-    @Value("${okta.oauth2.audience:}")
-    private static String audience;
-
-    private static ServerOAuth2AuthorizationRequestResolver authorizeRequestResolver(
-        ReactiveClientRegistrationRepository clientRegistrationRepository) {
+    private static ServerOAuth2AuthorizationRequestResolver reactiveAuthzRequestResolver(
+        ReactiveClientRegistrationRepository clientRegistrationRepository, String audience) {
 
         DefaultServerOAuth2AuthorizationRequestResolver authorizationRequestResolver =
             new DefaultServerOAuth2AuthorizationRequestResolver(
                 clientRegistrationRepository);
         authorizationRequestResolver.setAuthorizationRequestCustomizer(
-            authorizeRequestCustomizer());
+            authorizationRequestCustomizer(audience));
 
         return authorizationRequestResolver;
     }
 
-    private static Consumer<OAuth2AuthorizationRequest.Builder> authorizeRequestCustomizer() {
+    private static OAuth2AuthorizationRequestResolver mvcAuthzRequestResolver(
+        ClientRegistrationRepository clientRegistrationRepository, String audience) {
+
+        DefaultOAuth2AuthorizationRequestResolver authorizationRequestResolver =
+            new DefaultOAuth2AuthorizationRequestResolver(
+                clientRegistrationRepository, "/oauth2/authorization");
+        authorizationRequestResolver.setAuthorizationRequestCustomizer(
+            authorizationRequestCustomizer(audience));
+
+        return authorizationRequestResolver;
+    }
+
+    private static Consumer<OAuth2AuthorizationRequest.Builder> authorizationRequestCustomizer(String audience) {
         return customizer -> customizer
             .additionalParameters(params -> params.put("audience", audience));
     }

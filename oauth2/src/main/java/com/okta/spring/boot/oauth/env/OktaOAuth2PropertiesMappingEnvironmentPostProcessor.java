@@ -142,7 +142,7 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
             environment.getPropertySources().addLast(oktaOpaqueTokenPropertySource(environment, oidcMetadata));
         }
         environment.getPropertySources().addLast(oktaRedirectUriPropertySource(environment));
-        environment.getPropertySources().addLast(otkaForcePkcePropertySource(environment, oidcMetadata));
+        environment.getPropertySources().addLast(oktaForcePkcePropertySource(environment, oidcMetadata));
 
         if (application != null) {
             // This is required as EnvironmentPostProcessors are run before logging system is initialized
@@ -150,7 +150,7 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
         }
     }
 
-    private PropertySource<?> otkaForcePkcePropertySource(ConfigurableEnvironment environment, OIDCMetadata oidcMetadata) {
+    private PropertySource<?> oktaForcePkcePropertySource(ConfigurableEnvironment environment, OIDCMetadata oidcMetadata) {
         Map<String, Object> props = new HashMap<>();
         props.put("spring.security.oauth2.client.registration.okta.client-authentication-method", oidcMetadata.getClientAuthenticationMethod());
 
