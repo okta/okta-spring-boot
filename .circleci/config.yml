@@ -1,14 +1,18 @@
 version: 2.1
 
 orbs:
-  general-platform-helpers: okta/general-platform-helpers@1.8.13
+  general-platform-helpers: okta/general-platform-helpers@1.8
 
 aliases:
 
   - &build_steps
     - checkout
     - run: java -version
-    - run: ./mvnw -ntp clean install -Pci 
+    - run: ./mvnw -ntp clean install -Pci
+    - persist_to_workspace: # Allows for sharing of build-workspace (containing downloaded dependencies) (optional)
+        root: ~/project
+        paths:
+          - .
 
 jobs:
   
@@ -23,6 +27,8 @@ jobs:
     docker:
       - image: cimg/python:3.10
     steps:
+      - attach_workspace: # Allows for sharing of build-workspace (containing downloaded dependencies) (optional)
+          at: ~/project
       - general-platform-helpers/step-load-dependencies
       - general-platform-helpers/step-run-snyk-monitor:
           scan-all-projects: true
