@@ -23,8 +23,8 @@ jobs:
     docker:
       - image: cimg/python:3.10
     steps:
-      - platform-helpers-general/step-load-dependencies
-      - platform-helpers-general/step-run-snyk-monitor:
+      - general-platform-helpers/step-load-dependencies
+      - general-platform-helpers/step-run-snyk-monitor:
           scan-all-projects: true
           skip-unresolved: false
     
@@ -43,7 +43,7 @@ workflows:
             - semgrep-prepare
   snyk-dependency-scan:
     jobs:
-      - platform-helpers-general/job-snyk-prepare:
+      - general-platform-helpers/job-snyk-prepare:
           name: prepare-snyk
           requires:
             - build
