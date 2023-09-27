@@ -42,6 +42,7 @@ workflows:
           requires:
             - semgrep-prepare
   snyk-dependency-scan:
+    jobs:
       - platform-helpers-general/job-snyk-prepare:
           name: prepare-snyk
           requires:
