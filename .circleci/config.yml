@@ -30,7 +30,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/project
-      - run: rm mvnw mvnw.cmd .mvn/wrapper
+      - run: rm -rf mvnw mvnw.cmd .mvn/wrapper
       - general-platform-helpers/step-load-dependencies
       - general-platform-helpers/step-run-snyk-monitor:
           scan-all-projects: true
