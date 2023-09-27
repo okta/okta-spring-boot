@@ -27,6 +27,7 @@ jobs:
   snyk-scan:
     docker:
       - image: cimg/python:3.10
+      - image: cimg/openjdk:17.0.6
     steps:
       - attach_workspace:
           at: ~/project
@@ -53,5 +54,4 @@ workflows:
       - snyk-scan:
            name: execute-snyk
            requires:
-             - jdk17
              - prepare-snyk
