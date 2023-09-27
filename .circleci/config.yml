@@ -50,5 +50,7 @@ workflows:
              - jdk17
       - snyk-scan:
            name: execute-snyk
+           docker:
+             - image: cimg/openjdk:17.0.6
            requires:
              - prepare-snyk
