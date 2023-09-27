@@ -9,7 +9,6 @@ aliases:
     - checkout
     - run: java -version
     - run: ./mvnw -ntp clean install -Pci
-    - run: echo $JAVA_HOME
     - persist_to_workspace:
         root: ~/project
         paths:
