@@ -27,7 +27,7 @@ jobs:
     docker:
       - image: cimg/python:3.10
     steps:
-      - attach_workspace: # Allows for sharing of build-workspace (containing downloaded dependencies) (optional)
+      - attach_workspace:
           at: ~/project
       - general-platform-helpers/step-load-dependencies
       - general-platform-helpers/step-run-snyk-monitor:
@@ -38,22 +38,17 @@ workflows:
   build_and_test:
     jobs:
       - jdk17
-  # See OKTA-634437
-  semgrep:
-    jobs:
       - general-platform-helpers/job-semgrep-prepare:
-          name: semgrep-prepare
+           name: semgrep-prepare
       - general-platform-helpers/job-semgrep-scan:
-          name: "Scan with Semgrep"
-          requires:
-            - semgrep-prepare
-  snyk-dependency-scan:
-    jobs:
+           name: "Scan with Semgrep"
+           requires:
+             - semgrep-prepare
       - general-platform-helpers/job-snyk-prepare:
-          name: prepare-snyk
-          requires:
-            - build_and_test
+           name: prepare-snyk
+           requires:
+             - jdk17
       - snyk-scan:
-          name: execute-snyk
-          requires:
-            - prepare-snyk
+           name: execute-snyk
+           requires:
+             - prepare-snyk
