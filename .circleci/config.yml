@@ -9,13 +9,8 @@ aliases:
     - checkout
     - run: java -version
     - run: ./mvnw -ntp clean install -Pci
-    - persist_to_workspace:
-        root: ~/project
-        paths:
-          - .
 
 jobs:
-  
   jdk17:
     docker:
       - image: cimg/openjdk:17.0.6
@@ -33,7 +28,8 @@ jobs:
           scan-all-projects: true
           skip-unresolved: false
           run-on-non-main: true
-    
+          additional-arguments: "--maven-aggregate-project"
+
 workflows:
   build_and_test:
     jobs:
