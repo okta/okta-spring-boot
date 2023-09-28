@@ -26,7 +26,7 @@ jobs:
       - run: ./mvnw -ntp clean install -Pci -Dlicense.skip=true -Dmaven.test.skip.exec=true
       - general-platform-helpers/step-load-dependencies
       - general-platform-helpers/step-run-snyk-monitor:
-          scan-all-projects: true
+          scan-all-projects: false
           skip-unresolved: false
           run-on-non-main: true
           additional-arguments: "--maven-aggregate-project"
