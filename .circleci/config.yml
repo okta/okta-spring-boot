@@ -22,6 +22,7 @@ jobs:
     docker:
       - image: cimg/openjdk:17.0.6
     steps:
+      - checkout
       - general-platform-helpers/step-load-dependencies
       - run: ./mvnw -ntp clean install -Pci
       - general-platform-helpers/step-run-snyk-monitor:
