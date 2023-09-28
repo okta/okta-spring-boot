@@ -27,10 +27,7 @@ jobs:
     docker:
       - image: cimg/openjdk:17.0.6
     steps:
-      - attach_workspace:
-          at: ~/project
-      - run: echo $JAVA_HOME
-      - run: rm -rf mvnw mvnw.cmd .mvn/wrapper
+      - run: ./mvnw -ntp clean install -Pci
       - general-platform-helpers/step-load-dependencies
       - general-platform-helpers/step-run-snyk-monitor:
           scan-all-projects: true
