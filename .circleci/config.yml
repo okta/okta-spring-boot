@@ -27,8 +27,6 @@ jobs:
     docker:
       - image: cimg/python:3.10
       - image: cimg/openjdk:17.0.6
-    environment:
-      JAVA_HOME: /usr/local/jdk-17.0.6
     steps:
       - attach_workspace:
           at: ~/project
