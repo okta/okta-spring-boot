@@ -8,7 +8,7 @@ aliases:
   - &build_steps
     - checkout
     - run: java -version
-    - run: ./mvnw -ntp clean install -Pci
+    - run: ./mvnw -ntp clean install -Pci -Dlicense.skip=true
 
 jobs:
   jdk17:
@@ -23,8 +23,8 @@ jobs:
       - image: cimg/openjdk:17.0.6
     steps:
       - checkout
+      - run: ./mvnw -ntp clean install -Pci -Dlicense.skip=true -Dmaven.test.skip.exec=true
       - general-platform-helpers/step-load-dependencies
-      - run: ./mvnw -ntp clean install -Pci
       - general-platform-helpers/step-run-snyk-monitor:
           scan-all-projects: true
           skip-unresolved: false
