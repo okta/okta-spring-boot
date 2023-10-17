@@ -13,14 +13,14 @@ aliases:
 jobs:
   jdk17:
     docker:
-      - image: cimg/openjdk:17.0.6
+      - image: cimg/openjdk:21.0.0
     environment:
       JVM_OPTS: -Xmx3200m
     steps: *build_steps
 
   snyk-scan:
     docker:
-      - image: cimg/openjdk:17.0.6
+      - image: cimg/openjdk:21.0.0
     steps:
       - checkout
       - run: ./mvnw -ntp clean install -Pci -Dlicense.skip=true -Dmaven.test.skip.exec=true
@@ -34,7 +34,7 @@ jobs:
 workflows:
   build_and_test:
     jobs:
-      - jdk17
+      - jdk21
       - general-platform-helpers/job-semgrep-prepare:
            name: semgrep-prepare
       - general-platform-helpers/job-semgrep-scan:
