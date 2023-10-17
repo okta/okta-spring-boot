@@ -11,7 +11,7 @@ aliases:
     - run: ./mvnw -ntp clean install -Pci -Dlicense.skip=true
 
 jobs:
-  jdk17:
+  jdk21:
     docker:
       - image: cimg/openjdk:21.0.0
     environment:
