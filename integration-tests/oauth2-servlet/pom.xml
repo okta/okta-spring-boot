@@ -70,7 +70,6 @@
                             <dependency>com.okta.spring:okta-spring-boot-integration-tests-common-servlet</dependency>
                         </dependenciesToScan>
                         <reuseForks>true</reuseForks>
-                        <parallel>classesAndMethods</parallel>
                         <forkCount>1</forkCount>
                     </configuration>
                 </plugin>
