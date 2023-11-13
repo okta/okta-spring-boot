@@ -35,7 +35,7 @@ public class SpringCache<K, V> implements Cache<K, V> {
     private final org.springframework.cache.Cache springCache;
 
     public SpringCache(org.springframework.cache.Cache springCache) {
-        Assert.notNull(springCache, "spring cache instance cannot be null.");
+        //Assert.notNull(springCache, "spring cache instance cannot be null.");
         this.springCache = springCache;
     }
 

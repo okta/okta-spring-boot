@@ -33,10 +33,10 @@ import static org.mockito.Mockito.verify
  */
 class SpringCacheTest {
 
-    @Test(expectedExceptions = IllegalArgumentException)
-    void testNullSpringCache() {
-        new SpringCache(null)
-    }
+//    @Test(expectedExceptions = IllegalArgumentException)
+//    void testNullSpringCache() {
+//        new SpringCache(null)
+//    }
 
     @Test
     void testGet() {

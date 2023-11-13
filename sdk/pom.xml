@@ -50,12 +50,12 @@
             <version>${okta.sdk.version}</version>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
-            <groupId>com.okta.sdk</groupId>
-            <artifactId>okta-sdk-httpclient</artifactId>
-            <version>${okta.sdk.version}</version>
-            <scope>runtime</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.okta.sdk</groupId>-->
+<!--            <artifactId>okta-sdk-httpclient</artifactId>-->
+<!--            <version>${okta.sdk.version}</version>-->
+<!--            <scope>runtime</scope>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.okta.commons</groupId>
             <artifactId>okta-commons-lang</artifactId>

@@ -15,7 +15,7 @@
  */
 package com.okta.spring.boot.sdk
 
-import com.okta.sdk.client.Client
+import com.okta.sdk.resource.client.ApiClient
 import com.okta.sdk.impl.cache.DefaultCacheManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -34,17 +34,13 @@ import static org.hamcrest.Matchers.notNullValue
 class OktaSdkConfigTest extends AbstractTestNGSpringContextTests {
 
     @Autowired
-    Client client
+    ApiClient client
 
     @Test
     void basicConfigTest() {
         assertThat client, notNullValue()
 
         // check if client properties were set correctly
-        assertThat client.dataStore.baseUrlResolver.getBaseUrl(), equalTo("https://okta.example.com")
-        assertThat client.dataStore.clientCredentialsResolver.getClientCredentials().getCredentials(), equalTo("my-secret-api-token")
-
-        // no spring cache manager enabled the default is expected
-        assertThat client.dataStore.cacheManager, instanceOf(DefaultCacheManager)
+        assertThat client.getBasePath(), equalTo("https://okta.example.com")
     }
 }

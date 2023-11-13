@@ -15,7 +15,7 @@
  */
 package com.okta.spring.boot.sdk
 
-import com.okta.sdk.client.Client
+import com.okta.sdk.resource.client.ApiClient
 import com.okta.spring.boot.sdk.cache.SpringCacheManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -32,10 +32,10 @@ import static org.hamcrest.Matchers.*
 class OktaSdkConfigWithCacheTest extends AbstractTestNGSpringContextTests {
 
     @Autowired
-    Client client
+    ApiClient client
 
     @Test
     void correctCacheImpl() {
-        assertThat client.dataStore.cacheManager, instanceOf(SpringCacheManager)
+        assertThat client.cacheManager, instanceOf(SpringCacheManager)
     }
 }
