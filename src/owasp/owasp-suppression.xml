@@ -19,18 +19,22 @@
   -->
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
 
-    <!-- See https://bitbucket.org/snakeyaml/snakeyaml/issues/561/cve-2022-1471-vulnerability-in -->
-    <suppress>
-        <notes><![CDATA[Ignored since it is deemed "won't fix" by the library authors.]]></notes>
-        <packageUrl regex="true">^pkg:maven/org\.yaml/snakeyaml.*$</packageUrl>
-        <cve>CVE-2022-1471</cve>
+    <!-- False positive, see https://github.com/jeremylong/DependencyCheck/issues/5943 -->
+    <suppress base="true">
+       <notes>
+          <![CDATA[ FP per issue #5943 ]]>
+       </notes>
+       <packageUrl regex="true">^pkg:maven/org\.eclipse\.jgit/org\.eclipse\.jgit(\.[\w]*)*@6\.7\..*$</packageUrl>
+       <cve>CVE-2023-4759</cve>
     </suppress>
 
-    <!-- False Positive: See https://github.com/jeremylong/DependencyCheck/issues/5779 -->
+    <!-- False positive, see https://github.com/jeremylong/DependencyCheck/issues/5912 -->
     <suppress>
-        <notes><![CDATA[FP per issue #5779]]></notes>
-        <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson-databind@.*$</packageUrl>
-        <cve>CVE-2023-35116</cve>
+       <notes>
+          <![CDATA[ FP per issue #5012 ]]>
+       </notes>
+       <packageUrl regex="true">^pkg:maven/io\.netty/netty-.*@.*$</packageUrl>
+       <cve>CVE-2023-4586</cve>
     </suppress>
 
 </suppressions>
