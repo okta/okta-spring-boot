@@ -22,7 +22,7 @@ import com.okta.sdk.authc.credentials.ClientCredentials;
 import com.okta.sdk.authc.credentials.TokenClientCredentials;
 import com.okta.sdk.cache.CacheManager;
 import com.okta.sdk.client.AuthorizationMode;
-import com.okta.sdk.client.Client;
+import com.okta.sdk.resource.client.ApiClient;
 import com.okta.sdk.client.ClientBuilder;
 import com.okta.sdk.client.Clients;
 import com.okta.spring.boot.sdk.cache.SpringCacheManager;
@@ -49,7 +49,7 @@ import static com.okta.commons.configcheck.ConfigurationValidator.validateOrgUrl
  */
 @AutoConfiguration
 @Conditional(OktaSdkConfig.OktaApiConditions.class)
-@ConditionalOnClass(Client.class)
+@ConditionalOnClass(ApiClient.class)
 @EnableConfigurationProperties(OktaClientProperties.class)
 public class OktaSdkConfig {
 
@@ -64,7 +64,7 @@ public class OktaSdkConfig {
     }
 
     @Bean
-    protected Client oktaSdkClient() {
+    protected ApiClient oktaSdkClient() {
         ClientBuilder builder = Clients.builder()
                 .setCacheManager(oktaSdkCacheManager())
                 .setAuthorizationMode(AuthorizationMode.SSWS)
