@@ -63,7 +63,7 @@ class OktaOAuth2ResourceServerAutoConfig {
 
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter(OktaOAuth2Properties oktaOAuth2Properties) {
-        return new OktaJwtAuthenticationConverter(oktaOAuth2Properties.getGroupsClaim());
+        return new OktaJwtAuthenticationConverter(oktaOAuth2Properties);
     }
 
     @Bean
