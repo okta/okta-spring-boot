@@ -67,6 +67,11 @@ public final class OktaOAuth2Properties implements Validator {
     private String groupsClaim = "groups";
 
     /**
+     * The token claim name to map authorities
+     */
+    private String authoritiesClaimName;
+
+    /**
      * URL to redirect to after an RP-Initiated logout (SSO Logout).
      */
     private String postLogoutRedirectUri;
@@ -126,6 +131,14 @@ public final class OktaOAuth2Properties implements Validator {
 
     public void setGroupsClaim(String groupsClaim) {
         this.groupsClaim = groupsClaim;
+    }
+
+    public String getAuthoritiesClaimName() {
+        return authoritiesClaimName;
+    }
+
+    public void setAuthoritiesClaimName(String authoritiesClaimName) {
+        this.authoritiesClaimName = authoritiesClaimName;
     }
 
     public Set<String> getScopes() {

@@ -15,6 +15,7 @@
  */
 package com.okta.spring.boot.oauth;
 
+import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
@@ -28,6 +29,20 @@ final class OktaJwtAuthenticationConverter extends JwtAuthenticationConverter {
         this.setJwtGrantedAuthoritiesConverter(source -> {
             Collection<GrantedAuthority> result = originalConverter.convert(source);
             result.addAll(TokenUtil.tokenClaimsToAuthorities(source.getClaims(), groupClaim));
+            return result;
+        });
+    }
+
+    public OktaJwtAuthenticationConverter(OktaOAuth2Properties oktaOAuth2Properties) {
+        JwtGrantedAuthoritiesConverter originalConverter = new JwtGrantedAuthoritiesConverter();
+
+        if (oktaOAuth2Properties.getAuthoritiesClaimName() != null) {
+            originalConverter.setAuthoritiesClaimName(oktaOAuth2Properties.getAuthoritiesClaimName());
+        }
+
+        this.setJwtGrantedAuthoritiesConverter(source -> {
+            Collection<GrantedAuthority> result = originalConverter.convert(source);
+            result.addAll(TokenUtil.tokenClaimsToAuthorities(source.getClaims(), oktaOAuth2Properties.getGroupsClaim()));
             return result;
         });
     }
