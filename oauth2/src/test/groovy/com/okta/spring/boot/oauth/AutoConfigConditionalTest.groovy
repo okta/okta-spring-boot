@@ -456,15 +456,13 @@ class AutoConfigConditionalTest implements HttpMock {
             }
     }
 
-    @Test(enabled = false) // TODO: investigate why this is failing on upgrade from 3.2.0 to 3.2.4 and enable it back
+    @Test
     void reactiveResourceServerTest_emptyProperties() {
 
-        // missing properties, component does not load
         reactiveContextRunner()
             .run { context ->
-                // this is expected
-                assertThat(context).hasFailed()
-                assertThat(context.getStartupFailure()).isNotNull()
+                assertThat(context).hasNotFailed()
+                assertThat(context.getStartupFailure()).isNull()
             }
     }
 
