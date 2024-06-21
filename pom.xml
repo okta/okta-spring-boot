@@ -26,7 +26,7 @@
 
     <groupId>com.okta.spring</groupId>
     <artifactId>okta-spring-boot-parent</artifactId>
-    <version>3.0.7</version>
+    <version>3.0.8-SNAPSHOT</version>
     <name>Okta Spring Boot</name>
     <packaging>pom</packaging>
 
@@ -76,28 +76,28 @@
             <dependency>
                 <groupId>com.okta.spring</groupId>
                 <artifactId>okta-spring-boot-starter</artifactId>
-                <version>3.0.7</version>
+                <version>3.0.8-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.okta.spring</groupId>
                 <artifactId>okta-spring-security-oauth2</artifactId>
-                <version>3.0.7</version>
+                <version>3.0.8-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>com.okta.spring</groupId>
                 <artifactId>okta-spring-sdk</artifactId>
-                <version>3.0.7</version>
+                <version>3.0.8-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.okta.spring</groupId>
                 <artifactId>okta-spring-boot-integration-tests-common-servlet</artifactId>
-                <version>3.0.7</version>
+                <version>3.0.8-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.okta.spring</groupId>
                 <artifactId>okta-spring-boot-integration-tests-common-servlet</artifactId>
-                <version>3.0.7</version>
+                <version>3.0.8-SNAPSHOT</version>
                 <classifier>tests</classifier>
                 <type>test-jar</type>
                 <scope>test</scope>
@@ -105,12 +105,12 @@
             <dependency>
                 <groupId>com.okta.spring</groupId>
                 <artifactId>okta-spring-boot-integration-tests-common-reactive</artifactId>
-                <version>3.0.7</version>
+                <version>3.0.8-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.okta.spring</groupId>
                 <artifactId>okta-spring-boot-integration-tests-common-reactive</artifactId>
-                <version>3.0.7</version>
+                <version>3.0.8-SNAPSHOT</version>
                 <classifier>tests</classifier>
                 <type>test-jar</type>
                 <scope>test</scope>
@@ -247,8 +247,4 @@
             </pluginRepositories>
         </profile>
     </profiles>
-
-  <scm>
-    <tag>okta-spring-boot-parent-3.0.7</tag>
-  </scm>
 </project>
