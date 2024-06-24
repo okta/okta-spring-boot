@@ -37,7 +37,7 @@ This library uses semantic versioning and follows Okta's [library version policy
 | 1.5.x                         | 2.4.x                           |
 | 2.0.x                         | 2.4.x                           |
 | 2.1.x                         | 2.7.x                           |
-| 3.x.x                         | 3.0.x                           |
+| 3.x.y                         | 3.x.y                           |
               
 The latest release can always be found on the [releases page](https://github.com/okta/okta-spring-boot/releases).
 
