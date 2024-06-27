@@ -72,7 +72,7 @@ final class BrowserFriendlyBearerTokenServerAuthenticationEntryPoint implements
             response.setStatusCode(status);
 
             response.getHeaders().setContentType(MediaType.TEXT_PLAIN);
-            DataBuffer buffer = response.bufferFactory().wrap(statusAsString(status).getBytes(StandardCharsets.UTF_8));
+            DataBuffer buffer = response.bufferFactory().wrap(Okta.statusAsString(status).getBytes(StandardCharsets.UTF_8));
             return response.writeWith(Mono.just(buffer));
         });
     }
