@@ -38,8 +38,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.okta.spring.boot.oauth.Okta.statusAsString;
-
 /**
  * An {@link AuthenticationEntryPoint} implementation used to commence authentication of protected resource requests
  * using {@link BearerTokenAuthenticationFilter}.

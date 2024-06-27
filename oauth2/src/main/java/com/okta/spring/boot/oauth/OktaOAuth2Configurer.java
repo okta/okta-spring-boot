@@ -136,32 +136,6 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         return Optional.ofNullable((T) field.get(source));
     }
 
-    /**
-     * Method to "unset" Jwt Resource Server Configurer using Reflection API.
-     * <p>
-     * For Root/Org issuer cases, we automatically configure resource server to use Opaque Token validation mode, but Spring
-     * brings in the default Jwt configuration, therefore we are unable to set Opaque Token configuration
-     * programmatically (startup fails - Spring only supports Jwt or Opaque is supported, not both simultaneously).
-     * To address this, we need this helper method to unset Jwt configurer before attempting to set Opaque Token configuration
-     * for Root/Org issuer use case.
-     */
-    private void unsetJwtConfigurer(OAuth2ResourceServerConfigurer oAuth2ResourceServerConfigurer) {
-
-        AccessController.doPrivileged((PrivilegedAction<Field>) () -> {
-            Field result = null;
-            try {
-                result = OAuth2ResourceServerConfigurer.class.getDeclaredField("jwtConfigurer");
-                result.setAccessible(true);
-
-                result.set(oAuth2ResourceServerConfigurer, null);
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                log.warn("Could not access field '" + "jwtConfigurer" + "' of {} via reflection",
-                    OAuth2ResourceServerConfigurer.class.getName(), e);
-            }
-            return result;
-        });
-    }
-
     private void configureLogin(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties, Environment environment) throws Exception {
 
         RestTemplate restTemplate = OktaOAuth2ResourceServerAutoConfig.restTemplate(oktaOAuth2Properties);
