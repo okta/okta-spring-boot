@@ -23,8 +23,8 @@ import org.springframework.http.ResponseEntity;
 public class OIDCMetadata {
 
     private boolean isAuth0;
-    private final String clientAuthenticationMethod = "none";
-    private final String scope = "profile,email,openid";
+    private static final String clientAuthenticationMethod = "none";
+    private static final String scope = "profile,email,openid";
     private final String jwkSetURI;
     private final String authorizationURI;
     private final String tokenURI;

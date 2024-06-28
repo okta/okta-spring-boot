@@ -145,6 +145,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
      * To address this, we need this helper method to unset Jwt configurer before attempting to set Opaque Token configuration
      * for Root/Org issuer use case.
      */
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private void unsetJwtConfigurer(OAuth2ResourceServerConfigurer oAuth2ResourceServerConfigurer) {
 
         AccessController.doPrivileged((PrivilegedAction<Field>) () -> {

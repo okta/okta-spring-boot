@@ -132,7 +132,7 @@ public final class Okta {
         BearerTokenAuthenticationEntryPoint bearerTokenEntryPoint = new BearerTokenAuthenticationEntryPoint();
         return (request, response, authException) -> {
             response.setContentType(MediaType.TEXT_PLAIN.toString());
-            response.getWriter().print(statusAsString(Okta.getStatus(authException)));
+            response.getWriter().print(statusAsString(getStatus(authException)));
             bearerTokenEntryPoint.commence(request, response, authException);
         };
     }

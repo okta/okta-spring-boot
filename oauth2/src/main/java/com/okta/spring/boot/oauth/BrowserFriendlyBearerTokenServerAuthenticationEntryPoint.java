@@ -38,8 +38,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.okta.spring.boot.oauth.Okta.statusAsString;
-
 /**
  * An {@link AuthenticationEntryPoint} implementation used to commence authentication of protected resource requests
  * using {@link BearerTokenAuthenticationFilter}.
@@ -74,7 +72,7 @@ final class BrowserFriendlyBearerTokenServerAuthenticationEntryPoint implements
             response.setStatusCode(status);
 
             response.getHeaders().setContentType(MediaType.TEXT_PLAIN);
-            DataBuffer buffer = response.bufferFactory().wrap(statusAsString(status).getBytes(StandardCharsets.UTF_8));
+            DataBuffer buffer = response.bufferFactory().wrap(Okta.statusAsString(status).getBytes(StandardCharsets.UTF_8));
             return response.writeWith(Mono.just(buffer));
         });
     }
