@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  general-platform-helpers: okta/general-platform-helpers@1.8
+  general-platform-helpers: okta/general-platform-helpers@1.9
 
 aliases:
 
@@ -35,17 +35,11 @@ workflows:
   build_and_test:
     jobs:
       - jdk21
-      - general-platform-helpers/job-semgrep-prepare:
-           name: semgrep-prepare
       - general-platform-helpers/job-semgrep-scan:
            name: "Scan with Semgrep"
-           requires:
-             - semgrep-prepare
-      - general-platform-helpers/job-snyk-prepare:
-           name: prepare-snyk
-           requires:
-             - jdk21
+           context:
+             - static-analysis
       - snyk-scan:
            name: execute-snyk
-           requires:
-             - prepare-snyk
+           context:
+             - static-analysis
