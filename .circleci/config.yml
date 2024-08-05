@@ -43,5 +43,3 @@ workflows:
            name: execute-snyk
            context:
              - static-analysis
-           requires:
-             - prepare-snyk
