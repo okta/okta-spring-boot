@@ -39,7 +39,7 @@ jobs:
     steps:
       - checkout
 
-    - run:
+      - run:
         name: Install Python
         command: |
           sudo apt-get update
