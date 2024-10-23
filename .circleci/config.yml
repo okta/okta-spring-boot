@@ -35,10 +35,16 @@ jobs:
 
   reversing-labs:
     docker:
-      - image: cimg/python:3.10
+      - image: cimg/openjdk:21.0.0
     steps:
       - checkout
 
+    - run:
+        name: Install Python
+        command: |
+          sudo apt-get update
+          sudo apt-get install -y python3 python3-pip
+          sudo pip install --upgrade pip
       - run:
           name: Download Reverse Labs Scanner
           command: |
