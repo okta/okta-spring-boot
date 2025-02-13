@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   general-platform-helpers: okta/general-platform-helpers@1.9
+  platform-helpers: okta/platform-helpers@1
   python: circleci/python@2.0.3
   aws-cli: circleci/aws-cli@5.1
   
@@ -26,7 +27,6 @@ jobs:
     steps:
       - checkout
       - run: ./mvnw -ntp clean install -Pci -Dlicense.skip=true -Dmaven.test.skip.exec=true
-      - general-platform-helpers/step-load-dependencies
       - general-platform-helpers/step-run-snyk-monitor:
           scan-all-projects: false
           skip-unresolved: false
@@ -81,7 +81,7 @@ workflows:
   build_and_test:
     jobs:
       - jdk21
-      - general-platform-helpers/job-semgrep-scan:
+      - platform-helpers/job-semgrep-scan:
            name: "Scan with Semgrep"
            context:
              - static-analysis
