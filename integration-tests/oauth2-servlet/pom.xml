@@ -43,7 +43,11 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
+            <version>11.0.3</version>
+        </dependency>
         <dependency>
             <groupId>com.okta.oidc.tck</groupId>
             <artifactId>okta-oidc-tck</artifactId>
