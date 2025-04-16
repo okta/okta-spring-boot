@@ -65,6 +65,11 @@
             <artifactId>org.eclipse.jgit.ssh.apache</artifactId>
             <version>7.2.0.202503040940-r</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
+            <version>11.0.3</version>
+        </dependency>
     </dependencies>
 
     <build>
