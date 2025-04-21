@@ -74,11 +74,6 @@
             <artifactId>spring-boot-devtools</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.tomcat.embed</groupId>
-            <artifactId>tomcat-embed-core</artifactId>
-            <version>11.0.3</version>
-        </dependency>
         <!-- Logging -->
         <dependency>
             <!-- Required for any libraries that expect to call the commons logging APIs -->
