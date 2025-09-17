@@ -20,7 +20,7 @@
     <parent>
         <groupId>com.okta</groupId>
         <artifactId>okta-parent</artifactId>
-        <version>37</version>
+        <version>38</version>
         <relativePath>../okta-java-parent</relativePath>
     </parent>
 
@@ -58,7 +58,7 @@
             <dependency>
                 <groupId>io.rest-assured</groupId>
                 <artifactId>rest-assured-bom</artifactId>
-                <version>5.5.1</version>
+                <version>5.5.5</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -154,17 +154,17 @@
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcprov-jdk18on</artifactId>
-                <version>1.80</version>
+                <version>1.81</version>
             </dependency>
             <dependency>
                 <groupId>com.nimbusds</groupId>
                 <artifactId>nimbus-jose-jwt</artifactId>
-                <version>10.2</version>
+                <version>10.3.1</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.httpcomponents.client5</groupId>
                 <artifactId>httpclient5</artifactId>
-                <version>5.4.3</version>
+                <version>5.5</version>
             </dependency>
 
             <!-- test dependencies -->
@@ -183,13 +183,13 @@
             <dependency>
                 <groupId>io.rest-assured</groupId>
                 <artifactId>rest-assured-all</artifactId>
-                <version>5.5.1</version>
+                <version>5.5.5</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>5.17.0</version>
+                <version>5.18.0</version>
             </dependency>
             <dependency>
                 <groupId>org.yaml</groupId>
@@ -219,12 +219,12 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-handler</artifactId>
-                <version>4.2.0.Final</version>
+                <version>4.2.6.Final</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.tomcat.embed</groupId>
                 <artifactId>tomcat-embed-core</artifactId>
-                <version>11.0.6</version>
+                <version>11.0.11</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
