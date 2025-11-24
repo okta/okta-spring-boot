@@ -508,7 +508,7 @@ class AutoConfigConditionalTest implements HttpMock {
             assertThat(context).hasSingleBean(ReactiveOktaOAuth2ResourceServerAutoConfig)
             assertThat(context).hasSingleBean(ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig)
 
-            assertThat(context).hasSingleBean(OAuth2ClientProperties)
+            assertThat(context).doesNotHaveBean(OAuth2ClientProperties)
             assertThat(context).hasSingleBean(OktaOAuth2Properties)
 
             assertWebFiltersEnabled(context, AuthenticationWebFilter)

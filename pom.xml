@@ -21,7 +21,7 @@
         <groupId>com.okta</groupId>
         <artifactId>okta-parent</artifactId>
         <version>38</version>
-        <relativePath>../okta-java-parent</relativePath>
+        <relativePath>../okta-java-parent/parent</relativePath>
     </parent>
 
     <groupId>com.okta.spring</groupId>
@@ -129,7 +129,7 @@
             <dependency>
                 <groupId>com.okta.sdk</groupId>
                 <artifactId>okta-sdk-httpclient</artifactId>
-                <version>${okta.sdk.version}</version>
+                <version>8.2.5</version>
             </dependency>
             <dependency>
                 <groupId>com.okta.commons</groupId>
