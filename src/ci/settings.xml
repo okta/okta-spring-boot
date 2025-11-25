@@ -20,6 +20,11 @@
             <username>${env.CENTRAL_USERNAME}</username>
             <password>${env.CENTRAL_SECRET}</password>
         </server>
+        <server>
+            <id>sonatype-oss-index</id>
+            <username>${env.OSS_EMAIL}</username>
+            <password>${env.OSS_TOKEN}</password>
+        </server>
     </servers>
     <profiles>
         <profile>
