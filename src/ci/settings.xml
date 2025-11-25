@@ -16,7 +16,7 @@
 <settings>
     <servers>
         <server>
-            <id>${server}</id>
+            <id>central-sonatype-upload</id>
             <username>${env.CENTRAL_USERNAME}</username>
             <password>${env.CENTRAL_SECRET}</password>
         </server>
