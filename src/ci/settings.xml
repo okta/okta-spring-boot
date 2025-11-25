@@ -16,9 +16,9 @@
 <settings>
     <servers>
         <server>
-            <id>central-sonatype</id>
-            <username>${env.OSSRH_USERNAME}</username>
-            <password>${env.OSSRH_SECRET}</password>
+            <id>${server}</id>
+            <username>${env.CENTRAL_USERNAME}</username>
+            <password>${env.CENTRAL_SECRET}</password>
         </server>
     </servers>
     <profiles>
