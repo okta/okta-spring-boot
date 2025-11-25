@@ -246,6 +246,15 @@
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
              </plugin>
+              <plugin>
+                  <groupId>org.sonatype.central</groupId>
+                  <artifactId>central-publishing-maven-plugin</artifactId>
+                  <version>0.6.0</version> <extensions>true</extensions>
+                  <configuration>
+                      <publishingServerId>central-sonatype</publishingServerId> <tokenAuth>true</tokenAuth>
+                      <autoPublish>true</autoPublish>
+                  </configuration>
+              </plugin>
           </plugins>
        </pluginManagement>
     </build>
