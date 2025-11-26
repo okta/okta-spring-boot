@@ -26,7 +26,7 @@
 
     <groupId>com.okta.spring</groupId>
     <artifactId>okta-spring-boot-parent</artifactId>
-    <version>3.0.8-SNAPSHOT</version>
+    <version>3.0.9-SNAPSHOT</version>
     <name>Okta Spring Boot</name>
     <packaging>pom</packaging>
 
@@ -76,28 +76,28 @@
             <dependency>
                 <groupId>com.okta.spring</groupId>
                 <artifactId>okta-spring-boot-starter</artifactId>
-                <version>3.0.8-SNAPSHOT</version>
+                <version>3.0.9-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.okta.spring</groupId>
                 <artifactId>okta-spring-security-oauth2</artifactId>
-                <version>3.0.8-SNAPSHOT</version>
+                <version>3.0.9-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>com.okta.spring</groupId>
                 <artifactId>okta-spring-sdk</artifactId>
-                <version>3.0.8-SNAPSHOT</version>
+                <version>3.0.9-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.okta.spring</groupId>
                 <artifactId>okta-spring-boot-integration-tests-common-servlet</artifactId>
-                <version>3.0.8-SNAPSHOT</version>
+                <version>3.0.9-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.okta.spring</groupId>
                 <artifactId>okta-spring-boot-integration-tests-common-servlet</artifactId>
-                <version>3.0.8-SNAPSHOT</version>
+                <version>3.0.9-SNAPSHOT</version>
                 <classifier>tests</classifier>
                 <type>test-jar</type>
                 <scope>test</scope>
@@ -105,12 +105,12 @@
             <dependency>
                 <groupId>com.okta.spring</groupId>
                 <artifactId>okta-spring-boot-integration-tests-common-reactive</artifactId>
-                <version>3.0.8-SNAPSHOT</version>
+                <version>3.0.9-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.okta.spring</groupId>
                 <artifactId>okta-spring-boot-integration-tests-common-reactive</artifactId>
-                <version>3.0.8-SNAPSHOT</version>
+                <version>3.0.9-SNAPSHOT</version>
                 <classifier>tests</classifier>
                 <type>test-jar</type>
                 <scope>test</scope>
@@ -214,7 +214,7 @@
             <dependency>
                 <groupId>org.springframework.security</groupId>
                 <artifactId>spring-security-core</artifactId>
-                <version>6.5.3</version>
+                <version>6.5.5</version>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
@@ -224,12 +224,12 @@
             <dependency>
                 <groupId>org.apache.tomcat.embed</groupId>
                 <artifactId>tomcat-embed-core</artifactId>
-                <version>11.0.14</version>
+                <version>11.0.2</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.tomcat.embed</groupId>
                 <artifactId>tomcat-embed-websocket</artifactId>
-                <version>10.1.49</version>
+                <version>10.1.33</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -240,12 +240,35 @@
     </dependencyManagement>
 
     <build>
+       <plugins>
+           <plugin>
+               <groupId>org.owasp</groupId>
+               <artifactId>dependency-check-maven</artifactId>
+               <configuration>
+                   <ossIndexUsername>${env.OSS_EMAIL}</ossIndexUsername> <!-- the account's email -->
+                   <ossIndexPassword>${env.OSS_TOKEN}</ossIndexPassword>
+               </configuration>
+           </plugin>
+       </plugins>
        <pluginManagement>
           <plugins>
-             <plugin>
-                <groupId>org.owasp</groupId>
-                <artifactId>dependency-check-maven</artifactId>
-             </plugin>
+              <plugin>
+                  <groupId>org.owasp</groupId>
+                  <artifactId>dependency-check-maven</artifactId>
+                  <configuration>
+                      <skip>true</skip>
+                      <ossIndexServerId>sonatype-oss-index</ossIndexServerId>
+                  </configuration>
+              </plugin>
+              <plugin>
+                  <groupId>org.sonatype.central</groupId>
+                  <artifactId>central-publishing-maven-plugin</artifactId>
+                  <version>0.6.0</version>
+                  <extensions>true</extensions>
+                  <configuration>
+                      <publishingServerId>central-sonatype-upload</publishingServerId>
+                  </configuration>
+              </plugin>
           </plugins>
        </pluginManagement>
     </build>
