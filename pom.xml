@@ -245,7 +245,8 @@
                <groupId>org.owasp</groupId>
                <artifactId>dependency-check-maven</artifactId>
                <configuration>
-                   <skip>true</skip>
+                   <ossIndexUsername>${env.OSS_EMAIL}</ossIndexUsername> <!-- the account's email -->
+                   <ossIndexPassword>${env.OSS_TOKEN}</ossIndexPassword>
                </configuration>
            </plugin>
        </plugins>
