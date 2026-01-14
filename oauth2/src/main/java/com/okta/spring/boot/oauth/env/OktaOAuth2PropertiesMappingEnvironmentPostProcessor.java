@@ -39,8 +39,8 @@ import org.springframework.web.client.RestTemplate;
  * This {@link EnvironmentPostProcessor} configures additional {@link PropertySource}s that map OIDC discovery metadata
  * and standard Okta properties to standard Spring Boot OAuth2 properties.
  *
- * <p>
- * <table summary="Property mapping">
+ * <table>
+ *     <caption>Property mapping</caption>
  *     <tr>
  *         <th>Okta Property</th>
  *         <th>Spring Boot Property</th>
@@ -51,47 +51,47 @@ import org.springframework.web.client.RestTemplate;
  *     </tr>
  *     <tr>
  *         <td>okta.oauth2.client-secret</td>
- *         <td>spring.security.oauth2.client.registration.okta.client-secret
+ *         <td>spring.security.oauth2.client.registration.okta.client-secret</td>
  *     </tr>
  *     <tr>
  *         <td>okta.oauth2.scopes</td>
- *         <td>spring.security.oauth2.client.registration.okta.scope</td></td>
+ *         <td>spring.security.oauth2.client.registration.okta.scope</td>
  *     </tr>
  *     <tr>
  *         <td>${okta.oauth2.issuer}/v1/authorize</td>
- *         <td>spring.security.oauth2.client.provider.okta.authorization-uri</td></td>
+ *         <td>spring.security.oauth2.client.provider.okta.authorization-uri</td>
  *     </tr>
  *     <tr>
  *         <td>${okta.oauth2.issuer}/v1/token</td>
- *         <td>spring.security.oauth2.client.provider.okta.token-uri</td></td>
+ *         <td>spring.security.oauth2.client.provider.okta.token-uri</td>
  *     </tr>
  *     <tr>
  *         <td>${okta.oauth2.issuer}/v1/userinfo</td>
- *         <td>spring.security.oauth2.client.provider.okta.user-info-uri</td></td>
+ *         <td>spring.security.oauth2.client.provider.okta.user-info-uri</td>
  *     </tr>
  *     <tr>
  *         <td>${okta.oauth2.issuer}/v1/keys</td>
- *         <td>spring.security.oauth2.client.provider.okta.jwk-set-uri</td></td>
+ *         <td>spring.security.oauth2.client.provider.okta.jwk-set-uri</td>
  *     </tr>
  *     <tr>
  *         <td>${okta.oauth2.issuer}</td>
- *         <td>spring.security.oauth2.resourceserver.jwt.issuer-uri</td></td>
+ *         <td>spring.security.oauth2.resourceserver.jwt.issuer-uri</td>
  *     </tr>
  *     <tr>
  *         <td>${okta.oauth2.issuer}/v1/keys</td>
- *         <td>spring.security.oauth2.resourceserver.jwt.jwk-set-uri</td></td>
+ *         <td>spring.security.oauth2.resourceserver.jwt.jwk-set-uri</td>
  *     </tr>
  *     <tr>
  *         <td>${okta.oauth2.clientId}</td>
- *         <td>spring.security.oauth2.resourceserver.opaquetoken.client-id</td></td>
+ *         <td>spring.security.oauth2.resourceserver.opaquetoken.client-id</td>
  *     </tr>
  *     <tr>
  *         <td>${okta.oauth2.clientSecret}</td>
- *         <td>spring.security.oauth2.resourceserver.opaquetoken.client-secret</td></td>
+ *         <td>spring.security.oauth2.resourceserver.opaquetoken.client-secret</td>
  *     </tr>
  *     <tr>
  *         <td>${okta.oauth2.introspectionUri}</td>
- *         <td>spring.security.oauth2.resourceserver.opaquetoken.introspection-uri</td></td>
+ *         <td>spring.security.oauth2.resourceserver.opaquetoken.introspection-uri</td>
  *     </tr>
  * </table>
  *
