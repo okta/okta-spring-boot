@@ -64,16 +64,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
-        <!-- Spring Boot 4.x OAuth2 modules -->
+        <!-- Spring Boot 4.x OAuth2 modules via classic starter -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-oauth2-client</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
-            <optional>true</optional>
+            <artifactId>spring-boot-starter-classic</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>

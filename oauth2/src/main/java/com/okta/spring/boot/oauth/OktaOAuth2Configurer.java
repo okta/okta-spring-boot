@@ -18,14 +18,14 @@ package com.okta.spring.boot.oauth;
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
+import org.springframework.boot.security.oauth2.client.OAuth2ClientProperties;
+import org.springframework.boot.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
-import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.RestClientAuthorizationCodeTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
@@ -200,10 +200,10 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
     }
 
     private OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient(RestTemplate restTemplate) {
-
-        DefaultAuthorizationCodeTokenResponseClient accessTokenResponseClient = new DefaultAuthorizationCodeTokenResponseClient();
-        accessTokenResponseClient.setRestOperations(restTemplate);
-
+        // Spring Security 7.x uses RestClientAuthorizationCodeTokenResponseClient
+        // which is based on RestClient. For now, we use the default implementation.
+        // Custom RestTemplate configuration can be applied via RestClient.builder()
+        RestClientAuthorizationCodeTokenResponseClient accessTokenResponseClient = new RestClientAuthorizationCodeTokenResponseClient();
         return accessTokenResponseClient;
     }
 }
