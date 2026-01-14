@@ -42,8 +42,8 @@ import java.util.Collection;
 
 @AutoConfiguration
 @AutoConfigureBefore(name = {
-    "org.springframework.boot.security.oauth2.client.reactive.autoconfigure.ReactiveOAuth2ClientAutoConfiguration",
-    "org.springframework.boot.security.oauth2.resource.reactive.autoconfigure.ReactiveOAuth2ResourceServerAutoConfiguration"})
+    "org.springframework.boot.autoconfigure.security.oauth2.client.reactive.ReactiveOAuth2ClientAutoConfiguration",
+    "org.springframework.boot.autoconfigure.security.oauth2.resource.reactive.ReactiveOAuth2ResourceServerAutoConfiguration"})
 @EnableConfigurationProperties(OktaOAuth2Properties.class)
 @ConditionalOnOktaClientProperties
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
