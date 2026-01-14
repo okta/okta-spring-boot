@@ -55,9 +55,9 @@ class ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig {
         public Object postProcessAfterInitialization(Object bean, String beanName) {
             if (bean instanceof ServerHttpSecurity) {
                 final ServerHttpSecurity http = (ServerHttpSecurity) bean;
-                http.oauth2ResourceServer().jwt()
+                http.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt
                         .jwtAuthenticationConverter(new ReactiveJwtAuthenticationConverterAdapter(
-                                new OktaJwtAuthenticationConverter(oktaOAuth2Properties)));
+                                new OktaJwtAuthenticationConverter(oktaOAuth2Properties)))));
             }
             return bean;
         }

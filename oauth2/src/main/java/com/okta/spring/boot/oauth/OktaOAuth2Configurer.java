@@ -44,7 +44,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
 
     @SuppressWarnings("rawtypes")
     @Override
-    public void init(HttpSecurity http) throws Exception {
+    public void init(HttpSecurity http) {
 
         ApplicationContext context = http.getSharedObject(ApplicationContext.class);
 
@@ -67,7 +67,8 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
 
                 // check for RP-Initiated logout
                 if (!context.getBeansOfType(OidcClientInitiatedLogoutSuccessHandler.class).isEmpty()) {
-                    http.logout().logoutSuccessHandler(context.getBean(OidcClientInitiatedLogoutSuccessHandler.class));
+                    OidcClientInitiatedLogoutSuccessHandler handler = context.getBean(OidcClientInitiatedLogoutSuccessHandler.class);
+                    http.logout(logout -> logout.logoutSuccessHandler(handler));
                 }
 
                 // Resource Server Config
@@ -163,28 +164,28 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         });
     }
 
-    private void configureLogin(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties, Environment environment) throws Exception {
+    private void configureLogin(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties, Environment environment) {
 
         RestTemplate restTemplate = OktaOAuth2ResourceServerAutoConfig.restTemplate(oktaOAuth2Properties);
 
-        http.oauth2Login()
-            .tokenEndpoint()
-            .accessTokenResponseClient(accessTokenResponseClient(restTemplate));
-
         String redirectUriProperty = environment.getProperty("spring.security.oauth2.client.registration.okta.redirect-uri");
-        if (redirectUriProperty != null) {
-            //  remove `{baseUrl}` pattern, if present, as Spring will solve this on its own
-            String redirectUri = redirectUriProperty.replace("{baseUrl}", "");
-            http.oauth2Login().redirectionEndpoint().baseUri(redirectUri);
-        }
+        String redirectUri = redirectUriProperty != null ? redirectUriProperty.replace("{baseUrl}", "") : null;
+
+        http.oauth2Login(oauth2Login -> {
+            oauth2Login.tokenEndpoint(tokenEndpoint -> tokenEndpoint
+                .accessTokenResponseClient(accessTokenResponseClient(restTemplate)));
+            if (redirectUri != null) {
+                oauth2Login.redirectionEndpoint(redirectionEndpoint -> redirectionEndpoint.baseUri(redirectUri));
+            }
+        });
     }
 
-    private void configureResourceServerForJwtValidation(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {
-        http.oauth2ResourceServer()
-            .jwt().jwtAuthenticationConverter(new OktaJwtAuthenticationConverter(oktaOAuth2Properties));
+    private void configureResourceServerForJwtValidation(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) {
+        http.oauth2ResourceServer(oauth2 -> oauth2
+            .jwt(jwt -> jwt.jwtAuthenticationConverter(new OktaJwtAuthenticationConverter(oktaOAuth2Properties))));
     }
 
-    private void configureResourceServerForOpaqueTokenValidation(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {
+    private void configureResourceServerForOpaqueTokenValidation(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) {
 
         if (!isEmpty(oktaOAuth2Properties.getClientId()) && !isEmpty(oktaOAuth2Properties.getClientSecret())) {
             // Spring (2.7.x+) configures JWT be default and this creates startup failure "Spring Security
@@ -195,7 +196,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                 unsetJwtConfigurer(http.getConfigurer(OAuth2ResourceServerConfigurer.class));
             }
 
-            http.oauth2ResourceServer().opaqueToken();
+            http.oauth2ResourceServer(oauth2 -> oauth2.opaqueToken(org.springframework.security.config.Customizer.withDefaults()));
         }
     }
 

@@ -70,9 +70,9 @@ class ReactiveOktaOAuth2AutoConfig {
     SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http, ReactiveJwtDecoder jwtDecoder, ReactiveClientRegistrationRepository clientRegistrationRepository) {
         // as of Spring Security 5.4 the default chain uses oauth2Login OR a JWT resource server (NOT both)
         // this does the same as both defaults merged together (and provides the previous behavior)
-        http.authorizeExchange().anyExchange().authenticated();
+        http.authorizeExchange(exchanges -> exchanges.anyExchange().authenticated());
         Okta.configureOAuth2WithPkce(http, clientRegistrationRepository);
-        http.oauth2Client();
+        http.oauth2Client(org.springframework.security.config.Customizer.withDefaults());
         http.oauth2ResourceServer((server) -> customDecoder(server, jwtDecoder));
         return http.build();
     }

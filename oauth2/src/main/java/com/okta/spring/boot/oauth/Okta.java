@@ -55,7 +55,7 @@ public final class Okta {
      * @return the {@code http} to allow method chaining
      */
     public static ServerHttpSecurity configureResourceServer401ResponseBody(ServerHttpSecurity http) {
-        return http.exceptionHandling()
+        http.exceptionHandling(exceptionHandling -> exceptionHandling
                 .authenticationEntryPoint(new DelegatingServerAuthenticationEntryPoint(
                                                 // clients that accept plain text, browsers, curl, etc
                                                 new DelegatingServerAuthenticationEntryPoint.DelegateEntry(
@@ -65,7 +65,8 @@ public final class Okta {
                                                 // any non text client application/json etc
                                                 new DelegatingServerAuthenticationEntryPoint.DelegateEntry(
                                                         new MediaTypeServerWebExchangeMatcher(MediaType.ALL),
-                                                        new BearerTokenServerAuthenticationEntryPoint()))).and();
+                                                        new BearerTokenServerAuthenticationEntryPoint()))));
+        return http;
     }
 
     /**
@@ -77,8 +78,9 @@ public final class Okta {
      * @return the {@code http} to allow method chaining
      */
     public static HttpSecurity configureResourceServer401ResponseBody(HttpSecurity http) throws Exception {
-        return http.exceptionHandling()
-                    .defaultAuthenticationEntryPointFor(authenticationEntryPoint(), textRequestMatcher()).and();
+        http.exceptionHandling(exceptionHandling -> exceptionHandling
+                    .defaultAuthenticationEntryPointFor(authenticationEntryPoint(), textRequestMatcher()));
+        return http;
     }
 
     /**
@@ -96,7 +98,7 @@ public final class Okta {
         DefaultServerOAuth2AuthorizationRequestResolver authorizationRequestResolver = new DefaultServerOAuth2AuthorizationRequestResolver(clientRegistrationRepository);
         authorizationRequestResolver.setAuthorizationRequestCustomizer(withPkce());
         // enable oauth2 login that uses PKCE
-        http.oauth2Login().authorizationRequestResolver(authorizationRequestResolver);
+        http.oauth2Login(oauth2Login -> oauth2Login.authorizationRequestResolver(authorizationRequestResolver));
 
         return http;
     }
@@ -117,9 +119,9 @@ public final class Okta {
         DefaultOAuth2AuthorizationRequestResolver authorizationRequestResolver = new DefaultOAuth2AuthorizationRequestResolver(clientRegistrationRepository, "/oauth2/authorization");
         authorizationRequestResolver.setAuthorizationRequestCustomizer(withPkce());
         // enable oauth2 login that uses PKCE
-        http.oauth2Login()
-            .authorizationEndpoint()
-            .authorizationRequestResolver(authorizationRequestResolver);
+        http.oauth2Login(oauth2Login -> oauth2Login
+            .authorizationEndpoint(authorizationEndpoint -> authorizationEndpoint
+                .authorizationRequestResolver(authorizationRequestResolver)));
 
         return http;
     }

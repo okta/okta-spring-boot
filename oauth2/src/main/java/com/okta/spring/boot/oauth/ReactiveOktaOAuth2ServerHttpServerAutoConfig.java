@@ -144,10 +144,10 @@ class ReactiveOktaOAuth2ServerHttpServerAutoConfig {
         public Object postProcessAfterInitialization(Object bean, String beanName) {
             if (bean instanceof ServerHttpSecurity) {
                 ServerHttpSecurity httpSecurity = (ServerHttpSecurity) bean;
-                httpSecurity.oauth2Login().authenticationManager(reactiveAuthenticationManager(oAuth2UserService, oidcUserService));
+                httpSecurity.oauth2Login(oauth2Login -> oauth2Login.authenticationManager(reactiveAuthenticationManager(oAuth2UserService, oidcUserService)));
 
                 if (logoutSuccessHandler != null) {
-                    httpSecurity.logout().logoutSuccessHandler(logoutSuccessHandler);
+                    httpSecurity.logout(logout -> logout.logoutSuccessHandler(logoutSuccessHandler));
                 }
             }
             return bean;
