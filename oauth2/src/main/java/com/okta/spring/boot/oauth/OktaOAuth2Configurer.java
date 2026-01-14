@@ -62,7 +62,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                 && !isEmpty(propertiesProvider.getIssuerUri())
                 && !isEmpty(propertiesRegistration.getClientId())) {
                 // configure Okta user services
-                configureLogin(http, oktaOAuth2Properties, context.getEnvironment());
+                configureLogin(http, context.getEnvironment());
 
                 // check for RP-Initiated logout
                 if (!context.getBeansOfType(OidcClientInitiatedLogoutSuccessHandler.class).isEmpty()) {
@@ -167,7 +167,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         });
     }
 
-    private void configureLogin(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties, Environment environment) {
+    private void configureLogin(HttpSecurity http, Environment environment) {
 
         String redirectUriProperty = environment.getProperty("spring.security.oauth2.client.registration.okta.redirect-uri");
         String redirectUri = redirectUriProperty != null ? redirectUriProperty.replace("{baseUrl}", "") : null;
