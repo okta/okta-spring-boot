@@ -20,6 +20,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -52,13 +53,11 @@ public class ReactiveImplicitFlowApplication {
 
             Okta.configureResourceServer401ResponseBody(http);
 
-            return
-                http.authorizeExchange()
-                    .anyExchange().authenticated()
-                    .and()
-                .oauth2ResourceServer()
-                    .jwt().and().and().build();
-            }
+            return http
+                .authorizeExchange(exchange -> exchange.anyExchange().authenticated())
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+                .build();
+        }
     }
 
     @RestController

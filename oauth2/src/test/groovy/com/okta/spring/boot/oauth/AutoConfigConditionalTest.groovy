@@ -38,6 +38,7 @@ import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.ConfigurableEnvironment
+import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.authentication.ReactiveAuthenticationManagerResolver
 import org.springframework.security.config.BeanIds
@@ -796,7 +797,7 @@ class AutoConfigConditionalTest implements HttpMock {
 
         @Bean
         SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-            http.oauth2ResourceServer().jwt()
+            http.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
             return http.build()
         }
     }
@@ -807,7 +808,7 @@ class AutoConfigConditionalTest implements HttpMock {
 
         @Bean
         SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-            http.oauth2ResourceServer().opaqueToken()
+            http.oauth2ResourceServer(oauth2 -> oauth2.opaqueToken(Customizer.withDefaults()))
             return http.build()
         }
     }
@@ -818,7 +819,9 @@ class AutoConfigConditionalTest implements HttpMock {
 
         @Bean
         SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-            http.oauth2ResourceServer().jwt().and().opaqueToken()
+            http.oauth2ResourceServer(oauth2 -> oauth2
+                .jwt(Customizer.withDefaults())
+                .opaqueToken(Customizer.withDefaults()))
             return http.build()
         }
     }

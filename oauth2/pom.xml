@@ -101,6 +101,12 @@
         </dependency>
 
         <!-- Test deps -->
+        <!-- jcl-over-slf4j provides commons-logging API for Groovy compiler -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-test</artifactId>

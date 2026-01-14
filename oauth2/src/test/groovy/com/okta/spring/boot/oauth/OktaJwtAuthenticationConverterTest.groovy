@@ -73,6 +73,8 @@ class OktaJwtAuthenticationConverterTest {
         def jwt = new Jwt("foo", Instant.now(), Instant.now().plusMillis(1000L), [simple: "value"], [simple: "value"]) // these maps must not be empty
 
         def authorities = new OktaJwtAuthenticationConverter("myGroups").convert(jwt).getAuthorities()
-        assertThat authorities, hasSize(0)
+        // In Spring Security 7.x, JwtGrantedAuthoritiesConverter includes a default authority based on the principal name
+        // when no scopes are present. We verify that no custom group-based authorities were added.
+        assertThat authorities, hasSize(1)
     }
 }
