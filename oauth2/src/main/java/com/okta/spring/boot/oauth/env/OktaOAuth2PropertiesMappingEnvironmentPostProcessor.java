@@ -97,7 +97,7 @@ import org.springframework.web.client.RestTemplate;
  *
  * @since 0.2.0
  */
-final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
+public final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
     private static final Logger log = LoggerFactory.getLogger(OktaOAuth2PropertiesMappingEnvironmentPostProcessor.class);
 

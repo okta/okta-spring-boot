@@ -26,12 +26,12 @@ import org.springframework.boot.security.oauth2.client.autoconfigure.reactive.Re
 import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientAutoConfiguration
 import org.springframework.boot.security.oauth2.server.resource.autoconfigure.reactive.ReactiveOAuth2ResourceServerAutoConfiguration
 import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration
-import org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration
-import org.springframework.boot.autoconfigure.security.reactive.ReactiveUserDetailsServiceAutoConfiguration
+import org.springframework.boot.security.autoconfigure.web.reactive.ReactiveWebSecurityAutoConfiguration
+import org.springframework.boot.security.autoconfigure.ReactiveUserDetailsServiceAutoConfiguration
 import org.springframework.boot.test.context.runner.AbstractApplicationContextRunner
 import org.springframework.boot.test.context.runner.ReactiveWebApplicationContextRunner
 import org.springframework.boot.test.context.runner.WebApplicationContextRunner
-import org.springframework.boot.web.reactive.context.AnnotationConfigReactiveWebApplicationContext
+import org.springframework.boot.web.context.reactive.AnnotationConfigReactiveWebApplicationContext
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
@@ -87,7 +87,7 @@ class AutoConfigConditionalTest implements HttpMock {
         OAuth2ResourceServerAutoConfiguration,
         OAuth2ClientAutoConfiguration,
         ReactiveOAuth2ClientAutoConfiguration,
-        ReactiveSecurityAutoConfiguration,
+        ReactiveWebSecurityAutoConfiguration,
         ReactiveUserDetailsServiceAutoConfiguration,
         ReactiveOAuth2ResourceServerAutoConfiguration]
 
