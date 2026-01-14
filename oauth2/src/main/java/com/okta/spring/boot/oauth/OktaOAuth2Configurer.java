@@ -73,26 +73,30 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
 
                 // Resource Server Config
                 OAuth2ResourceServerProperties.Opaquetoken propertiesOpaquetoken;
-                if (!context.getBeansOfType(OAuth2ResourceServerProperties.class).isEmpty()
-                    && (propertiesOpaquetoken = context.getBean(OAuth2ResourceServerProperties.class).getOpaquetoken()) != null
-                    && !isEmpty(propertiesOpaquetoken.getIntrospectionUri())
-                    && TokenUtil.isRootOrgIssuer(propertiesProvider.getIssuerUri())) {
-                    log.debug("Opaque Token validation/introspection will be configured.");
-                    configureResourceServerForOpaqueTokenValidation(http, oktaOAuth2Properties);
-                    return;
-                }
-                OAuth2ResourceServerConfigurer oAuth2ResourceServerConfigurer = http.getConfigurer(OAuth2ResourceServerConfigurer.class);
+                try {
+                    if (!context.getBeansOfType(OAuth2ResourceServerProperties.class).isEmpty()
+                        && (propertiesOpaquetoken = context.getBean(OAuth2ResourceServerProperties.class).getOpaquetoken()) != null
+                        && !isEmpty(propertiesOpaquetoken.getIntrospectionUri())
+                        && TokenUtil.isRootOrgIssuer(propertiesProvider.getIssuerUri())) {
+                        log.debug("Opaque Token validation/introspection will be configured.");
+                        configureResourceServerForOpaqueTokenValidation(http, oktaOAuth2Properties);
+                        return;
+                    }
+                    OAuth2ResourceServerConfigurer oAuth2ResourceServerConfigurer = http.getConfigurer(OAuth2ResourceServerConfigurer.class);
 
-                if (getJwtConfigurer(oAuth2ResourceServerConfigurer).isPresent()) {
-                    log.debug("JWT configurer is set in OAuth resource server configuration. " +
-                        "JWT validation will be configured.");
-                    configureResourceServerForJwtValidation(http, oktaOAuth2Properties);
-                } else if (getOpaqueTokenConfigurer(oAuth2ResourceServerConfigurer).isPresent()) {
-                    log.debug("Opaque Token configurer is set in OAuth resource server configuration. " +
-                        "Opaque Token validation/introspection will be configured.");
-                    configureResourceServerForOpaqueTokenValidation(http, oktaOAuth2Properties);
-                } else {
-                    log.debug("OAuth2ResourceServerConfigurer bean not configured, Resource Server support will not be enabled.");
+                    if (getJwtConfigurer(oAuth2ResourceServerConfigurer).isPresent()) {
+                        log.debug("JWT configurer is set in OAuth resource server configuration. " +
+                            "JWT validation will be configured.");
+                        configureResourceServerForJwtValidation(http, oktaOAuth2Properties);
+                    } else if (getOpaqueTokenConfigurer(oAuth2ResourceServerConfigurer).isPresent()) {
+                        log.debug("Opaque Token configurer is set in OAuth resource server configuration. " +
+                            "Opaque Token validation/introspection will be configured.");
+                        configureResourceServerForOpaqueTokenValidation(http, oktaOAuth2Properties);
+                    } else {
+                        log.debug("OAuth2ResourceServerConfigurer bean not configured, Resource Server support will not be enabled.");
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to configure OAuth2 resource server", e);
                 }
             } else {
                 log.debug("OAuth/OIDC Login not configured due to missing issuer, client-id, or client-secret property");

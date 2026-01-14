@@ -16,11 +16,12 @@
 package com.okta.spring.boot.oauth.env;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.env.EnvironmentPostProcessor;
-import org.springframework.boot.logging.DeferredLog;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
@@ -98,7 +99,7 @@ import org.springframework.web.client.RestTemplate;
  */
 final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
-    private static final DeferredLog log = new DeferredLog();
+    private static final Logger log = LoggerFactory.getLogger(OktaOAuth2PropertiesMappingEnvironmentPostProcessor.class);
 
     private static final String OKTA_OAUTH_PREFIX = "okta.oauth2.";
     private static final String OKTA_OAUTH_ISSUER = OKTA_OAUTH_PREFIX + "issuer";
@@ -143,11 +144,6 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
         }
         environment.getPropertySources().addLast(oktaRedirectUriPropertySource(environment));
         environment.getPropertySources().addLast(otkaForcePkcePropertySource(environment, oidcMetadata));
-
-        if (application != null) {
-            // This is required as EnvironmentPostProcessors are run before logging system is initialized
-            application.addInitializers(ctx -> log.replayTo(OktaOAuth2PropertiesMappingEnvironmentPostProcessor.class));
-        }
     }
 
     private PropertySource<?> otkaForcePkcePropertySource(ConfigurableEnvironment environment, OIDCMetadata oidcMetadata) {
