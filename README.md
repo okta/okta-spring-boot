@@ -24,20 +24,60 @@ This library uses semantic versioning and follows Okta's [library version policy
 |--------------| ------------------------- |
 | 0.x.x, 1.x.x | :warning: Retired |
 | 2.x.x        | :heavy_check_mark: Stable |
-| 3.x.x        | :heavy_check_mark: Stable |
+| 3.0.x        | :heavy_check_mark: Stable (Spring Boot 3.x) |
+| 3.1.x        | :heavy_check_mark: Stable (Spring Boot 4.x) |
 
-> Note: 3.x.x versions of the SDK would need JDK 17 or above.
+> **Note:** Version 3.1.x requires **JDK 17 or above** and is designed for **Spring Boot 4.x** / **Spring Security 7.x**.
+> Version 3.0.x continues to support Spring Boot 3.x / Spring Security 6.x with JDK 17+.
 
 ## Spring Boot Version Compatibility
 
-| Okta Spring Boot SDK Versions | Compatible Spring Boot Versions |
-|-------------------------------|---------------------------------|
-| 1.2.x                         | 2.1.x                           |
-| 1.4.x                         | 2.2.x                           |
-| 1.5.x                         | 2.4.x                           |
-| 2.0.x                         | 2.4.x                           |
-| 2.1.x                         | 2.7.x                           |
-| 3.x.y                         | 3.x.y                           |
+| Okta Spring Boot SDK Versions | Compatible Spring Boot Versions | Compatible Spring Security | Minimum Java |
+|-------------------------------|---------------------------------|----------------------------|--------------|
+| 1.2.x                         | 2.1.x                           | 5.x                        | 8            |
+| 1.4.x                         | 2.2.x                           | 5.x                        | 8            |
+| 1.5.x                         | 2.4.x                           | 5.x                        | 8            |
+| 2.0.x                         | 2.4.x                           | 5.x                        | 8            |
+| 2.1.x                         | 2.7.x                           | 5.x                        | 11           |
+| 3.0.x                         | 3.x.y                           | 6.x                        | 17           |
+| 3.1.x                         | 4.x.y                           | 7.x                        | 17           |
+
+## Upgrading to 3.1.x (Spring Boot 4.x)
+
+Version 3.1.x introduces **breaking changes** to support Spring Boot 4.x and Spring Security 7.x. Please review the following before upgrading:
+
+### Breaking Changes
+
+#### 1. Java 17 Required
+Spring Boot 4.x requires Java 17 as the minimum version. Ensure your application is compiled and run on Java 17 or higher.
+
+#### 2. Package Path Changes
+Spring Boot 4.x relocated OAuth2 autoconfiguration classes. If you import any of these classes directly, update your imports:
+
+```java
+// Old (Spring Boot 3.x)
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
+
+// New (Spring Boot 4.x)
+import org.springframework.boot.security.oauth2.client.OAuth2ClientProperties;
+```
+
+#### 3. Spring Security 7.x Lambda DSL
+Spring Security 7.x requires the lambda DSL style for security configurations. Update your `SecurityFilterChain` beans:
+
+```java
+// Old style (Spring Security 6.x) - DEPRECATED
+http.authorizeRequests()
+    .antMatchers("/").permitAll()
+    .anyRequest().authenticated();
+
+// New style (Spring Security 7.x)
+http.authorizeHttpRequests(authorize -> authorize
+    .requestMatchers("/").permitAll()
+    .anyRequest().authenticated());
+```
+
+For a complete list of changes, see the [CHANGELOG](CHANGELOG.md).
               
 The latest release can always be found on the [releases page](https://github.com/okta/okta-spring-boot/releases).
 
@@ -195,23 +235,24 @@ to add custom scopes, refer to the [documentation](https://developer.okta.com/do
 
 ```java
 import com.okta.spring.boot.oauth.Okta;
-import org.springframework.http.HttpMethod;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
+@Configuration
 @EnableWebSecurity
 public class OAuth2ResourceServerSecurityConfiguration {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http.authorizeRequests()
-            // allow anonymous access to the root page
-            .antMatchers("/").permitAll()
-            // all other requests
-            .anyRequest().authenticated()
-            .and()
-            .oauth2ResourceServer().jwt(); // replace .jwt() with .opaqueToken() for Opaque Token case
+        http.authorizeHttpRequests(authorize -> authorize
+                // allow anonymous access to the root page
+                .requestMatchers("/").permitAll()
+                // all other requests
+                .anyRequest().authenticated())
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {})); // replace .jwt() with .opaqueToken() for Opaque Token case
 
         // Send a 401 message to the browser (w/o this, you'll see a blank page)
         Okta.configureResourceServer401ResponseBody(http);
@@ -229,11 +270,13 @@ To configure a resource server when using Spring WebFlux, you need to use a coup
 ```java
 import com.okta.spring.boot.oauth.Okta;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
+@Configuration
 @EnableWebFluxSecurity 
 @EnableReactiveMethodSecurity 
 public class SecurityConfiguration {
@@ -241,11 +284,9 @@ public class SecurityConfiguration {
     @Bean 
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         http
-            .authorizeExchange()
-                .anyExchange().authenticated()
-                .and()
-            .oauth2ResourceServer()
-                .jwt();
+            .authorizeExchange(exchanges -> exchanges
+                .anyExchange().authenticated())
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {}));
                 
         // Send a 401 message to the browser (w/o this, you'll see a blank page)
         Okta.configureResourceServer401ResponseBody(http);
@@ -258,6 +299,7 @@ public class SecurityConfiguration {
 If you want to support SSO and a resource server in the same application, you can do that too!
 
 ```java
+@Configuration
 @EnableWebFluxSecurity 
 @EnableReactiveMethodSecurity 
 public class SecurityConfiguration {
@@ -265,13 +307,10 @@ public class SecurityConfiguration {
     @Bean 
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         http
-            .authorizeExchange()
-                .anyExchange().authenticated()
-                .and()
-            .oauth2Login()
-                .and()
-            .oauth2ResourceServer()
-                .jwt();
+            .authorizeExchange(exchanges -> exchanges
+                .anyExchange().authenticated())
+            .oauth2Login(oauth2 -> {})
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {}));
         return http.build();
     }
 }
@@ -315,6 +354,7 @@ okta:
 ```
 
 ```java
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -323,11 +363,11 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
+        http.authorizeHttpRequests(authorize -> authorize
             // allow anonymous access to the root and logout pages
-            .antMatchers("/", "/logout/callback").permitAll()
+            .requestMatchers("/", "/logout/callback").permitAll()
             // all other requests
-            .anyRequest().authenticated();
+            .anyRequest().authenticated());
         return http.build();
     }
 }
@@ -362,11 +402,11 @@ If you want to allow anonymous access to specific routes you can add a `Security
 static class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-                .antMatchers("/my-anon-page").permitAll()
-                .anyRequest().authenticated()
-            .and().oauth2Client()
-            .and().oauth2Login();
+        http.authorizeHttpRequests(authorize -> authorize
+                .requestMatchers("/my-anon-page").permitAll()
+                .anyRequest().authenticated())
+            .oauth2Client(oauth2 -> {})
+            .oauth2Login(oauth2 -> {});
         return http.build();
     }
 }
