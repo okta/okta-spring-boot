@@ -21,23 +21,24 @@ import com.okta.spring.boot.oauth.config.OktaOAuth2Properties
 import com.okta.spring.boot.oauth.env.OktaOAuth2PropertiesMappingEnvironmentPostProcessor
 import org.springframework.boot.autoconfigure.AutoConfigurations
 import org.springframework.boot.autoconfigure.logging.ConditionEvaluationReportLoggingListener
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties
-import org.springframework.boot.autoconfigure.security.oauth2.client.reactive.ReactiveOAuth2ClientAutoConfiguration
-import org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
-import org.springframework.boot.autoconfigure.security.oauth2.resource.reactive.ReactiveOAuth2ResourceServerAutoConfiguration
-import org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
-import org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration
-import org.springframework.boot.autoconfigure.security.reactive.ReactiveUserDetailsServiceAutoConfiguration
+import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties
+import org.springframework.boot.security.oauth2.client.autoconfigure.reactive.ReactiveOAuth2ClientAutoConfiguration
+import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientAutoConfiguration
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.reactive.ReactiveOAuth2ResourceServerAutoConfiguration
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration
+import org.springframework.boot.security.autoconfigure.web.reactive.ReactiveWebSecurityAutoConfiguration
+import org.springframework.boot.security.autoconfigure.ReactiveUserDetailsServiceAutoConfiguration
 import org.springframework.boot.test.context.runner.AbstractApplicationContextRunner
 import org.springframework.boot.test.context.runner.ReactiveWebApplicationContextRunner
 import org.springframework.boot.test.context.runner.WebApplicationContextRunner
-import org.springframework.boot.web.reactive.context.AnnotationConfigReactiveWebApplicationContext
+import org.springframework.boot.web.context.reactive.AnnotationConfigReactiveWebApplicationContext
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.ConfigurableEnvironment
+import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.authentication.ReactiveAuthenticationManagerResolver
 import org.springframework.security.config.BeanIds
@@ -87,7 +88,7 @@ class AutoConfigConditionalTest implements HttpMock {
         OAuth2ResourceServerAutoConfiguration,
         OAuth2ClientAutoConfiguration,
         ReactiveOAuth2ClientAutoConfiguration,
-        ReactiveSecurityAutoConfiguration,
+        ReactiveWebSecurityAutoConfiguration,
         ReactiveUserDetailsServiceAutoConfiguration,
         ReactiveOAuth2ResourceServerAutoConfiguration]
 
@@ -796,7 +797,7 @@ class AutoConfigConditionalTest implements HttpMock {
 
         @Bean
         SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-            http.oauth2ResourceServer().jwt()
+            http.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
             return http.build()
         }
     }
@@ -807,7 +808,7 @@ class AutoConfigConditionalTest implements HttpMock {
 
         @Bean
         SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-            http.oauth2ResourceServer().opaqueToken()
+            http.oauth2ResourceServer(oauth2 -> oauth2.opaqueToken(Customizer.withDefaults()))
             return http.build()
         }
     }
@@ -818,7 +819,9 @@ class AutoConfigConditionalTest implements HttpMock {
 
         @Bean
         SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-            http.oauth2ResourceServer().jwt().and().opaqueToken()
+            http.oauth2ResourceServer(oauth2 -> oauth2
+                .jwt(Customizer.withDefaults())
+                .opaqueToken(Customizer.withDefaults()))
             return http.build()
         }
     }

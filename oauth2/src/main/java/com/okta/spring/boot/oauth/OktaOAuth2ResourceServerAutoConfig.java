@@ -24,8 +24,8 @@ import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
@@ -41,7 +41,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.security.oauth2.server.resource.introspection.NimbusOpaqueTokenIntrospector;
+import org.springframework.security.oauth2.server.resource.introspection.SpringOpaqueTokenIntrospector;
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 import org.springframework.web.client.RestTemplate;
 
@@ -114,14 +114,13 @@ class OktaOAuth2ResourceServerAutoConfig {
     OpaqueTokenIntrospector opaqueTokenIntrospector(OktaOAuth2Properties oktaOAuth2Properties,
                                                     OAuth2ResourceServerProperties oAuth2ResourceServerProperties) {
 
-        RestTemplate restTemplate = restTemplate(oktaOAuth2Properties);
-        restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(
-            oAuth2ResourceServerProperties.getOpaquetoken().getClientId(),
-            oAuth2ResourceServerProperties.getOpaquetoken().getClientSecret()));
-
-        OpaqueTokenIntrospector delegate = new NimbusOpaqueTokenIntrospector(
-            oAuth2ResourceServerProperties.getOpaquetoken().getIntrospectionUri(),
-            restTemplate);
+        // Spring Security 7.x uses SpringOpaqueTokenIntrospector with builder pattern
+        // The builder handles client credentials encoding internally
+        OpaqueTokenIntrospector delegate = SpringOpaqueTokenIntrospector.withIntrospectionUri(
+            oAuth2ResourceServerProperties.getOpaquetoken().getIntrospectionUri())
+            .clientId(oAuth2ResourceServerProperties.getOpaquetoken().getClientId())
+            .clientSecret(oAuth2ResourceServerProperties.getOpaquetoken().getClientSecret())
+            .build();
 
         return token -> {
             OAuth2AuthenticatedPrincipal principal = delegate.introspect(token);

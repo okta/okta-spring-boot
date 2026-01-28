@@ -16,11 +16,12 @@
 package com.okta.spring.boot.oauth.env;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.env.EnvironmentPostProcessor;
-import org.springframework.boot.logging.DeferredLog;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
@@ -38,8 +39,8 @@ import org.springframework.web.client.RestTemplate;
  * This {@link EnvironmentPostProcessor} configures additional {@link PropertySource}s that map OIDC discovery metadata
  * and standard Okta properties to standard Spring Boot OAuth2 properties.
  *
- * <p>
- * <table summary="Property mapping">
+ * <table>
+ *     <caption>Property mapping</caption>
  *     <tr>
  *         <th>Okta Property</th>
  *         <th>Spring Boot Property</th>
@@ -50,55 +51,55 @@ import org.springframework.web.client.RestTemplate;
  *     </tr>
  *     <tr>
  *         <td>okta.oauth2.client-secret</td>
- *         <td>spring.security.oauth2.client.registration.okta.client-secret
+ *         <td>spring.security.oauth2.client.registration.okta.client-secret</td>
  *     </tr>
  *     <tr>
  *         <td>okta.oauth2.scopes</td>
- *         <td>spring.security.oauth2.client.registration.okta.scope</td></td>
+ *         <td>spring.security.oauth2.client.registration.okta.scope</td>
  *     </tr>
  *     <tr>
  *         <td>${okta.oauth2.issuer}/v1/authorize</td>
- *         <td>spring.security.oauth2.client.provider.okta.authorization-uri</td></td>
+ *         <td>spring.security.oauth2.client.provider.okta.authorization-uri</td>
  *     </tr>
  *     <tr>
  *         <td>${okta.oauth2.issuer}/v1/token</td>
- *         <td>spring.security.oauth2.client.provider.okta.token-uri</td></td>
+ *         <td>spring.security.oauth2.client.provider.okta.token-uri</td>
  *     </tr>
  *     <tr>
  *         <td>${okta.oauth2.issuer}/v1/userinfo</td>
- *         <td>spring.security.oauth2.client.provider.okta.user-info-uri</td></td>
+ *         <td>spring.security.oauth2.client.provider.okta.user-info-uri</td>
  *     </tr>
  *     <tr>
  *         <td>${okta.oauth2.issuer}/v1/keys</td>
- *         <td>spring.security.oauth2.client.provider.okta.jwk-set-uri</td></td>
+ *         <td>spring.security.oauth2.client.provider.okta.jwk-set-uri</td>
  *     </tr>
  *     <tr>
  *         <td>${okta.oauth2.issuer}</td>
- *         <td>spring.security.oauth2.resourceserver.jwt.issuer-uri</td></td>
+ *         <td>spring.security.oauth2.resourceserver.jwt.issuer-uri</td>
  *     </tr>
  *     <tr>
  *         <td>${okta.oauth2.issuer}/v1/keys</td>
- *         <td>spring.security.oauth2.resourceserver.jwt.jwk-set-uri</td></td>
+ *         <td>spring.security.oauth2.resourceserver.jwt.jwk-set-uri</td>
  *     </tr>
  *     <tr>
  *         <td>${okta.oauth2.clientId}</td>
- *         <td>spring.security.oauth2.resourceserver.opaquetoken.client-id</td></td>
+ *         <td>spring.security.oauth2.resourceserver.opaquetoken.client-id</td>
  *     </tr>
  *     <tr>
  *         <td>${okta.oauth2.clientSecret}</td>
- *         <td>spring.security.oauth2.resourceserver.opaquetoken.client-secret</td></td>
+ *         <td>spring.security.oauth2.resourceserver.opaquetoken.client-secret</td>
  *     </tr>
  *     <tr>
  *         <td>${okta.oauth2.introspectionUri}</td>
- *         <td>spring.security.oauth2.resourceserver.opaquetoken.introspection-uri</td></td>
+ *         <td>spring.security.oauth2.resourceserver.opaquetoken.introspection-uri</td>
  *     </tr>
  * </table>
  *
  * @since 0.2.0
  */
-final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
+public final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
-    private static final DeferredLog log = new DeferredLog();
+    private static final Logger log = LoggerFactory.getLogger(OktaOAuth2PropertiesMappingEnvironmentPostProcessor.class);
 
     private static final String OKTA_OAUTH_PREFIX = "okta.oauth2.";
     private static final String OKTA_OAUTH_ISSUER = OKTA_OAUTH_PREFIX + "issuer";
@@ -143,11 +144,6 @@ final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implements Envir
         }
         environment.getPropertySources().addLast(oktaRedirectUriPropertySource(environment));
         environment.getPropertySources().addLast(otkaForcePkcePropertySource(environment, oidcMetadata));
-
-        if (application != null) {
-            // This is required as EnvironmentPostProcessors are run before logging system is initialized
-            application.addInitializers(ctx -> log.replayTo(OktaOAuth2PropertiesMappingEnvironmentPostProcessor.class));
-        }
     }
 
     private PropertySource<?> otkaForcePkcePropertySource(ConfigurableEnvironment environment, OIDCMetadata oidcMetadata) {

@@ -60,10 +60,8 @@ public class ReactiveRedirectCodeFlowApplication {
         @Bean
         public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http, ReactiveClientRegistrationRepository clientRegistrationRepository) {
             http
-                .authorizeExchange()
-                .anyExchange().authenticated()
-                .and()
-                .csrf().disable(); // make testing easier
+                .authorizeExchange(exchange -> exchange.anyExchange().authenticated())
+                .csrf(csrf -> csrf.disable()); // make testing easier
 
             Okta.configureOAuth2WithPkce(http, clientRegistrationRepository);
 

@@ -19,7 +19,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
@@ -32,7 +33,7 @@ import static com.okta.spring.boot.oauth.Okta.configureOAuth2WithPkce;
 
 @SpringBootApplication
 @RestController
-@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
+@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class BasicRedirectCodeFlowApplication {
 
     @GetMapping("/")
@@ -56,12 +57,12 @@ public class BasicRedirectCodeFlowApplication {
 // The following isn't needed as the equivalent is provided by Spring Boot Security by default
     @Bean
     SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository) throws Exception {
-       http.authorizeRequests().anyRequest().authenticated();
+       http.authorizeHttpRequests(requests -> requests.anyRequest().authenticated());
        configureOAuth2WithPkce(http, clientRegistrationRepository);
-       http.oauth2Client();
+       http.oauth2Client(Customizer.withDefaults());
 
         // disable csrf to make testing easier
-       http.csrf().disable();
+       http.csrf(csrf -> csrf.disable());
 
        return http.build();
     }

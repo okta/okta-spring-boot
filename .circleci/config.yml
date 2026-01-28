@@ -36,6 +36,7 @@ jobs:
   reversing-labs:
     docker:
       - image: cimg/openjdk:21.0.0
+    resource_class: large
     steps:
       - checkout
 

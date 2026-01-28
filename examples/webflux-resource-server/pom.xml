@@ -20,7 +20,7 @@
     <parent>
         <groupId>com.okta.spring.examples</groupId>
         <artifactId>okta-spring-boot-examples</artifactId>
-        <version>3.0.9-SNAPSHOT</version>
+        <version>3.1.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>okta-spring-boot-webflux-example</artifactId>
@@ -32,7 +32,7 @@
         <dependency>
             <groupId>com.okta.spring</groupId>
             <artifactId>okta-spring-boot-starter</artifactId>
-            <version>3.0.9-SNAPSHOT</version>
+            <version>3.1.0-SNAPSHOT</version>
         </dependency>
 
         <!-- Other standard Spring starters -->

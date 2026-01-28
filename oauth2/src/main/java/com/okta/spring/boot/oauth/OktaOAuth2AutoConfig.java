@@ -22,14 +22,12 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.autoconfigure.security.ConditionalOnDefaultWebSecurity;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -75,17 +73,17 @@ class OktaOAuth2AutoConfig {
     }
 
     @Configuration
-    @ConditionalOnDefaultWebSecurity
+    @ConditionalOnMissingBean(SecurityFilterChain.class)
     static class OAuth2SecurityFilterChainConfiguration {
 
         @Bean
         SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository) throws Exception {
             // as of Spring Security 5.4 the default chain uses oauth2Login OR a JWT resource server (NOT both)
             // this does the same as both defaults merged together (and provides the previous behavior)
-            http.authorizeRequests((requests) -> requests.anyRequest().authenticated());
+            http.authorizeHttpRequests(requests -> requests.anyRequest().authenticated());
             Okta.configureOAuth2WithPkce(http, clientRegistrationRepository);
-            http.oauth2Client();
-            http.oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
+            http.oauth2Client(org.springframework.security.config.Customizer.withDefaults());
+            http.oauth2ResourceServer(oauth2 -> oauth2.jwt(org.springframework.security.config.Customizer.withDefaults()));
             return http.build();
         }
     }

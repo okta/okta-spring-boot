@@ -18,18 +18,17 @@ package com.okta.spring.boot.oauth;
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
+import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
-import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.RestClientAuthorizationCodeTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
-import org.springframework.web.client.RestTemplate;
 
 import java.lang.reflect.Field;
 import java.security.AccessController;
@@ -44,7 +43,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
 
     @SuppressWarnings("rawtypes")
     @Override
-    public void init(HttpSecurity http) throws Exception {
+    public void init(HttpSecurity http) {
 
         ApplicationContext context = http.getSharedObject(ApplicationContext.class);
 
@@ -63,35 +62,40 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                 && !isEmpty(propertiesProvider.getIssuerUri())
                 && !isEmpty(propertiesRegistration.getClientId())) {
                 // configure Okta user services
-                configureLogin(http, oktaOAuth2Properties, context.getEnvironment());
+                configureLogin(http, context.getEnvironment());
 
                 // check for RP-Initiated logout
                 if (!context.getBeansOfType(OidcClientInitiatedLogoutSuccessHandler.class).isEmpty()) {
-                    http.logout().logoutSuccessHandler(context.getBean(OidcClientInitiatedLogoutSuccessHandler.class));
+                    OidcClientInitiatedLogoutSuccessHandler handler = context.getBean(OidcClientInitiatedLogoutSuccessHandler.class);
+                    http.logout(logout -> logout.logoutSuccessHandler(handler));
                 }
 
                 // Resource Server Config
                 OAuth2ResourceServerProperties.Opaquetoken propertiesOpaquetoken;
-                if (!context.getBeansOfType(OAuth2ResourceServerProperties.class).isEmpty()
-                    && (propertiesOpaquetoken = context.getBean(OAuth2ResourceServerProperties.class).getOpaquetoken()) != null
-                    && !isEmpty(propertiesOpaquetoken.getIntrospectionUri())
-                    && TokenUtil.isRootOrgIssuer(propertiesProvider.getIssuerUri())) {
-                    log.debug("Opaque Token validation/introspection will be configured.");
-                    configureResourceServerForOpaqueTokenValidation(http, oktaOAuth2Properties);
-                    return;
-                }
-                OAuth2ResourceServerConfigurer oAuth2ResourceServerConfigurer = http.getConfigurer(OAuth2ResourceServerConfigurer.class);
+                try {
+                    if (!context.getBeansOfType(OAuth2ResourceServerProperties.class).isEmpty()
+                        && (propertiesOpaquetoken = context.getBean(OAuth2ResourceServerProperties.class).getOpaquetoken()) != null
+                        && !isEmpty(propertiesOpaquetoken.getIntrospectionUri())
+                        && TokenUtil.isRootOrgIssuer(propertiesProvider.getIssuerUri())) {
+                        log.debug("Opaque Token validation/introspection will be configured.");
+                        configureResourceServerForOpaqueTokenValidation(http, oktaOAuth2Properties);
+                        return;
+                    }
+                    OAuth2ResourceServerConfigurer oAuth2ResourceServerConfigurer = http.getConfigurer(OAuth2ResourceServerConfigurer.class);
 
-                if (getJwtConfigurer(oAuth2ResourceServerConfigurer).isPresent()) {
-                    log.debug("JWT configurer is set in OAuth resource server configuration. " +
-                        "JWT validation will be configured.");
-                    configureResourceServerForJwtValidation(http, oktaOAuth2Properties);
-                } else if (getOpaqueTokenConfigurer(oAuth2ResourceServerConfigurer).isPresent()) {
-                    log.debug("Opaque Token configurer is set in OAuth resource server configuration. " +
-                        "Opaque Token validation/introspection will be configured.");
-                    configureResourceServerForOpaqueTokenValidation(http, oktaOAuth2Properties);
-                } else {
-                    log.debug("OAuth2ResourceServerConfigurer bean not configured, Resource Server support will not be enabled.");
+                    if (getJwtConfigurer(oAuth2ResourceServerConfigurer).isPresent()) {
+                        log.debug("JWT configurer is set in OAuth resource server configuration. " +
+                            "JWT validation will be configured.");
+                        configureResourceServerForJwtValidation(http, oktaOAuth2Properties);
+                    } else if (getOpaqueTokenConfigurer(oAuth2ResourceServerConfigurer).isPresent()) {
+                        log.debug("Opaque Token configurer is set in OAuth resource server configuration. " +
+                            "Opaque Token validation/introspection will be configured.");
+                        configureResourceServerForOpaqueTokenValidation(http, oktaOAuth2Properties);
+                    } else {
+                        log.debug("OAuth2ResourceServerConfigurer bean not configured, Resource Server support will not be enabled.");
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to configure OAuth2 resource server", e);
                 }
             } else {
                 log.debug("OAuth/OIDC Login not configured due to missing issuer, client-id, or client-secret property");
@@ -163,28 +167,26 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
         });
     }
 
-    private void configureLogin(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties, Environment environment) throws Exception {
-
-        RestTemplate restTemplate = OktaOAuth2ResourceServerAutoConfig.restTemplate(oktaOAuth2Properties);
-
-        http.oauth2Login()
-            .tokenEndpoint()
-            .accessTokenResponseClient(accessTokenResponseClient(restTemplate));
+    private void configureLogin(HttpSecurity http, Environment environment) {
 
         String redirectUriProperty = environment.getProperty("spring.security.oauth2.client.registration.okta.redirect-uri");
-        if (redirectUriProperty != null) {
-            //  remove `{baseUrl}` pattern, if present, as Spring will solve this on its own
-            String redirectUri = redirectUriProperty.replace("{baseUrl}", "");
-            http.oauth2Login().redirectionEndpoint().baseUri(redirectUri);
-        }
+        String redirectUri = redirectUriProperty != null ? redirectUriProperty.replace("{baseUrl}", "") : null;
+
+        http.oauth2Login(oauth2Login -> {
+            oauth2Login.tokenEndpoint(tokenEndpoint -> tokenEndpoint
+                .accessTokenResponseClient(accessTokenResponseClient()));
+            if (redirectUri != null) {
+                oauth2Login.redirectionEndpoint(redirectionEndpoint -> redirectionEndpoint.baseUri(redirectUri));
+            }
+        });
     }
 
-    private void configureResourceServerForJwtValidation(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {
-        http.oauth2ResourceServer()
-            .jwt().jwtAuthenticationConverter(new OktaJwtAuthenticationConverter(oktaOAuth2Properties));
+    private void configureResourceServerForJwtValidation(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) {
+        http.oauth2ResourceServer(oauth2 -> oauth2
+            .jwt(jwt -> jwt.jwtAuthenticationConverter(new OktaJwtAuthenticationConverter(oktaOAuth2Properties))));
     }
 
-    private void configureResourceServerForOpaqueTokenValidation(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {
+    private void configureResourceServerForOpaqueTokenValidation(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) {
 
         if (!isEmpty(oktaOAuth2Properties.getClientId()) && !isEmpty(oktaOAuth2Properties.getClientSecret())) {
             // Spring (2.7.x+) configures JWT be default and this creates startup failure "Spring Security
@@ -195,15 +197,14 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                 unsetJwtConfigurer(http.getConfigurer(OAuth2ResourceServerConfigurer.class));
             }
 
-            http.oauth2ResourceServer().opaqueToken();
+            http.oauth2ResourceServer(oauth2 -> oauth2.opaqueToken(org.springframework.security.config.Customizer.withDefaults()));
         }
     }
 
-    private OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient(RestTemplate restTemplate) {
-
-        DefaultAuthorizationCodeTokenResponseClient accessTokenResponseClient = new DefaultAuthorizationCodeTokenResponseClient();
-        accessTokenResponseClient.setRestOperations(restTemplate);
-
-        return accessTokenResponseClient;
+    private OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient() {
+        // Spring Security 7.x uses RestClientAuthorizationCodeTokenResponseClient
+        // which is based on RestClient. For now, we use the default implementation.
+        // Custom RestTemplate configuration can be applied via RestClient.builder()
+        return new RestClientAuthorizationCodeTokenResponseClient();
     }
 }

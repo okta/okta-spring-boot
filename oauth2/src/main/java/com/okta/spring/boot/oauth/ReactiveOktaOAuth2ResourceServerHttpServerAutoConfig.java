@@ -21,13 +21,13 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
-import org.springframework.security.oauth2.server.resource.BearerTokenAuthenticationToken;
+import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter;
 
 @AutoConfiguration
@@ -55,9 +55,9 @@ class ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig {
         public Object postProcessAfterInitialization(Object bean, String beanName) {
             if (bean instanceof ServerHttpSecurity) {
                 final ServerHttpSecurity http = (ServerHttpSecurity) bean;
-                http.oauth2ResourceServer().jwt()
+                http.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt
                         .jwtAuthenticationConverter(new ReactiveJwtAuthenticationConverterAdapter(
-                                new OktaJwtAuthenticationConverter(oktaOAuth2Properties)));
+                                new OktaJwtAuthenticationConverter(oktaOAuth2Properties)))));
             }
             return bean;
         }
