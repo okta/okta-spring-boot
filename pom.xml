@@ -35,7 +35,7 @@
         <spring-cloud.version>4.2.0</spring-cloud.version>
         <github.slug>okta/okta-spring-boot</github.slug>
         <okta.sdk.version>24.0.0</okta.sdk.version>
-        <okta.commons.version>2.0.1</okta.commons.version>
+        <okta.commons.version>2.0.2</okta.commons.version>
         <!-- Spring Boot 4.x requires Java 17+ -->
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
