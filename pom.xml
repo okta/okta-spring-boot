@@ -311,6 +311,6 @@
     </profiles>
 
   <scm>
-    <tag>okta-spring-boot-parent-3.0.8</tag>
+    <tag>okta-spring-boot-parent-3.0.9</tag>
   </scm>
 </project>
