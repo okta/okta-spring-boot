@@ -260,6 +260,14 @@
                    <ossIndexPassword>${env.OSS_TOKEN}</ossIndexPassword>
                </configuration>
            </plugin>
+           <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-release-plugin</artifactId>
+               <version>3.1.1</version>
+               <configuration>
+                   <localCheckout>true</localCheckout>
+               </configuration>
+           </plugin>
        </plugins>
        <pluginManagement>
           <plugins>
