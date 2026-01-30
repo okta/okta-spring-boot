@@ -137,6 +137,7 @@ class ReactiveOktaOAuth2ServerHttpServerAutoConfig {
             this.oAuth2UserService = oAuth2UserService;
             this.oidcUserService = oidcUserService;
             this.logoutSuccessHandler = logoutSuccessHandler;
+
         }
 
         @Override
