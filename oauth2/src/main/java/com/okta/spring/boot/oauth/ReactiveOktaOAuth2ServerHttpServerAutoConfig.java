@@ -29,6 +29,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.DelegatingReactiveAuthenticationManager;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
@@ -62,15 +63,10 @@ import java.net.URISyntaxException;
 class ReactiveOktaOAuth2ServerHttpServerAutoConfig {
 
     @Bean
-    ReactiveAuthenticationManager oktaReactiveAuthenticationManager(@Qualifier("oauth2UserService") ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService,
-                                                                    @Qualifier("oidcUserService") OidcReactiveOAuth2UserService oidcUserService) {
-        return reactiveAuthenticationManager(oAuth2UserService, oidcUserService);
-    }
-
-    @Bean
-    BeanPostProcessor authManagerServerHttpSecurityBeanPostProcessor(ReactiveAuthenticationManager oktaReactiveAuthenticationManager,
+    BeanPostProcessor authManagerServerHttpSecurityBeanPostProcessor(@Qualifier("oauth2UserService") ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService,
+                                                                     @Qualifier("oidcUserService") OidcReactiveOAuth2UserService oidcUserService,
                                                                      @Autowired(required = false) OidcClientInitiatedServerLogoutSuccessHandler logoutSuccessHandler) {
-        return new OktaOAuth2LoginServerBeanPostProcessor(oktaReactiveAuthenticationManager, logoutSuccessHandler);
+        return new OktaOAuth2LoginServerBeanPostProcessor(oAuth2UserService, oidcUserService, logoutSuccessHandler);
     }
 
     @Bean
@@ -131,12 +127,15 @@ class ReactiveOktaOAuth2ServerHttpServerAutoConfig {
 
     static class OktaOAuth2LoginServerBeanPostProcessor implements BeanPostProcessor {
 
-        private final ReactiveAuthenticationManager reactiveAuthenticationManager;
+        private final ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService;
+        private final OidcReactiveOAuth2UserService oidcUserService;
         private final OidcClientInitiatedServerLogoutSuccessHandler logoutSuccessHandler;
 
-        OktaOAuth2LoginServerBeanPostProcessor(ReactiveAuthenticationManager reactiveAuthenticationManager,
-                                               OidcClientInitiatedServerLogoutSuccessHandler logoutSuccessHandler) {
-            this.reactiveAuthenticationManager = reactiveAuthenticationManager;
+        OktaOAuth2LoginServerBeanPostProcessor(ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService,
+                                               OidcReactiveOAuth2UserService oidcUserService,
+                                               @Nullable OidcClientInitiatedServerLogoutSuccessHandler logoutSuccessHandler) {
+            this.oAuth2UserService = oAuth2UserService;
+            this.oidcUserService = oidcUserService;
             this.logoutSuccessHandler = logoutSuccessHandler;
         }
 
@@ -144,7 +143,7 @@ class ReactiveOktaOAuth2ServerHttpServerAutoConfig {
         public Object postProcessAfterInitialization(Object bean, String beanName) {
             if (bean instanceof ServerHttpSecurity) {
                 ServerHttpSecurity httpSecurity = (ServerHttpSecurity) bean;
-                httpSecurity.oauth2Login(oauth2Login -> oauth2Login.authenticationManager(reactiveAuthenticationManager));
+                httpSecurity.oauth2Login(oauth2Login -> oauth2Login.authenticationManager(reactiveAuthenticationManager(oAuth2UserService, oidcUserService)));
 
                 if (logoutSuccessHandler != null) {
                     httpSecurity.logout(logout -> logout.logoutSuccessHandler(logoutSuccessHandler));
