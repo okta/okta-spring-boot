@@ -26,7 +26,7 @@
 
     <groupId>com.okta.spring</groupId>
     <artifactId>okta-spring-boot-parent</artifactId>
-    <version>3.1.0-SNAPSHOT</version>
+    <version>3.0.10-SNAPSHOT</version>
     <name>Okta Spring Boot</name>
     <packaging>pom</packaging>
 
@@ -80,28 +80,28 @@
             <dependency>
                 <groupId>com.okta.spring</groupId>
                 <artifactId>okta-spring-boot-starter</artifactId>
-                <version>3.1.0-SNAPSHOT</version>
+                <version>3.0.10-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.okta.spring</groupId>
                 <artifactId>okta-spring-security-oauth2</artifactId>
-                <version>3.1.0-SNAPSHOT</version>
+                <version>3.0.10-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>com.okta.spring</groupId>
                 <artifactId>okta-spring-sdk</artifactId>
-                <version>3.1.0-SNAPSHOT</version>
+                <version>3.0.10-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.okta.spring</groupId>
                 <artifactId>okta-spring-boot-integration-tests-common-servlet</artifactId>
-                <version>3.1.0-SNAPSHOT</version>
+                <version>3.0.10-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.okta.spring</groupId>
                 <artifactId>okta-spring-boot-integration-tests-common-servlet</artifactId>
-                <version>3.1.0-SNAPSHOT</version>
+                <version>3.0.10-SNAPSHOT</version>
                 <classifier>tests</classifier>
                 <type>test-jar</type>
                 <scope>test</scope>
@@ -109,12 +109,12 @@
             <dependency>
                 <groupId>com.okta.spring</groupId>
                 <artifactId>okta-spring-boot-integration-tests-common-reactive</artifactId>
-                <version>3.1.0-SNAPSHOT</version>
+                <version>3.0.10-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.okta.spring</groupId>
                 <artifactId>okta-spring-boot-integration-tests-common-reactive</artifactId>
-                <version>3.1.0-SNAPSHOT</version>
+                <version>3.0.10-SNAPSHOT</version>
                 <classifier>tests</classifier>
                 <type>test-jar</type>
                 <scope>test</scope>
@@ -230,10 +230,17 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>3.18.0</version>
             </dependency>
+            <dependency>
+                <groupId>org.codehaus.plexus</groupId>
+                <artifactId>plexus-utils</artifactId>
+                <version>4.0.2</version>
+            </dependency>
+            
             <!-- Exclude commons-logging to avoid banned dependency issue in Spring Boot 4.x -->
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-core</artifactId>
+                <version>7.0.2</version>
                 <exclusions>
                     <exclusion>
                         <groupId>commons-logging</groupId>
@@ -252,6 +259,14 @@
                <configuration>
                    <ossIndexUsername>${env.OSS_EMAIL}</ossIndexUsername> <!-- the account's email -->
                    <ossIndexPassword>${env.OSS_TOKEN}</ossIndexPassword>
+               </configuration>
+           </plugin>
+           <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-release-plugin</artifactId>
+               <version>3.1.1</version>
+               <configuration>
+                   <localCheckout>true</localCheckout>
                </configuration>
            </plugin>
        </plugins>
@@ -280,6 +295,22 @@
 
     <profiles>
         <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>3.5.3</version>
+                        <configuration>
+                            <forkCount>0</forkCount>
+                            <reuseForks>false</reuseForks>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>spring-milestone</id>
             <repositories>
                 <repository>
@@ -305,6 +336,6 @@
     </profiles>
 
   <scm>
-    <tag>okta-spring-boot-parent-3.0.8</tag>
+    <tag>okta-spring-boot-parent-3.0.9</tag>
   </scm>
 </project>
