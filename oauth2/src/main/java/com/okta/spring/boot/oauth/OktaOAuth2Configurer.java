@@ -18,7 +18,6 @@ package com.okta.spring.boot.oauth;
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties;
 import org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
@@ -52,15 +51,51 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
             OktaOAuth2Properties oktaOAuth2Properties = context.getBean(OktaOAuth2Properties.class);
 
             // Auth Code Flow Config
+            try {
+                initializeOAuth2ClientConfiguration(http, context, oktaOAuth2Properties);
+            } catch (ClassNotFoundException e) {
+                log.warn("OAuth2ClientProperties not found on classpath. Ensure spring-boot-starter-security-oauth2-client is included as a dependency.", e);
+            } catch (RuntimeException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to initialize OAuth2 client configuration", e);
+            }
+        }
+    }
 
-            // if OAuth2ClientProperties bean is not available do NOT configure
-            OAuth2ClientProperties.Provider propertiesProvider;
-            OAuth2ClientProperties.Registration propertiesRegistration;
-            if (!context.getBeansOfType(OAuth2ClientProperties.class).isEmpty()
-                && (propertiesProvider = context.getBean(OAuth2ClientProperties.class).getProvider().get("okta")) != null
-                && (propertiesRegistration = context.getBean(OAuth2ClientProperties.class).getRegistration().get("okta")) != null
-                && !isEmpty(propertiesProvider.getIssuerUri())
-                && !isEmpty(propertiesRegistration.getClientId())) {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private void initializeOAuth2ClientConfiguration(HttpSecurity http, ApplicationContext context, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {
+        // Load class dynamically to support Spring Boot 3.x and 4.x
+        Class<?> oauth2ClientPropertiesClass = Class.forName("org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties");
+        
+        // Check if bean exists
+        java.util.Map<String, ?> beans = context.getBeansOfType(oauth2ClientPropertiesClass);
+        if (beans.isEmpty()) {
+            log.debug("OAuth2ClientProperties bean not found in context. Skipping OAuth2 client configuration.");
+            return;
+        }
+
+        Object clientPropertiesBean = beans.values().iterator().next();
+        
+        // Get provider and registration using reflection
+        java.lang.reflect.Method getProviderMethod = oauth2ClientPropertiesClass.getMethod("getProvider");
+        java.lang.reflect.Method getRegistrationMethod = oauth2ClientPropertiesClass.getMethod("getRegistration");
+        
+        java.util.Map<String, ?> providers = (java.util.Map<String, ?>) getProviderMethod.invoke(clientPropertiesBean);
+        java.util.Map<String, ?> registrations = (java.util.Map<String, ?>) getRegistrationMethod.invoke(clientPropertiesBean);
+        
+        Object okataProvider = providers != null ? providers.get("okta") : null;
+        Object oktaRegistration = registrations != null ? registrations.get("okta") : null;
+        
+        if (okataProvider != null && oktaRegistration != null) {
+            // Extract issuer URI and client ID using reflection
+            java.lang.reflect.Method getIssuerUriMethod = okataProvider.getClass().getMethod("getIssuerUri");
+            String issuerUri = (String) getIssuerUriMethod.invoke(okataProvider);
+            
+            java.lang.reflect.Method getClientIdMethod = oktaRegistration.getClass().getMethod("getClientId");
+            String clientId = (String) getClientIdMethod.invoke(oktaRegistration);
+            
+            if (!isEmpty(issuerUri) && !isEmpty(clientId)) {
                 // configure Okta user services
                 configureLogin(http, context.getEnvironment());
 
@@ -76,7 +111,7 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                     if (!context.getBeansOfType(OAuth2ResourceServerProperties.class).isEmpty()
                         && (propertiesOpaquetoken = context.getBean(OAuth2ResourceServerProperties.class).getOpaquetoken()) != null
                         && !isEmpty(propertiesOpaquetoken.getIntrospectionUri())
-                        && TokenUtil.isRootOrgIssuer(propertiesProvider.getIssuerUri())) {
+                        && TokenUtil.isRootOrgIssuer(issuerUri)) {
                         log.debug("Opaque Token validation/introspection will be configured.");
                         configureResourceServerForOpaqueTokenValidation(http, oktaOAuth2Properties);
                         return;
@@ -100,6 +135,8 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
             } else {
                 log.debug("OAuth/OIDC Login not configured due to missing issuer, client-id, or client-secret property");
             }
+        } else {
+            log.debug("OAuth/OIDC Login not configured due to missing okta provider or registration configuration");
         }
     }
 
