@@ -24,11 +24,9 @@ This library uses semantic versioning and follows Okta's [library version policy
 |--------------| ------------------------- |
 | 0.x.x, 1.x.x | :warning: Retired |
 | 2.x.x        | :heavy_check_mark: Stable |
-| 3.0.x        | :heavy_check_mark: Stable (Spring Boot 3.x) |
-| 3.1.x        | :heavy_check_mark: Stable (Spring Boot 4.x) |
+| 3.0.x        | :heavy_check_mark: Stable (Spring Boot 3.x & 4.x) |
 
-> **Note:** Version 3.1.x requires **JDK 17 or above** and is designed for **Spring Boot 4.x** / **Spring Security 7.x**.
-> Version 3.0.x continues to support Spring Boot 3.x / Spring Security 6.x with JDK 17+.
+> **Note:** Version 3.0.10+ requires **JDK 17 or above** and supports both **Spring Boot 3.x** / **Spring Security 6.x** and **Spring Boot 4.x** / **Spring Security 7.x**.
 
 ## Spring Boot Version Compatibility
 
@@ -39,19 +37,19 @@ This library uses semantic versioning and follows Okta's [library version policy
 | 1.5.x                         | 2.4.x                           | 5.x                        | 8            |
 | 2.0.x                         | 2.4.x                           | 5.x                        | 8            |
 | 2.1.x                         | 2.7.x                           | 5.x                        | 11           |
-| 3.0.x                         | 3.x.y                           | 6.x                        | 17           |
-| 3.1.x                         | 4.x.y                           | 7.x                        | 17           |
+| 3.0.x - 3.0.9                 | 3.x.y                           | 6.x                        | 17           |
+| 3.0.10+                       | 3.x.y and 4.x.y                 | 6.x and 7.x                | 17           |
 
-## Upgrading to 3.1.x (Spring Boot 4.x)
+## Upgrading to Spring Boot 4.x (3.0.10+)
 
-Version 3.1.x introduces **breaking changes** to support Spring Boot 4.x and Spring Security 7.x. Please review the following before upgrading:
+Version 3.0.10+ adds full support for Spring Boot 4.x and Spring Security 7.x while maintaining compatibility with Spring Boot 3.x. If you're using Spring Boot 3.x and upgrading to 4.x, review the following:
 
-### Breaking Changes
+### Key Changes
 
 #### 1. Java 17 Required
 Spring Boot 4.x requires Java 17 as the minimum version. Ensure your application is compiled and run on Java 17 or higher.
 
-#### 2. Package Path Changes
+#### 2. Package Path Changes (Spring Boot 4.x only)
 Spring Boot 4.x relocated OAuth2 autoconfiguration classes. If you import any of these classes directly, update your imports:
 
 ```java
@@ -63,7 +61,7 @@ import org.springframework.boot.security.oauth2.client.OAuth2ClientProperties;
 ```
 
 #### 3. Spring Security 7.x Lambda DSL
-Spring Security 7.x requires the lambda DSL style for security configurations. Update your `SecurityFilterChain` beans:
+Spring Security 7.x (used with Spring Boot 4.x) requires the lambda DSL style for security configurations. Update your `SecurityFilterChain` beans:
 
 ```java
 // Old style (Spring Security 6.x) - DEPRECATED
