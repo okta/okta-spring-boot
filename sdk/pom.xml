@@ -43,12 +43,12 @@
         <dependency>
             <groupId>com.okta.sdk</groupId>
             <artifactId>okta-sdk-api</artifactId>
-            <version>8.2.5</version>
+            <version>25.0.1</version>
         </dependency>
         <dependency>
             <groupId>com.okta.sdk</groupId>
             <artifactId>okta-sdk-impl</artifactId>
-            <version>8.2.5</version>
+            <version>25.0.1</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
