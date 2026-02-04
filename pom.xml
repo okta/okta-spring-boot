@@ -31,7 +31,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <spring-boot.version>4.0.1</spring-boot.version>
+        <spring-boot.version>4.0.2</spring-boot.version>
         <spring-cloud.version>4.2.0</spring-cloud.version>
         <github.slug>okta/okta-spring-boot</github.slug>
         <okta.sdk.version>24.0.0</okta.sdk.version>
