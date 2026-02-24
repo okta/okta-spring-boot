@@ -24,7 +24,6 @@ import org.springframework.validation.Validator;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
-import java.util.Optional;
 import java.util.Set;
 
 @ConfigurationProperties("okta.oauth2")
