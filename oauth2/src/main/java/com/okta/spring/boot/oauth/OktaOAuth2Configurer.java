@@ -66,7 +66,15 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void initializeOAuth2ClientConfiguration(HttpSecurity http, ApplicationContext context, OktaOAuth2Properties oktaOAuth2Properties) throws Exception {
         // Load class dynamically to support Spring Boot 3.x and 4.x
-        Class<?> oauth2ClientPropertiesClass = Class.forName("org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties");
+        // Try Spring Boot 4.x package first, then fall back to Spring Boot 3.x package.
+        // The class moved from org.springframework.boot.autoconfigure.security.oauth2.client
+        // to org.springframework.boot.security.oauth2.client.autoconfigure in Spring Boot 4.x.
+        Class<?> oauth2ClientPropertiesClass;
+        try {
+            oauth2ClientPropertiesClass = Class.forName("org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties");
+        } catch (ClassNotFoundException e4) {
+            oauth2ClientPropertiesClass = Class.forName("org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties");
+        }
         
         // Check if bean exists
         java.util.Map<String, ?> beans = context.getBeansOfType(oauth2ClientPropertiesClass);

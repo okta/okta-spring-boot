@@ -5,11 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.1.0] - Unreleased
+## [3.1.0] - 2026-02-24
 
 ### ⚠️ BREAKING CHANGES
 
 This release introduces breaking changes to support Spring Boot 4.x and Spring Security 7.x.
+
+> **Versioning note:** The Spring Boot 4.x upgrade was incorrectly shipped in patch releases `3.0.9` and `3.0.10`.
+> Those releases should be avoided. Consumers on Spring Boot 3.x should stay on `3.0.8`;
+> consumers upgrading to Spring Boot 4.x should use `3.1.0+`. See [#904](https://github.com/okta/okta-spring-boot/issues/904) and [#886](https://github.com/okta/okta-spring-boot/issues/886).
 
 #### Java Version Requirement
 - **Minimum Java version is now 17** (previously Java 11)
@@ -58,13 +62,18 @@ http.authorizeHttpRequests(authorize -> authorize
 - Groovy 4.0.27 for Java 17 compatibility
 
 ### Changed
+- **Version corrected from `3.0.10` → `3.1.0`** to properly reflect the Spring Boot 4.x minor upgrade ([#904](https://github.com/okta/okta-spring-boot/issues/904))
 - Updated all OAuth2 package imports to Spring Boot 4.x paths
 - Migrated Spring Security configurations to lambda DSL style
 - Replaced `DeferredLog` with SLF4J `LoggerFactory` for deferred logging
 - Updated `NamedOAuth2ServerAuthorizationRequestResolver` to use modern authorization request customizer pattern
 - Updated exception handling for checked exceptions in `getOrderFromPath` method
+- `OktaOAuth2Properties` now takes `Environment` instead of `OAuth2ClientProperties` to avoid `NoClassDefFoundError` on Spring Boot 3.x ([#886](https://github.com/okta/okta-spring-boot/issues/886))
+- `OktaOAuth2Configurer` uses reflection to load `OAuth2ClientProperties` dynamically, supporting both Spring Boot 3.x and 4.x package paths
 
 ### Fixed
+- `NoClassDefFoundError: org/springframework/boot/security/oauth2/client/autoconfigure/OAuth2ClientProperties` on Spring Boot 3.x ([#886](https://github.com/okta/okta-spring-boot/issues/886))
+- Semver violation: Spring Boot 4.x upgrade shipped as patch version ([#904](https://github.com/okta/okta-spring-boot/issues/904))
 - Javadoc HTML5 compatibility issues (table summary attributes, duplicate tags)
 - PMD violations for unused method parameters
 - Commons-logging banned dependency exclusions
@@ -74,7 +83,7 @@ http.authorizeHttpRequests(authorize -> authorize
 - `spring-boot-dependencies`: 4.0.1
 - `spring-cloud`: 4.2.0
 - `okta-sdk`: 24.0.0
-- `okta-commons`: 2.0.1
+- `okta-commons`: 2.0.2
 - `groovy`: 4.0.27
 - `slf4j-api`: 2.0.17
 - `mockito-core`: 5.18.0

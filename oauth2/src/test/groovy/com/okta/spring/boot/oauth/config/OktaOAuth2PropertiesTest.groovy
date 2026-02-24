@@ -15,7 +15,7 @@
  */
 package com.okta.spring.boot.oauth.config
 
-import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties
+import org.springframework.core.env.Environment
 import org.springframework.validation.Errors
 import org.testng.annotations.Test
 
@@ -29,16 +29,14 @@ class OktaOAuth2PropertiesTest {
     @Test
     void validationErrors_allInvalidTest() {
 
-        def oauthProps = mock(OAuth2ClientProperties)
-        def oktaRegistration = mock(OAuth2ClientProperties.Registration)
-        def regMap = [okta: oktaRegistration]
+        def env = mock(Environment)
         def errors = mock(Errors)
 
-        when(oauthProps.getRegistration()).thenReturn(regMap)
-        when(oktaRegistration.getClientId()).thenReturn("{clientId}")
-        when(oktaRegistration.getClientSecret()).thenReturn("{clientSecret}")
+        // Simulate Spring properties carrying placeholder values
+        when(env.getProperty("spring.security.oauth2.client.registration.okta.client-id")).thenReturn("{clientId}")
+        when(env.getProperty("spring.security.oauth2.client.registration.okta.client-secret")).thenReturn("{clientSecret}")
 
-        def underTest = new OktaOAuth2Properties(oauthProps)
+        def underTest = new OktaOAuth2Properties(env)
         underTest.setIssuer("foobar")
         underTest.validate(underTest, errors)
 
@@ -51,14 +49,10 @@ class OktaOAuth2PropertiesTest {
     @Test
     void validationErrors_issuerNonHttpsTest() {
 
-        def oauthProps = mock(OAuth2ClientProperties)
-        def oktaRegistration = mock(OAuth2ClientProperties.Registration)
-        def regMap = [okta: oktaRegistration]
+        def env = mock(Environment)
         def errors = mock(Errors)
 
-        when(oauthProps.getRegistration()).thenReturn(regMap)
-
-        def underTest = new OktaOAuth2Properties(oauthProps)
+        def underTest = new OktaOAuth2Properties(env)
         underTest.setIssuer("http://okta.example.com")
         underTest.validate(underTest, errors)
 
@@ -69,22 +63,19 @@ class OktaOAuth2PropertiesTest {
     @Test
     void accessNullClientIdWithoutSpringOAuthProps() {
 
-        def oauthProps = mock(OAuth2ClientProperties)
-        def regMap = [okta: null]
+        def env = mock(Environment)
+        when(env.getProperty("spring.security.oauth2.client.registration.okta.client-id")).thenReturn(null)
 
-        when(oauthProps.getRegistration()).thenReturn(regMap)
-
-        def underTest = new OktaOAuth2Properties(oauthProps)
+        def underTest = new OktaOAuth2Properties(env)
         assertThat underTest.clientId, nullValue()
     }
 
     @Test
     void accessValidClientIdWithoutSpringOAuthProps() {
-        def oauthProps = mock(OAuth2ClientProperties)
-        def regMap = [okta: null]
-        when(oauthProps.getRegistration()).thenReturn(regMap)
 
-        def underTest = new OktaOAuth2Properties(oauthProps)
+        def env = mock(Environment)
+
+        def underTest = new OktaOAuth2Properties(env)
         underTest.setClientId("a-client-id")
         assertThat underTest.clientId, is("a-client-id")
     }

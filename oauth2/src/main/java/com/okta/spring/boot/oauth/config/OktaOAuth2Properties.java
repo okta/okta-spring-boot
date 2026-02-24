@@ -17,18 +17,25 @@ package com.okta.spring.boot.oauth.config;
 
 import com.okta.commons.configcheck.ConfigurationValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties;
+import org.springframework.core.env.Environment;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
-import java.util.Optional;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 @ConfigurationProperties("okta.oauth2")
 public final class OktaOAuth2Properties implements Validator {
 
-    private final OAuth2ClientProperties clientProperties;
+    // Environment replaces OAuth2ClientProperties to avoid a hard binary dependency
+    // on org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties
+    // which only exists in Spring Boot 4.x. In 3.x it was at
+    // org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties.
+    // A direct constructor-param reference causes NoClassDefFoundError on SB 3.x because
+    // DefaultBindConstructorProvider inspects all constructor signatures at startup.
+    private final Environment environment;
 
     /**
      * Login route path. This property should NOT be used with applications that have multiple OAuth2 providers.
@@ -87,13 +94,15 @@ public final class OktaOAuth2Properties implements Validator {
     }
 
     @Autowired
-    public OktaOAuth2Properties(@Autowired(required = false) OAuth2ClientProperties clientProperties) {
-        this.clientProperties = clientProperties;
+    public OktaOAuth2Properties(@Autowired(required = false) Environment environment) {
+        this.environment = environment;
     }
 
     public String getClientId() {
-        return getRegistration().map(OAuth2ClientProperties.Registration::getClientId)
-                                .orElse(clientId);
+        if (clientId != null) { return clientId; }
+        return environment != null
+                ? environment.getProperty("spring.security.oauth2.client.registration.okta.client-id")
+                : null;
     }
 
     public void setClientId(String clientId) {
@@ -101,8 +110,10 @@ public final class OktaOAuth2Properties implements Validator {
     }
 
     public String getClientSecret() {
-        return getRegistration().map(OAuth2ClientProperties.Registration::getClientSecret)
-                                .orElse(clientSecret);
+        if (clientSecret != null) { return clientSecret; }
+        return environment != null
+                ? environment.getProperty("spring.security.oauth2.client.registration.okta.client-secret")
+                : null;
     }
 
     public void setClientSecret(String clientSecret) {
@@ -142,8 +153,17 @@ public final class OktaOAuth2Properties implements Validator {
     }
 
     public Set<String> getScopes() {
-        return getRegistration().map(OAuth2ClientProperties.Registration::getScope)
-                                .orElse(scopes);
+        if (scopes != null && !scopes.isEmpty()) { return scopes; }
+        if (environment != null) {
+            // OktaOAuth2PropertiesMappingEnvironmentPostProcessor maps okta.oauth2.scopes ->
+            // spring.security.oauth2.client.registration.okta.scope, covering both
+            // okta.oauth2.scopes and directly-set spring.security.oauth2.client.registration.okta.scope.
+            String v = environment.getProperty("spring.security.oauth2.client.registration.okta.scope");
+            if (v != null && !v.isBlank()) {
+                return new LinkedHashSet<>(Arrays.asList(v.split("\s*,\s*")));
+            }
+        }
+        return scopes;
     }
 
     public void setScopes(Set<String> scopes) {
@@ -156,12 +176,6 @@ public final class OktaOAuth2Properties implements Validator {
 
     public void setRedirectUri(String redirectUri) {
         this.redirectUri = redirectUri;
-    }
-
-    private Optional<OAuth2ClientProperties.Registration> getRegistration() {
-        return Optional.ofNullable(clientProperties != null
-                ? clientProperties.getRegistration().get("okta")
-                : null);
     }
 
     public String getPostLogoutRedirectUri() {
