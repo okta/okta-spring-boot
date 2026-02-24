@@ -20,7 +20,7 @@
     <parent>
         <groupId>com.okta.spring.examples</groupId>
         <artifactId>okta-spring-boot-examples</artifactId>
-        <version>3.1.0</version>
+        <version>3.1.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>okta-spring-boot-hosted-code-flow-example</artifactId>
@@ -37,7 +37,7 @@
         <dependency>
             <groupId>com.okta.spring</groupId>
             <artifactId>okta-spring-sdk</artifactId>
-            <version>3.1.0</version>
+            <version>3.1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
