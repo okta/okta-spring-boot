@@ -34,7 +34,6 @@ import java.util.Date;
 
 @SpringBootApplication
 @RestController
-@EnableReactiveMethodSecurity
 public class ReactiveRedirectCodeFlowApplication {
 
     @GetMapping(value = "/")
@@ -55,6 +54,7 @@ public class ReactiveRedirectCodeFlowApplication {
     }
 
     @EnableWebFluxSecurity
+    @EnableReactiveMethodSecurity
     static class SecurityConfiguration {
 
         @Bean

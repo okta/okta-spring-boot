@@ -16,15 +16,18 @@
 package com.okta.spring.boot.oauth;
 
 import com.okta.commons.lang.Strings;
+import com.okta.spring.boot.oauth.aot.OktaRuntimeHintsRegistrar;
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
 import com.okta.spring.boot.oauth.http.Auth0ClientRequestInterceptor;
 import com.okta.spring.boot.oauth.http.UserAgentRequestInterceptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
+import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -47,27 +50,34 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Objects;
 
 @AutoConfiguration
-@AutoConfigureBefore(OAuth2ResourceServerAutoConfiguration.class)
+@AutoConfigureBefore(name = "org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration")
 @ConditionalOnClass(JwtAuthenticationToken.class)
 @ConditionalOnOktaResourceServerProperties
 @EnableConfigurationProperties(OktaOAuth2Properties.class)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+@ImportRuntimeHints(OktaRuntimeHintsRegistrar.class)
 class OktaOAuth2ResourceServerAutoConfig {
 
     @Bean
-    public JwtAuthenticationConverter jwtAuthenticationConverter(OktaOAuth2Properties oktaOAuth2Properties) {
-        return new OktaJwtAuthenticationConverter(oktaOAuth2Properties);
+    @ConditionalOnMissingBean
+    public JwtAuthenticationConverter jwtAuthenticationConverter(OktaOAuth2Properties oktaOAuth2Properties,
+                                                                 @Autowired(required = false) List<AuthoritiesProvider> authoritiesProviders) {
+        return new OktaJwtAuthenticationConverter(oktaOAuth2Properties,
+            authoritiesProviders != null ? authoritiesProviders : Collections.emptyList());
     }
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty("spring.security.oauth2.resourceserver.jwt.jwk-set-uri")
     JwtDecoder jwtDecoder(OAuth2ResourceServerProperties oAuth2ResourceServerProperties,
                           OktaOAuth2Properties oktaOAuth2Properties) {
 
@@ -112,7 +122,8 @@ class OktaOAuth2ResourceServerAutoConfig {
     @Bean
     @Conditional(OktaOpaqueTokenIntrospectConditional.class)
     OpaqueTokenIntrospector opaqueTokenIntrospector(OktaOAuth2Properties oktaOAuth2Properties,
-                                                    OAuth2ResourceServerProperties oAuth2ResourceServerProperties) {
+                                                    OAuth2ResourceServerProperties oAuth2ResourceServerProperties,
+                                                    @Autowired(required = false) List<AuthoritiesProvider> authoritiesProviders) {
 
         // Spring Security 7.x uses SpringOpaqueTokenIntrospector with builder pattern
         // The builder handles client credentials encoding internally
@@ -122,15 +133,17 @@ class OktaOAuth2ResourceServerAutoConfig {
             .clientSecret(oAuth2ResourceServerProperties.getOpaquetoken().getClientSecret())
             .build();
 
+        List<AuthoritiesProvider> providers = authoritiesProviders != null ? authoritiesProviders : Collections.emptyList();
+
         return token -> {
             OAuth2AuthenticatedPrincipal principal = delegate.introspect(token);
 
-            Collection<GrantedAuthority> mappedAuthorities =
-                Collections.unmodifiableCollection(
-                    TokenUtil.opaqueTokenClaimsToAuthorities(principal.getAttributes(), oktaOAuth2Properties.getGroupsClaim(), principal.getAuthorities()));
+            Collection<GrantedAuthority> mappedAuthorities = new ArrayList<>(
+                TokenUtil.opaqueTokenClaimsToAuthorities(principal.getAttributes(), oktaOAuth2Properties.getGroupsClaim(), principal.getAuthorities()));
+            providers.forEach(p -> mappedAuthorities.addAll(p.getAuthorities(principal)));
 
             return new DefaultOAuth2AuthenticatedPrincipal(
-                principal.getName(), principal.getAttributes(), mappedAuthorities);
+                principal.getName(), principal.getAttributes(), Collections.unmodifiableCollection(mappedAuthorities));
         };
     }
 }

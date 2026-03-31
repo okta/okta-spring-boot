@@ -107,6 +107,38 @@ public final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implement
     private static final String OKTA_OAUTH_CLIENT_ID = OKTA_OAUTH_PREFIX + "client-id";
     private static final String OKTA_OAUTH_CLIENT_SECRET = OKTA_OAUTH_PREFIX + "client-secret";
     private static final String OKTA_OAUTH_SCOPES = OKTA_OAUTH_PREFIX + "scopes"; // array vs string
+    private static final String OKTA_OAUTH_JWK_SET_URI = OKTA_OAUTH_PREFIX + "resourceserver.jwt.jwk-set-uri";
+    private static final String SPRING_JWK_SET_URI = "spring.security.oauth2.resourceserver.jwt.jwk-set-uri";
+
+    /**
+     * Active Spring profiles that automatically skip the OIDC discovery HTTP call.
+     * Mirrors the set used by {@link OktaEnvironmentPostProcessorApplicationListener}.
+     */
+    private static final Set<String> DISCOVERY_SKIP_PROFILES = java.util.stream.Stream.of(
+        "test", "dev", "local", "mock", "offline"
+    ).collect(java.util.stream.Collectors.toSet());
+
+    /**
+     * Returns {@code true} when the OIDC discovery HTTP call should be skipped.
+     * Triggered by {@code okta.oauth2.skip-discovery=true} or any active profile
+     * in {@link #DISCOVERY_SKIP_PROFILES} or {@code okta.oauth2.discovery-skip-profiles}.
+     */
+    private boolean shouldSkipDiscovery(ConfigurableEnvironment environment) {
+        if ("true".equalsIgnoreCase(environment.getProperty("okta.oauth2.skip-discovery"))) {
+            return true;
+        }
+        String extraProfiles = environment.getProperty("okta.oauth2.discovery-skip-profiles", "");
+        Set<String> skipProfiles = java.util.stream.Stream.concat(
+            DISCOVERY_SKIP_PROFILES.stream(),
+            Arrays.stream(extraProfiles.split(",")).map(String::trim).filter(s -> !s.isEmpty())
+        ).collect(java.util.stream.Collectors.toSet());
+        for (String profile : environment.getActiveProfiles()) {
+            if (skipProfiles.contains(profile)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
@@ -114,8 +146,24 @@ public final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implement
         OIDCMetadata oidcMetadata;
         try {
             String issuer = environment.getProperty(OKTA_OAUTH_ISSUER);
-            if (issuer != null) {
-                RestTemplate restTemplate = new RestTemplate();
+            if (issuer != null && !shouldSkipDiscovery(environment)) {
+                RestTemplate restTemplate;
+                String proxyHost = environment.getProperty("okta.oauth2.proxy.host");
+                int proxyPort = environment.getProperty("okta.oauth2.proxy.port", Integer.class, 0);
+                String proxyUsername = environment.getProperty("okta.oauth2.proxy.username");
+                String proxyPassword = environment.getProperty("okta.oauth2.proxy.password");
+                if (proxyHost != null && proxyPort > 0) {
+                    java.net.Proxy proxy = new java.net.Proxy(java.net.Proxy.Type.HTTP, new java.net.InetSocketAddress(proxyHost, proxyPort));
+                    org.springframework.http.client.SimpleClientHttpRequestFactory requestFactory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+                    requestFactory.setProxy(proxy);
+                    restTemplate = new RestTemplate();
+                    restTemplate.setRequestFactory(requestFactory);
+                    if (proxyUsername != null && proxyPassword != null) {
+                        restTemplate.getInterceptors().add(new org.springframework.http.client.support.BasicAuthenticationInterceptor(proxyUsername, proxyPassword));
+                    }
+                } else {
+                    restTemplate = new RestTemplate();
+                }
                 if (!issuer.endsWith("/")) {
                     issuer += "/";
                 }
@@ -126,8 +174,17 @@ public final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implement
                 oidcMetadata = new OIDCMetadata(OKTA_OAUTH_ISSUER_WITH_PATH);
             }
         } catch (JsonProcessingException | ResourceAccessException e) {
-            log.warn("Failed to process '.well-known/openid-configuration' metadata. Using defaults for Okta");
-            oidcMetadata = new OIDCMetadata(OKTA_OAUTH_ISSUER_WITH_PATH);
+            // If the issuer starts with http:// (e.g., integration test scenarios) and the metadata
+            // endpoint was not reachable, fall back to computing endpoints from the issuer URL directly.
+            String rawIssuer = environment.getProperty(OKTA_OAUTH_ISSUER);
+            if (rawIssuer != null && rawIssuer.startsWith("http://")) {
+                log.debug("OIDC discovery failed for http issuer (likely an integration test). " +
+                    "Deriving endpoints from issuer URL: {}", rawIssuer);
+                oidcMetadata = new OIDCMetadata(OKTA_OAUTH_ISSUER_WITH_PATH);
+            } else {
+                log.warn("Failed to process '.well-known/openid-configuration' metadata. Using defaults for Okta");
+                oidcMetadata = new OIDCMetadata(OKTA_OAUTH_ISSUER_WITH_PATH);
+            }
         }
 
         // convert okta.oauth2.* properties to long form spring oauth properties
@@ -144,6 +201,12 @@ public final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implement
         }
         environment.getPropertySources().addLast(oktaRedirectUriPropertySource(environment));
         environment.getPropertySources().addLast(otkaForcePkcePropertySource(environment, oidcMetadata));
+        // Set a friendly client-name for the Spring Security default login page (only when client-id is configured)
+        if (!environment.containsProperty("spring.security.oauth2.client.registration.okta.client-name")) {
+            Map<String, Object> clientNameProps = new HashMap<>();
+            clientNameProps.put("spring.security.oauth2.client.registration.okta.client-name", "Okta");
+            environment.getPropertySources().addLast(new ConditionalMapPropertySource("okta-client-name", clientNameProps, environment, OKTA_OAUTH_ISSUER, OKTA_OAUTH_CLIENT_ID));
+        }
     }
 
     private PropertySource<?> otkaForcePkcePropertySource(ConfigurableEnvironment environment, OIDCMetadata oidcMetadata) {
@@ -183,7 +246,17 @@ public final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implement
 
     private PropertySource oktaRedirectUriPropertySource(Environment environment) {
         Map<String, Object> properties = new HashMap<>();
-        properties.put("spring.security.oauth2.client.registration.okta.redirect-uri", "{baseUrl}${okta.oauth2.redirect-uri}");
+        // If the spring property is already set directly, don't override it
+        if (environment.containsProperty("spring.security.oauth2.client.registration.okta.redirect-uri")) {
+            return new ConditionalMapPropertySource("okta-redirect-uri-helper", properties, environment, "okta.oauth2.redirect-uri");
+        }
+        String redirectUri = environment.getProperty("okta.oauth2.redirect-uri");
+        if (redirectUri != null && (redirectUri.contains("{baseUrl}") || redirectUri.startsWith("http://") || redirectUri.startsWith("https://"))) {
+            // Use as-is: either already has {baseUrl} template or is an absolute URL (e.g. behind a proxy)
+            properties.put("spring.security.oauth2.client.registration.okta.redirect-uri", redirectUri);
+        } else {
+            properties.put("spring.security.oauth2.client.registration.okta.redirect-uri", "{baseUrl}${okta.oauth2.redirect-uri}");
+        }
         return new ConditionalMapPropertySource("okta-redirect-uri-helper", properties, environment, "okta.oauth2.redirect-uri");
     }
 
@@ -191,7 +264,15 @@ public final class OktaOAuth2PropertiesMappingEnvironmentPostProcessor implement
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("spring.security.oauth2.resourceserver.jwt.issuer-uri", "${" + OKTA_OAUTH_ISSUER + "}");
-        properties.put("spring.security.oauth2.resourceserver.jwt.jwk-set-uri", oidcMetadata.getJwkSetURI());
+        // Only set jwk-set-uri if neither the spring.security nor the okta.oauth2 alias is already configured.
+        // If the okta.oauth2 alias is set, map it through to the spring.security key.
+        boolean springJwkSetUriPresent = environment.containsProperty(SPRING_JWK_SET_URI);
+        boolean oktaJwkSetUriPresent = environment.containsProperty(OKTA_OAUTH_JWK_SET_URI);
+        if (oktaJwkSetUriPresent) {
+            properties.put(SPRING_JWK_SET_URI, "${" + OKTA_OAUTH_JWK_SET_URI + "}");
+        } else if (!springJwkSetUriPresent) {
+            properties.put(SPRING_JWK_SET_URI, oidcMetadata.getJwkSetURI());
+        }
         properties.put("spring.security.oauth2.client.provider.okta.authorization-uri", oidcMetadata.getAuthorizationURI());
         properties.put("spring.security.oauth2.client.provider.okta.token-uri", oidcMetadata.getTokenURI());
         properties.put("spring.security.oauth2.client.provider.okta.user-info-uri", oidcMetadata.getUserInfoURI());

@@ -15,14 +15,17 @@
  */
 package com.okta.spring.boot.oauth;
 
+import com.okta.spring.boot.oauth.aot.OktaRuntimeHintsRegistrar;
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerProperties;
-import org.springframework.boot.security.oauth2.server.resource.autoconfigure.reactive.ReactiveOAuth2ResourceServerAutoConfiguration;
+
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
@@ -32,15 +35,17 @@ import org.springframework.security.oauth2.server.resource.authentication.Bearer
 import org.springframework.web.reactive.function.client.WebClient;
 
 @AutoConfiguration
-@AutoConfigureBefore(ReactiveOAuth2ResourceServerAutoConfiguration.class)
+@AutoConfigureBefore(name = "org.springframework.boot.security.oauth2.server.resource.autoconfigure.reactive.ReactiveOAuth2ResourceServerAutoConfiguration")
 @ConditionalOnOktaResourceServerProperties
 @EnableConfigurationProperties({OktaOAuth2Properties.class, OAuth2ResourceServerProperties.class})
 @ConditionalOnClass({ EnableWebFluxSecurity.class, BearerTokenAuthenticationToken.class, ReactiveJwtDecoder.class })
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
+@ImportRuntimeHints(OktaRuntimeHintsRegistrar.class)
 class ReactiveOktaOAuth2ResourceServerAutoConfig {
 
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty("spring.security.oauth2.resourceserver.jwt.jwk-set-uri")
     ReactiveJwtDecoder jwtDecoder(OAuth2ResourceServerProperties oAuth2ResourceServerProperties, OktaOAuth2Properties oktaOAuth2Properties) {
 
         NimbusReactiveJwtDecoder.JwkSetUriReactiveJwtDecoderBuilder builder =

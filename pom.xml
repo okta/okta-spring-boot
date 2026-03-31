@@ -32,7 +32,11 @@
 
     <properties>
         <spring-boot.version>4.0.1</spring-boot.version>
-        <spring-cloud.version>4.2.0</spring-cloud.version>
+        <spring-cloud.version>4.3.2</spring-cloud.version>
+        <!-- Spring Security 7.0.4 requires DefaultParameterNameDiscoverer.getSharedInstance()
+             which was added in Spring Framework 7.0.4. Override spring-boot-dependencies'
+             internal spring-framework.version property to ensure compatibility. -->
+        <spring-framework.version>7.0.4</spring-framework.version>
         <github.slug>okta/okta-spring-boot</github.slug>
         <okta.sdk.version>24.0.0</okta.sdk.version>
         <okta.commons.version>2.0.2</okta.commons.version>
@@ -68,6 +72,24 @@
             </dependency>
 
             <dependency>
+                <!-- Fix CVE-2026-22732: upgrade spring-security-web to 7.0.4.
+                     Spring Security 7.0.4 requires Spring Framework 7.0.4+
+                     (DefaultParameterNameDiscoverer.getSharedInstance() API). -->
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-framework-bom</artifactId>
+                <version>7.0.4</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <!-- Fix CVE-2026-22732: upgrade spring-security-web to 7.0.4 -->
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-bom</artifactId>
+                <version>7.0.4</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
                 <!-- Import dependency management from Spring Boot -->
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -75,6 +97,8 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
+
 
             <!-- this project's modules -->
             <dependency>
@@ -213,7 +237,7 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-handler</artifactId>
-                <version>4.2.6.Final</version>
+                <version>4.2.9.Final</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.tomcat.embed</groupId>
@@ -236,11 +260,13 @@
                 <version>4.0.2</version>
             </dependency>
             
-            <!-- Exclude commons-logging to avoid banned dependency issue in Spring Boot 4.x -->
+            <!-- Exclude commons-logging to avoid banned dependency issue in Spring Boot 4.x.
+                 Version upgraded to 7.0.4 to match spring-security-bom:7.0.4 requirement
+                 (DefaultParameterNameDiscoverer.getSharedInstance() added in 7.0.4). -->
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-core</artifactId>
-                <version>7.0.2</version>
+                <version>${spring-framework.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>commons-logging</groupId>
@@ -259,6 +285,7 @@
                <configuration>
                    <ossIndexUsername>${env.OSS_EMAIL}</ossIndexUsername> <!-- the account's email -->
                    <ossIndexPassword>${env.OSS_TOKEN}</ossIndexPassword>
+                   <suppressionFile>${project.basedir}/../src/owasp/owasp-suppression.xml</suppressionFile>
                </configuration>
            </plugin>
            <plugin>

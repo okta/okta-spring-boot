@@ -21,19 +21,29 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 
 import java.util.Collection;
+import java.util.Collections;
 
 final class OktaJwtAuthenticationConverter extends JwtAuthenticationConverter {
 
     public OktaJwtAuthenticationConverter(String groupClaim) {
+        this(groupClaim, Collections.emptyList());
+    }
+
+    public OktaJwtAuthenticationConverter(String groupClaim, Collection<AuthoritiesProvider> authoritiesProviders) {
         JwtGrantedAuthoritiesConverter originalConverter = new JwtGrantedAuthoritiesConverter();
         this.setJwtGrantedAuthoritiesConverter(source -> {
             Collection<GrantedAuthority> result = originalConverter.convert(source);
             result.addAll(TokenUtil.tokenClaimsToAuthorities(source.getClaims(), groupClaim));
+            authoritiesProviders.forEach(p -> result.addAll(p.getAuthorities(source)));
             return result;
         });
     }
 
     public OktaJwtAuthenticationConverter(OktaOAuth2Properties oktaOAuth2Properties) {
+        this(oktaOAuth2Properties, Collections.emptyList());
+    }
+
+    public OktaJwtAuthenticationConverter(OktaOAuth2Properties oktaOAuth2Properties, Collection<AuthoritiesProvider> authoritiesProviders) {
         JwtGrantedAuthoritiesConverter originalConverter = new JwtGrantedAuthoritiesConverter();
 
         if (oktaOAuth2Properties.getAuthoritiesClaimName() != null) {
@@ -43,6 +53,7 @@ final class OktaJwtAuthenticationConverter extends JwtAuthenticationConverter {
         this.setJwtGrantedAuthoritiesConverter(source -> {
             Collection<GrantedAuthority> result = originalConverter.convert(source);
             result.addAll(TokenUtil.tokenClaimsToAuthorities(source.getClaims(), oktaOAuth2Properties.getGroupsClaim()));
+            authoritiesProviders.forEach(p -> result.addAll(p.getAuthorities(source)));
             return result;
         });
     }

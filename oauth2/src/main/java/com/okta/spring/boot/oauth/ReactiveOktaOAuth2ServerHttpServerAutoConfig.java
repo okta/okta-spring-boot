@@ -63,9 +63,9 @@ import java.net.URISyntaxException;
 class ReactiveOktaOAuth2ServerHttpServerAutoConfig {
 
     @Bean
-    BeanPostProcessor authManagerServerHttpSecurityBeanPostProcessor(@Qualifier("oauth2UserService") ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService,
-                                                                     @Qualifier("oidcUserService") OidcReactiveOAuth2UserService oidcUserService,
-                                                                     @Autowired(required = false) OidcClientInitiatedServerLogoutSuccessHandler logoutSuccessHandler) {
+    static BeanPostProcessor authManagerServerHttpSecurityBeanPostProcessor(@Qualifier("oauth2UserService") ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService,
+                                                                             @Qualifier("oidcUserService") OidcReactiveOAuth2UserService oidcUserService,
+                                                                             @Autowired(required = false) OidcClientInitiatedServerLogoutSuccessHandler logoutSuccessHandler) {
         return new OktaOAuth2LoginServerBeanPostProcessor(oAuth2UserService, oidcUserService, logoutSuccessHandler);
     }
 

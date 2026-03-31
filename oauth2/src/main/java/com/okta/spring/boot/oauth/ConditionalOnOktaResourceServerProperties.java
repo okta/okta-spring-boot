@@ -15,14 +15,23 @@
  */
 package com.okta.spring.boot.oauth;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Conditional;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Activates when any of the following is present:
+ * {@code okta.oauth2.issuer}, {@code spring.security.oauth2.resourceserver.jwt.issuer-uri},
+ * or {@code spring.security.oauth2.resourceserver.jwt.jwk-set-uri}.
+ *
+ * <p>The OR semantics ensure that the resource-server beans are included in
+ * GraalVM native images even when the OIDC discovery HTTP call cannot be made
+ * at AOT compile time (fixes #406).</p>
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE, ElementType.METHOD })
-@ConditionalOnProperty(name = "spring.security.oauth2.resourceserver.jwt.jwk-set-uri")
+@Conditional(OktaResourceServerCondition.class)
 @interface ConditionalOnOktaResourceServerProperties {}
