@@ -38,7 +38,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @SpringBootApplication
-@EnableReactiveMethodSecurity
 public class ReactiveImplicitFlowApplication {
 
     public static void main(String[] args) {
@@ -46,6 +45,7 @@ public class ReactiveImplicitFlowApplication {
     }
 
     @EnableWebFluxSecurity
+    @EnableReactiveMethodSecurity
     static class SecurityConfiguration {
 
         @Bean

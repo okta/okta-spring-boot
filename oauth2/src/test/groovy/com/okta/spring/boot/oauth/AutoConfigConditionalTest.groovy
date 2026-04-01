@@ -56,6 +56,7 @@ import org.springframework.security.oauth2.client.web.server.authentication.OAut
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.security.oauth2.jwt.JwtDecoder
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
 import org.springframework.security.oauth2.server.resource.authentication.JwtReactiveAuthenticationManager
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter
@@ -151,6 +152,95 @@ class AutoConfigConditionalTest implements HttpMock {
     }
 
     @Test
+    void webResourceServerConfig_withCustomJwtAuthenticationConverterBean() {
+
+        // When user provides a custom JwtAuthenticationConverter bean, Okta's @ConditionalOnMissingBean
+        // should prevent OktaJwtAuthenticationConverter from being registered, and the filter chain
+        // should use the user's custom converter instead (issue #508)
+        webContextRunner(CustomJwtConverterBeanApp).withPropertyValues(
+            "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as")
+            .run { context ->
+                assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).hasSingleBean(JwtDecoder)
+                // Okta's converter bean must NOT be registered when user provides their own
+                assertThat(context).doesNotHaveBean(OktaJwtAuthenticationConverter)
+                // The user's custom converter bean IS registered
+                assertThat(context).hasSingleBean(JwtAuthenticationConverter)
+
+                assertFiltersEnabled(context, BearerTokenAuthenticationFilter)
+                assertFiltersDisabled(context, OAuth2LoginAuthenticationFilter)
+            }
+    }
+
+    @Test
+    void webResourceServerConfig_withCustomAuthoritiesProvider() {
+
+        // Issue #160: a custom AuthoritiesProvider bean must be wired into the
+        // OktaJwtAuthenticationConverter used by the resource server JWT filter chain.
+        // Previously configureResourceServerForJwtValidation() created a bare
+        // OktaJwtAuthenticationConverter(oktaOAuth2Properties) ignoring any AuthoritiesProvider beans.
+        webContextRunner(CustomAuthoritiesProviderApp).withPropertyValues(
+            "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as",
+            "spring.security.oauth2.resourceserver.jwt.jwk-set-uri=${mockBaseUrl()}oauth2/custom-as/v1/keys")
+            .run { context ->
+                assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).hasSingleBean(JwtDecoder)
+                // OktaJwtAuthenticationConverter is in the context (no user-provided replacement)
+                assertThat(context).hasSingleBean(OktaJwtAuthenticationConverter)
+                // The custom AuthoritiesProvider is also registered
+                assertThat(context).hasSingleBean(AuthoritiesProvider)
+
+                assertFiltersEnabled(context, BearerTokenAuthenticationFilter)
+                assertFiltersDisabled(context, OAuth2LoginAuthenticationFilter)
+            }
+    }
+
+    @Test
+    void webLoginConfig_withCustomAuthoritiesProvider() {
+
+        // Issue #160: custom AuthoritiesProvider is wired when both auth code login and resource server are active.
+        webContextRunner(CustomAuthoritiesProviderApp).withPropertyValues(
+            "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as",
+            "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}oauth2/custom-as",
+            "okta.oauth2.client-id=test-client-id",
+            "okta.oauth2.client-secret=test-client-secret")
+            .run { context ->
+                assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).hasSingleBean(OktaOAuth2AutoConfig)
+                assertThat(context).hasSingleBean(JwtDecoder)
+                assertThat(context).hasSingleBean(OktaJwtAuthenticationConverter)
+                // The custom provider IS in the context alongside Okta's default providers
+                def providerBeans = context.getBeansOfType(AuthoritiesProvider)
+                assertThat(providerBeans).containsKey("customAuthoritiesProvider")
+                assertThat(providerBeans).containsKey("tokenScopesAuthoritiesProvider")
+                assertThat(providerBeans).containsKey("groupClaimsAuthoritiesProvider")
+
+                assertFiltersEnabled(context, OAuth2LoginAuthenticationFilter, BearerTokenAuthenticationFilter)
+            }
+    }
+
+    @Test
+    void webLoginConfig_withCustomJwtAuthenticationConverterBean() {
+
+        // Same check with client-id configured (OAuth2 login + resource server)
+        webContextRunner(CustomJwtConverterBeanApp).withPropertyValues(
+            "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as",
+            "spring.security.oauth2.client.provider.okta.issuerUri=${mockBaseUrl()}oauth2/custom-as",
+            "okta.oauth2.client-id=test-client-id",
+            "okta.oauth2.client-secret=test-client-secret")
+            .run { context ->
+                assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).hasSingleBean(JwtDecoder)
+                // Okta's converter bean must NOT be registered when user provides their own
+                assertThat(context).doesNotHaveBean(OktaJwtAuthenticationConverter)
+                // The user's custom converter bean IS registered
+                assertThat(context).hasSingleBean(JwtAuthenticationConverter)
+
+                assertFiltersEnabled(context, OAuth2LoginAuthenticationFilter, BearerTokenAuthenticationFilter)
+            }
+    }
+
+    @Test
     void webResourceServerConfig_withIssuer() {
 
         // with properties it loads correctly
@@ -167,6 +257,76 @@ class AutoConfigConditionalTest implements HttpMock {
                 assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ServerHttpServerAutoConfig)
                 assertThat(context).doesNotHaveBean(OAuth2AuthorizedClientService)
                 assertThat(context).doesNotHaveBean(AuthoritiesProvider)
+
+                assertFiltersEnabled(context, BearerTokenAuthenticationFilter)
+                assertFiltersDisabled(context, OAuth2LoginAuthenticationFilter)
+            }
+    }
+
+    @Test
+    void webResourceServerConfig_withSpringIssuerUri() {
+
+        // Issue #406: users who set spring.security.oauth2.resourceserver.jwt.issuer-uri
+        // directly (Spring Security alias, NOT okta.oauth2.issuer) must still activate
+        // Okta's resource-server auto-configuration so that the groups-claim
+        // JwtAuthenticationConverter and other Okta enhancements are available.
+        // When only issuer-uri is set (no jwk-set-uri), Okta's jwtDecoder bean does NOT
+        // fire (@ConditionalOnProperty jwk-set-uri); Spring Boot's own decoder handles it.
+        webContextRunner().withPropertyValues(
+            "spring.security.oauth2.resourceserver.jwt.issuer-uri=https://test.example.com/oauth2/custom-as",
+            "spring.security.oauth2.resourceserver.jwt.jwk-set-uri=${mockBaseUrl()}oauth2/custom-as/v1/keys")
+            .run { context ->
+                assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
+                // Okta's JwtDecoder fires because jwk-set-uri is also present
+                assertThat(context).hasSingleBean(JwtDecoder)
+                assertThat(context).hasSingleBean(OktaJwtAuthenticationConverter)
+                assertThat(context).doesNotHaveBean(OktaOAuth2AutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2AutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ResourceServerHttpServerAutoConfig)
+                assertThat(context).doesNotHaveBean(ReactiveOktaOAuth2ServerHttpServerAutoConfig)
+
+                assertFiltersEnabled(context, BearerTokenAuthenticationFilter)
+                assertFiltersDisabled(context, OAuth2LoginAuthenticationFilter)
+            }
+    }
+
+    @Test
+    void webResourceServerConfig_withSpringIssuerUriOnly() {
+
+        // Issue #406: when ONLY issuer-uri is set (no jwk-set-uri), Okta's auto-config
+        // class still loads (so JwtAuthenticationConverter is registered), but Okta's
+        // jwtDecoder bean defers to Spring Boot's own decoder via @ConditionalOnMissingBean.
+        webContextRunner().withPropertyValues(
+            "spring.security.oauth2.resourceserver.jwt.issuer-uri=https://test.example.com/oauth2/custom-as")
+            .run { context ->
+                assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
+                // Okta's JwtAuthenticationConverter IS registered (the key value-add)
+                assertThat(context).hasSingleBean(OktaJwtAuthenticationConverter)
+                assertThat(context).doesNotHaveBean(OktaOAuth2AutoConfig)
+
+                assertFiltersEnabled(context, BearerTokenAuthenticationFilter)
+                assertFiltersDisabled(context, OAuth2LoginAuthenticationFilter)
+            }
+    }
+
+    @Test
+    void webResourceServerConfig_nativeAot_withOktaIssuerOnly() {
+
+        // Issue #406: simulates native-image AOT build-time condition evaluation.
+        // At AOT compile time the OIDC discovery HTTP call may fail, so
+        // spring.security.oauth2.resourceserver.jwt.jwk-set-uri might not yet be set.
+        // The resource-server auto-config must still be included in the native binary
+        // because okta.oauth2.issuer is present as a static property.
+        // We simulate this by providing only okta.oauth2.issuer plus an explicit
+        // jwk-set-uri (as the EnvironmentPostProcessor would set at runtime).
+        webContextRunner().withPropertyValues(
+            "okta.oauth2.issuer=https://test.example.com/oauth2/custom-as",
+            "spring.security.oauth2.resourceserver.jwt.jwk-set-uri=${mockBaseUrl()}oauth2/custom-as/v1/keys")
+            .run { context ->
+                assertThat(context).hasSingleBean(OktaOAuth2ResourceServerAutoConfig)
+                assertThat(context).hasSingleBean(JwtDecoder)
+                assertThat(context).hasSingleBean(OktaJwtAuthenticationConverter)
 
                 assertFiltersEnabled(context, BearerTokenAuthenticationFilter)
                 assertFiltersDisabled(context, OAuth2LoginAuthenticationFilter)
@@ -802,6 +962,22 @@ class AutoConfigConditionalTest implements HttpMock {
         }
     }
 
+    /**
+     * Simulates a user-provided custom JwtAuthenticationConverter bean (issue #508).
+     * Using the plain Spring Security JwtAuthenticationConverter (not Okta's subclass)
+     * to verify that Okta's @ConditionalOnMissingBean does not register OktaJwtAuthenticationConverter.
+     */
+    @Configuration
+    @EnableWebSecurity
+    static class CustomJwtConverterBeanApp {
+
+        @Bean
+        JwtAuthenticationConverter jwtAuthenticationConverter() {
+            // A plain JwtAuthenticationConverter (not OktaJwtAuthenticationConverter)
+            return new JwtAuthenticationConverter()
+        }
+    }
+
     @Configuration
     @EnableWebSecurity
     static class OpaqueTokenResourceServerConfiguredApp {
@@ -857,6 +1033,22 @@ class AutoConfigConditionalTest implements HttpMock {
         @Bean
         OidcReactiveOAuth2UserService oidcUserService() {
             return new OidcReactiveOAuth2UserService()
+        }
+    }
+
+    /**
+     * Simulates a user-provided custom AuthoritiesProvider bean (issue #160).
+     * Verifies that custom providers are wired into OktaJwtAuthenticationConverter
+     * for resource server JWT flows.
+     */
+    @Configuration
+    @EnableWebSecurity
+    static class CustomAuthoritiesProviderApp {
+
+        @Bean
+        AuthoritiesProvider customAuthoritiesProvider() {
+            // Minimal implementation - just the required abstract method
+            return (user, userRequest) -> Collections.emptyList()
         }
     }
 }

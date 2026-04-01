@@ -15,6 +15,7 @@
  */
 package com.okta.spring.boot.oauth;
 
+import com.okta.spring.boot.oauth.aot.OktaRuntimeHintsRegistrar;
 import com.okta.spring.boot.oauth.config.OktaOAuth2Properties;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -26,6 +27,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
@@ -46,6 +48,7 @@ import java.util.Collection;
 @ConditionalOnClass({ EnableWebSecurity.class, ClientRegistration.class })
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @Import(AuthorityProvidersConfig.class)
+@ImportRuntimeHints(OktaRuntimeHintsRegistrar.class)
 class OktaOAuth2AutoConfig {
 
     @Bean

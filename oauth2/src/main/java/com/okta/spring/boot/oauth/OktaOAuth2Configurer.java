@@ -33,6 +33,7 @@ import java.lang.reflect.Field;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Optional;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 
 import static com.okta.commons.lang.Strings.isEmpty;
 
@@ -227,8 +228,85 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
     }
 
     private void configureResourceServerForJwtValidation(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) {
+        // Do not override if user has already set a custom converter directly in their DSL
+        // (init() runs during http.build(), so user's DSL settings are already applied)
+        if (hasUserSetJwtAuthenticationConverter(http)) {
+            log.debug("Custom jwtAuthenticationConverter detected in DSL - Okta will not override it.");
+            return;
+        }
+
+        ApplicationContext context = http.getSharedObject(ApplicationContext.class);
+
+        // Check for a user-provided custom JwtAuthenticationConverter bean.
+        // OktaOAuth2ResourceServerAutoConfig registers OktaJwtAuthenticationConverter with
+        // @ConditionalOnMissingBean, so if user provided their own bean, Okta's won't be registered.
+        Optional<JwtAuthenticationConverter> customConverterBean = context
+            .getBeansOfType(JwtAuthenticationConverter.class)
+            .values().stream()
+            .filter(c -> !(c instanceof OktaJwtAuthenticationConverter))
+            .findFirst();
+
+        if (customConverterBean.isPresent()) {
+            log.debug("Custom JwtAuthenticationConverter bean found - using it instead of Okta's default.");
+            JwtAuthenticationConverter converter = customConverterBean.get();
+            http.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(converter)));
+            return;
+        }
+
+        // Default: use the OktaJwtAuthenticationConverter bean already registered in the context,
+        // which has AuthoritiesProvider beans injected by OktaOAuth2ResourceServerAutoConfig
+        // (fix for #160: AuthoritiesProvider not being used in resource server JWT flows).
+        // Fall back to a bare instance only when the bean is unavailable (e.g. resource-server-only
+        // setup without the JWK-set URI so the @ConditionalOnMissingBean bean wasn't created).
+        JwtAuthenticationConverter oktaConverter = context.getBeansOfType(JwtAuthenticationConverter.class)
+            .values().stream()
+            .filter(c -> c instanceof OktaJwtAuthenticationConverter)
+            .findFirst()
+            .orElseGet(() -> new OktaJwtAuthenticationConverter(oktaOAuth2Properties));
         http.oauth2ResourceServer(oauth2 -> oauth2
-            .jwt(jwt -> jwt.jwtAuthenticationConverter(new OktaJwtAuthenticationConverter(oktaOAuth2Properties))));
+            .jwt(jwt -> jwt.jwtAuthenticationConverter(oktaConverter)));
+    }
+
+    /**
+     * Checks via reflection whether the user has already explicitly set a
+     * {@code jwtAuthenticationConverter} on the {@link OAuth2ResourceServerConfigurer.JwtConfigurer}.
+     * Returns {@code true} if a non-null converter was set in the user's DSL before
+     * {@code init()} ran, so Okta should not override it.
+     */
+    private boolean hasUserSetJwtAuthenticationConverter(HttpSecurity http) {
+        return AccessController.doPrivileged((PrivilegedAction<Boolean>) () -> {
+            try {
+                OAuth2ResourceServerConfigurer<?> rsConfigurer =
+                    http.getConfigurer(OAuth2ResourceServerConfigurer.class);
+                if (rsConfigurer == null) return false;
+
+                Object jwtConfigurer;
+                try {
+                    jwtConfigurer = getJwtConfigurer(rsConfigurer).orElse(null);
+                } catch (IllegalAccessException e) {
+                    return false;
+                }
+                if (jwtConfigurer == null) return false;
+
+                // Walk the class hierarchy of the inner JwtConfigurer to find the field
+                Class<?> clazz = jwtConfigurer.getClass();
+                while (clazz != null && clazz != Object.class) {
+                    try {
+                        Field field = clazz.getDeclaredField("jwtAuthenticationConverter");
+                        field.setAccessible(true);
+                        return field.get(jwtConfigurer) != null;
+                    } catch (NoSuchFieldException e) {
+                        clazz = clazz.getSuperclass();
+                    } catch (IllegalAccessException e) {
+                        log.debug("Cannot read jwtAuthenticationConverter field.", e);
+                        return false;
+                    }
+                }
+            } catch (Exception e) {
+                log.debug("Could not inspect JwtConfigurer for existing converter. Proceeding with Okta default.", e);
+            }
+            return false;
+        });
     }
 
     private void configureResourceServerForOpaqueTokenValidation(HttpSecurity http, OktaOAuth2Properties oktaOAuth2Properties) {

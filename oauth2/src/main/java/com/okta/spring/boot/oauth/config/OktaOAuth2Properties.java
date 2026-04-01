@@ -88,6 +88,21 @@ public final class OktaOAuth2Properties implements Validator {
      */
     private Proxy proxy;
 
+    /**
+     * When set to {@code true}, allows the use of an {@code http://} issuer URL without
+     * triggering a validation error. Intended for integration test scenarios only.
+     * Never enable this in production.
+     */
+    private boolean allowInsecureIssuer = false;
+
+    /**
+     * When set to {@code true}, skips the OIDC discovery HTTP call at startup
+     * ({@code issuer/.well-known/openid-configuration}). Endpoints will be derived
+     * directly from the issuer URL instead. Useful for integration/unit tests where
+     * the issuer is not reachable at startup time.
+     */
+    private boolean skipDiscovery = false;
+
     // work around for https://github.com/spring-projects/spring-boot/issues/17035
     private OktaOAuth2Properties() {
         this(null);
@@ -194,6 +209,22 @@ public final class OktaOAuth2Properties implements Validator {
         this.proxy = proxy;
     }
 
+    public boolean isAllowInsecureIssuer() {
+        return allowInsecureIssuer;
+    }
+
+    public void setAllowInsecureIssuer(boolean allowInsecureIssuer) {
+        this.allowInsecureIssuer = allowInsecureIssuer;
+    }
+
+    public boolean isSkipDiscovery() {
+        return skipDiscovery;
+    }
+
+    public void setSkipDiscovery(boolean skipDiscovery) {
+        this.skipDiscovery = skipDiscovery;
+    }
+
     @Override
     public boolean supports(Class<?> clazz) {
         return OktaOAuth2Properties.class.isAssignableFrom(clazz);
@@ -214,7 +245,7 @@ public final class OktaOAuth2Properties implements Validator {
                     errors.rejectValue("clientSecret", res.getMessage()));
         }
 
-        if (properties.getIssuer() != null) {
+        if (properties.getIssuer() != null && !properties.isAllowInsecureIssuer()) {
             ConfigurationValidator.validateIssuer(properties.getIssuer()).ifInvalid(res ->
                     errors.rejectValue("issuer", res.getMessage()));
         }

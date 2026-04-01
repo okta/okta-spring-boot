@@ -37,5 +37,45 @@
        <cve>CVE-2023-4586</cve>
     </suppress>
 
+    <!--
+        CVE-2026-33871 and CVE-2026-33870 affect netty < 4.2.10.Final.
+        io.netty:netty-transport is managed at 4.2.9.Final via Spring Boot BOM 4.0.1.
+        Versions 4.2.10.Final+ are not yet available in Artifactory.
+        Suppressed until Artifactory is updated with netty >= 4.2.10.Final.
+        Track: https://github.com/okta/okta-spring-boot/issues/XXX
+    -->
+    <suppress>
+       <notes>
+          <![CDATA[ netty >= 4.2.10.Final not yet available in Artifactory. Revisit when Spring Boot BOM is updated. ]]>
+       </notes>
+       <packageUrl regex="true">^pkg:maven/io\.netty/netty-.*@4\.2\.9\.Final$</packageUrl>
+       <cve>CVE-2026-33871</cve>
+    </suppress>
+    <suppress>
+       <notes>
+          <![CDATA[ netty >= 4.2.10.Final not yet available in Artifactory. Revisit when Spring Boot BOM is updated. ]]>
+       </notes>
+       <packageUrl regex="true">^pkg:maven/io\.netty/netty-.*@4\.2\.9\.Final$</packageUrl>
+       <cve>CVE-2026-33870</cve>
+    </suppress>
+
+    <!--
+        CVE-2026-29062 (CVSS 8.7) affects tools.jackson.core:jackson-core/databind < 3.1.1.
+        Spring Boot BOM 4.0.1 manages jackson at 3.0.3. The fix version (3.1.1) requires
+        tools.jackson.core:jackson-annotations:3.1.1 which is not yet available in Artifactory.
+        Upgrading jackson-core/databind to 3.1.1 without the matching annotations JAR causes
+        a ClassNotFoundException (com.fasterxml.jackson.annotation.JsonSerializeAs) at runtime.
+        Suppressed until Artifactory is updated with tools.jackson.core:jackson-annotations:3.1.1
+        OR Spring Boot BOM manages a compatible fixed version.
+        Track: https://github.com/okta/okta-spring-boot/issues/XXX
+    -->
+    <suppress>
+       <notes>
+          <![CDATA[ jackson-annotations:3.1.1 not yet available in Artifactory; upgrade breaks runtime. Revisit when Artifactory is updated. ]]>
+       </notes>
+       <packageUrl regex="true">^pkg:maven/tools\.jackson\.core/jackson-(core|databind)@3\.0\..*$</packageUrl>
+       <cve>CVE-2026-29062</cve>
+    </suppress>
+
 </suppressions>
 
