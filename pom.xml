@@ -257,7 +257,7 @@
             <dependency>
                 <groupId>org.codehaus.plexus</groupId>
                 <artifactId>plexus-utils</artifactId>
-                <version>4.0.2</version>
+                <version>4.0.3</version>
             </dependency>
             
             <!-- Exclude commons-logging to avoid banned dependency issue in Spring Boot 4.x.
