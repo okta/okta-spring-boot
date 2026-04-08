@@ -32,7 +32,7 @@
 
     <properties>
         <spring-boot.version>4.0.1</spring-boot.version>
-        <spring-cloud.version>4.3.2</spring-cloud.version>
+        <spring-cloud.version>5.0.2</spring-cloud.version>
         <!-- Spring Security 7.0.4 requires DefaultParameterNameDiscoverer.getSharedInstance()
              which was added in Spring Framework 7.0.4. Override spring-boot-dependencies'
              internal spring-framework.version property to ensure compatibility. -->
