@@ -73,11 +73,11 @@
 
             <dependency>
                 <!-- Fix CVE-2026-22732: upgrade spring-security-web to 7.0.4.
-                     Spring Security 7.0.4 requires Spring Framework 7.0.4+
+                     Spring Security 7.0.6 requires Spring Framework 7.0.4+
                      (DefaultParameterNameDiscoverer.getSharedInstance() API). -->
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-framework-bom</artifactId>
-                <version>7.0.4</version>
+                <version>7.0.6</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
