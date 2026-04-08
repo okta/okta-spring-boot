@@ -36,7 +36,7 @@
         <!-- Spring Security 7.0.4 requires DefaultParameterNameDiscoverer.getSharedInstance()
              which was added in Spring Framework 7.0.4. Override spring-boot-dependencies'
              internal spring-framework.version property to ensure compatibility. -->
-        <spring-framework.version>7.0.4</spring-framework.version>
+        <spring-framework.version>7.0.6</spring-framework.version>
         <github.slug>okta/okta-spring-boot</github.slug>
         <okta.sdk.version>24.0.0</okta.sdk.version>
         <okta.commons.version>2.0.2</okta.commons.version>
