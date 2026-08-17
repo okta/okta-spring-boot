@@ -114,6 +114,13 @@ final class OktaOAuth2Configurer extends AbstractHttpConfigurer<OktaOAuth2Config
                     http.logout(logout -> logout.logoutSuccessHandler(handler));
                 }
 
+                // Check if OAuth2ResourceServerConfigurer is already configured. If it is, skip opaque token configuration.
+                OAuth2ResourceServerConfigurer<HttpSecurity> authenticationManagerResolver = http.getConfigurer(OAuth2ResourceServerConfigurer.class);
+                if (authenticationManagerResolver != null) {
+                    log.debug("AuthenticationManagerResolver is already configured. Skipping opaque token configuration.");
+                    return;
+                }
+
                 // Resource Server Config
                 OAuth2ResourceServerProperties.Opaquetoken propertiesOpaquetoken;
                 try {
