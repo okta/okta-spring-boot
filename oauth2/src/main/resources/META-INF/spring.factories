@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-org.springframework.boot.env.EnvironmentPostProcessor = com.okta.spring.boot.oauth.env.OktaOAuth2PropertiesMappingEnvironmentPostProcessor
+org.springframework.boot.EnvironmentPostProcessor = com.okta.spring.boot.oauth.env.OktaOAuth2PropertiesMappingEnvironmentPostProcessor
 org.springframework.context.ApplicationListener = com.okta.spring.boot.oauth.env.OktaEnvironmentPostProcessorApplicationListener
 
 org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer = \
